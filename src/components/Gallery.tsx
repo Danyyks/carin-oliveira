@@ -1,3 +1,4 @@
+import { Sparkles } from "lucide-react";
 import type { GaleriaItem } from "@/config/studio";
 
 // Vitrine com as fotos passando (loop contínuo). Placeholders em degradê
@@ -8,7 +9,10 @@ export default function Gallery({ itens }: { itens: GaleriaItem[] }) {
     <div className="tile t-gal wide">
       <div className="gal-head">
         <b>Galeria de trabalhos</b>
-        <span>✨ atualizada sempre</span>
+        <span>
+          <Sparkles size={13} strokeWidth={2} />
+          Atualizada sempre
+        </span>
       </div>
       <div className="gal-viewport">
         <div className="gal-track">

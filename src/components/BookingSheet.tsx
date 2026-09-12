@@ -53,7 +53,7 @@ export default function BookingSheet({
     const s = studio.servicos[svc!];
     const primeiroNome = studio.nome.split(" ")[0];
     const msg =
-      `Olá, ${primeiroNome}! Vim pela sua bio 💅\n\n` +
+      `Olá, ${primeiroNome}! Vim pela sua bio.\n\n` +
       `Gostaria de agendar:\n` +
       `• Serviço: ${s.nome}\n` +
       `• Data: ${dia}\n` +
@@ -68,7 +68,7 @@ export default function BookingSheet({
       <div className={`sheet${open ? " open" : ""}`} role="dialog" aria-modal="true" aria-label="Agendar horário">
         <div className="grabber" />
         <h2>Agendar horário</h2>
-        <p className="lead">Monte seu agendamento e a confirmação abre no WhatsApp 💬</p>
+        <p className="lead">Monte seu agendamento e a confirmação abre no WhatsApp.</p>
 
         <div className="step">
           <div className="step-label">
@@ -127,7 +127,7 @@ export default function BookingSheet({
             <span>{brl(studio.servicos[svc!].preco)}</span>
           </div>
         ) : (
-          <div className="summary empty">Selecione as opções acima 🌸</div>
+          <div className="summary empty">Selecione as opções acima</div>
         )}
 
         <button className="confirm" disabled={!pronto} onClick={confirmar}>

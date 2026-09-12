@@ -1,3 +1,4 @@
+import { CalendarDays, Sparkles, MapPin, Clock } from "lucide-react";
 import type { StudioConfig } from "@/config/studio";
 import { brl, wppUrl } from "@/lib/utils";
 import { WhatsappIcon, InstagramIcon } from "./icons";
@@ -13,7 +14,7 @@ export default function BentoGrid({
   const primeiroNome = studio.nome.split(" ")[0];
   const wpp = wppUrl(
     studio.whatsapp,
-    `Olá, ${primeiroNome}! Vim pela sua bio 💅 Gostaria de agendar um horário.`,
+    `Olá, ${primeiroNome}! Vim pela sua bio. Gostaria de agendar um horário.`,
   );
   const insta = `https://instagram.com/${studio.instagram}`;
   const maps = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(studio.enderecoTexto)}`;
@@ -21,7 +22,9 @@ export default function BentoGrid({
   return (
     <div className="bento">
       <button className="tile t-book wide" onClick={() => onBook()} aria-label="Agendar horário">
-        <div className="tico">📅</div>
+        <div className="tico">
+          <CalendarDays size={22} strokeWidth={2} />
+        </div>
         <div className="txt">
           <div className="ttitle">Agendar horário</div>
           <div className="tsub">Serviço, dia e horário em segundos</div>
@@ -44,7 +47,9 @@ export default function BentoGrid({
 
       <div className="tile t-serv wide">
         <div className="head">
-          <div className="tico">💅</div>
+          <div className="tico ic-rose">
+            <Sparkles size={19} strokeWidth={2} />
+          </div>
           <b>Serviços &amp; valores</b>
         </div>
         <div className="svc-list">
@@ -70,12 +75,16 @@ export default function BentoGrid({
       <Gallery itens={studio.galeria} />
 
       <a className="tile compact" href={maps} target="_blank" rel="noopener">
-        <div className="tico">📍</div>
+        <div className="tico ic-rose">
+          <MapPin size={19} strokeWidth={2} />
+        </div>
         <span className="ttitle">{studio.bairro}</span>
         <span className="arrow">→</span>
       </a>
       <div className="tile compact" style={{ cursor: "default" }}>
-        <div className="tico">🕑</div>
+        <div className="tico ic-rose">
+          <Clock size={19} strokeWidth={2} />
+        </div>
         <span className="ttitle" style={{ fontSize: ".86rem" }}>
           {studio.horario}
         </span>

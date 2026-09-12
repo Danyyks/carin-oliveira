@@ -35,7 +35,7 @@ export const studio: StudioConfig = {
   horario: "Ter a Sáb · 9–19h",
   horarios: ["09:00", "10:30", "13:00", "14:30", "16:00", "17:30"],
   bio: [
-    "Nail Designer 💅 Alongamento, gel & nail art",
+    "Nail Designer · Alongamento, gel e nail art",
     "Atendimento com hora marcada · São Paulo",
   ],
   servicos: [

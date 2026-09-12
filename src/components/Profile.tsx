@@ -1,3 +1,4 @@
+import { Camera } from "lucide-react";
 import type { StudioConfig } from "@/config/studio";
 import { VerifiedIcon } from "./icons";
 
@@ -6,7 +7,9 @@ export default function Profile({ studio }: { studio: StudioConfig }) {
     <div className="profile">
       <div className="avatar">
         <span>{studio.nome.trim().charAt(0)}</span>
-        <div className="cam">📷</div>
+        <div className="cam">
+          <Camera size={13} strokeWidth={2.2} />
+        </div>
       </div>
       <div className="name">
         {studio.nome} <VerifiedIcon />
