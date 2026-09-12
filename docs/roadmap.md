@@ -6,8 +6,8 @@ Fazemos **uma etapa de cada vez**, juntos. Cada etapa entrega algo testável.
 |---|---|---|---|
 | 0 | **Fundação / docs** | Repositório + documentação organizada | ✅ feito |
 | 1 | **Scaffold Next.js** | Projeto Next.js 16 + TS + Tailwind + estrutura de pastas; build verde | ✅ feito |
-| 2 | **Link na bio (visual)** | Bento aprovado portado em componentes; mobile-first; claro/escuro; dados vindos de config | ⏳ próxima |
-| 3 | **Firebase** | Projeto Firestore + Auth; modelo de dados; regras de segurança | ⬜ |
+| 2 | **Link na bio (visual)** | Bento portado em componentes (Profile, BentoGrid, Gallery, BookingSheet); mobile-first; claro/escuro; dados via `src/config/studio.ts` | ✅ feito |
+| 3 | **Firebase** | Projeto Firestore + Auth; modelo de dados; regras de segurança | ⏳ próxima |
 | 4 | **Serviços & disponibilidade** | Login do painel + CRUD de serviços/combos/promoções + definição de dias/horários; site lê serviços reais | ⬜ |
 | 5 | **Agendamento** | Fluxo pedido → pendente → confirma/recusa; anti-duplicidade; tempo real | ⬜ |
 | 6 | **Notificações** | E-mail (EmailJS) + push (FCM + API route) + `wa.me` de confirmação | ⬜ |

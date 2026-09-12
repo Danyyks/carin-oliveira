@@ -27,6 +27,9 @@ firebase-debug.log
 # Testes
 coverage/
 
+# Ferramentas locais (Claude Code)
+.claude/
+
 # Sistema / editor
 .DS_Store
 Thumbs.db
