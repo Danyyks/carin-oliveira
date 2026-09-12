@@ -35,4 +35,16 @@ O **agendamento**: o cliente marca dia/horário → a Carin confirma pelo painel
 ```
 
 ## Como rodar
-_A definir — será preenchido quando o scaffold do Next.js for criado (Etapa 1)._
+```bash
+npm install       # instala as dependências (só na primeira vez)
+npm run dev       # ambiente de desenvolvimento em http://localhost:3000
+npm run build     # build de produção
+npm start         # roda o build de produção
+```
+
+## Estrutura do app
+```
+src/app/          # rotas (App Router) — página pública e, futuramente, /admin
+public/           # arquivos estáticos (imagens, ícones, manifest do PWA)
+docs/             # documentação do projeto
+```
