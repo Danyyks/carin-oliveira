@@ -1,0 +1,35 @@
+# Dependências
+node_modules/
+.pnp
+.pnp.js
+
+# Builds
+.next/
+out/
+build/
+dist/
+
+# Ambiente / segredos
+.env
+.env.local
+.env*.local
+serviceAccountKey.json
+firebase-service-account.json
+
+# Firebase
+.firebase/
+firebase-debug.log
+*-debug.log
+
+# Vercel
+.vercel
+
+# Testes
+coverage/
+
+# Sistema / editor
+.DS_Store
+Thumbs.db
+*.log
+.idea/
+.vscode/
