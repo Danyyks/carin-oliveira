@@ -894,3 +894,132 @@ a {
 .adm-grupo .adm-item:first-of-type {
   border-top: none;
 }
+
+/* ---------- Agendamento: formulário do sheet ---------- */
+.sheet-campos {
+  display: flex;
+  flex-direction: column;
+  gap: 9px;
+}
+.sheet-input {
+  font-family: inherit;
+  font-size: 0.95rem;
+  color: var(--text);
+  background: var(--surface-2);
+  border: 1.5px solid var(--border);
+  border-radius: 13px;
+  padding: 12px 14px;
+  width: 100%;
+}
+.sheet-input:focus {
+  outline: none;
+  border-color: var(--accent-soft);
+}
+.sheet-vazio {
+  color: var(--text-muted);
+  font-size: 0.88rem;
+}
+.sheet-erro {
+  color: #e5484d;
+  font-size: 0.86rem;
+  font-weight: 600;
+  margin-top: 6px;
+}
+.sheet-btn {
+  margin-top: 16px;
+  width: 100%;
+  background: var(--accent);
+  color: #fff;
+  border: none;
+  padding: 15px;
+  border-radius: 15px;
+  font-weight: 800;
+  font-size: 1.02rem;
+  cursor: pointer;
+  transition: transform 0.15s, opacity 0.2s;
+}
+.sheet-btn:active {
+  transform: scale(0.98);
+}
+.sheet-btn:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+.sheet-sucesso {
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 8px 0 4px;
+}
+.sucesso-check {
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  background: #25d366;
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 10px;
+}
+.sheet-sucesso .lead {
+  margin-bottom: 4px;
+}
+
+/* ---------- Agendamentos no painel ---------- */
+.ag-grupo-label {
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--accent-deep);
+  margin: 16px 0 4px;
+}
+.ag-grupo-label:first-of-type {
+  margin-top: 2px;
+}
+.ag-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 12px 2px;
+  border-top: 1px solid var(--border);
+}
+.ag-info b {
+  font-weight: 700;
+  font-size: 0.96rem;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.ag-info > span {
+  display: block;
+  color: var(--text-muted);
+  font-size: 0.82rem;
+}
+.ag-quando {
+  color: var(--accent-deep) !important;
+  font-weight: 600 !important;
+}
+.ag-acoes {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+}
+.ag-confirmar {
+  padding: 9px 16px;
+  font-size: 0.85rem;
+}
+.ag-tag-ok {
+  font-size: 0.62rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: #1fa855;
+  background: #e6f6ec;
+  padding: 2px 7px;
+  border-radius: 99px;
+}

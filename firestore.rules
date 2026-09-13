@@ -37,13 +37,23 @@ service cloud.firestore {
     // - NINGUÉM (além da dona) pode editar/apagar -> um 2º create no mesmo id falha,
     //   impedindo dois clientes pegarem o mesmo horário;
     // - só a dona lê a lista e confirma/recusa (update/delete).
-    match /agendamentos/{id} {
-      allow read: if isDono();
+    // Horários ocupados (público): só data/hora/status — sem dados do cliente.
+    // O público só CRIA (create-only); o id determinístico "data_hora" impede
+    // dois pedidos no mesmo horário. Só a dona altera/apaga (confirmar/liberar).
+    match /slots/{id} {
+      allow read: if true;
+      allow create: if request.resource.data.status == 'pendente'
+        && request.resource.data.data is string
+        && request.resource.data.hora is string;
       allow update, delete: if isDono();
-      allow create: if
-        request.resource.data.status == 'pendente'
-        && request.resource.data.keys().hasAll(
-             ['servicoId', 'clienteNome', 'clienteWhatsapp', 'data', 'hora', 'status', 'criadoEm'])
+    }
+
+    // Agendamentos (com dados do cliente): só a dona lê e gerencia;
+    // o público só CRIA o pedido (nunca edita/apaga).
+    match /agendamentos/{id} {
+      allow read, update, delete: if isDono();
+      allow create: if request.resource.data.status == 'pendente'
+        && request.resource.data.servicoNome is string
         && request.resource.data.clienteNome is string
         && request.resource.data.clienteNome.size() > 1
         && request.resource.data.clienteNome.size() <= 80

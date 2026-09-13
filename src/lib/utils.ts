@@ -9,19 +9,21 @@ export function wppUrl(phone: string, text: string) {
 const DIAS = ["dom", "seg", "ter", "qua", "qui", "sex", "sáb"];
 const MESES = ["jan", "fev", "mar", "abr", "mai", "jun", "jul", "ago", "set", "out", "nov", "dez"];
 
-export type Dia = { key: string; dia: string; num: number; mes: string; label: string };
+export type Dia = { key: string; dia: string; num: number; mes: string; weekday: number; label: string };
 
-/** Próximos `qtd` dias a partir de amanhã (provisório; a disponibilidade real vem do painel na Etapa 4/5). */
+/** Próximos `qtd` dias a partir de amanhã. `key` é a data local (YYYY-MM-DD). */
 export function proximosDias(qtd = 6): Dia[] {
   const out: Dia[] = [];
   for (let i = 1; i <= qtd; i++) {
     const d = new Date();
     d.setDate(d.getDate() + i);
+    const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
     out.push({
-      key: d.toISOString().slice(0, 10),
+      key,
       dia: DIAS[d.getDay()],
       num: d.getDate(),
       mes: MESES[d.getMonth()],
+      weekday: d.getDay(),
       label: `${DIAS[d.getDay()]}, ${d.getDate()}/${String(d.getMonth() + 1).padStart(2, "0")}`,
     });
   }

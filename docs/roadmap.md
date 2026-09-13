@@ -9,7 +9,7 @@ Fazemos **uma etapa de cada vez**, juntos. Cada etapa entrega algo testável.
 | 2 | **Link na bio (visual)** | Bento portado em componentes (Profile, BentoGrid, Gallery, BookingSheet); mobile-first; claro/escuro; dados via `src/config/studio.ts` | ✅ feito |
 | 3 | **Firebase** | Projeto Firestore + Auth; modelo de dados; regras de segurança | ✅ feito |
 | 4 | **Serviços & disponibilidade** | Login do painel + CRUD de serviços/combos/promoções + definição de dias/horários; site lê serviços reais | ⏳ próxima |
-| 5 | **Agendamento** | Fluxo pedido → pendente → confirma/recusa; anti-duplicidade; tempo real | ⬜ |
+| 5 | **Agendamento** | Fluxo pedido → pendente → confirma/recusa; anti-duplicidade; tempo real | ✅ feito |
 | 6 | **Notificações** | E-mail (EmailJS) + push (FCM + API route) + `wa.me` de confirmação | ⬜ |
 | 7 | **PWA do admin** | "Painel Carin" instalável (manifest/ícone/SW só em /admin); público não instalável | ✅ feito (adiantado) |
 | 8 | **Mapa + polish + go-live** | Mini-mapa; dados e fotos reais da Carin; domínio; deploy final | ⬜ |

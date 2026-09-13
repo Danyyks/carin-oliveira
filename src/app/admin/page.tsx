@@ -2,7 +2,7 @@
 
 import { useEffect, useState, type FormEvent } from "react";
 import { useAuth } from "@/hooks/useAuth";
-import { brl } from "@/lib/utils";
+import { brl, wppUrl } from "@/lib/utils";
 import {
   ouvirServicos,
   addServico,
@@ -10,9 +10,19 @@ import {
   removeServico,
   ouvirAgenda,
   salvarAgenda,
+  ouvirAgendamentos,
+  confirmarAgendamento,
+  recusarAgendamento,
   type ServicoDoc,
   type TipoServico,
+  type Agendamento,
 } from "@/lib/db";
+
+// Normaliza o número do cliente para o formato do wa.me (com DDI 55).
+function zap(raw: string) {
+  const d = raw.replace(/\D/g, "");
+  return d.startsWith("55") ? d : "55" + d;
+}
 
 export default function AdminPage() {
   const { user, loading, login, logout } = useAuth();
@@ -103,9 +113,77 @@ function Dashboard({ email, logout }: { email: string; logout: () => Promise<voi
         </div>
         <button className="adm-btn-ghost" onClick={() => logout()}>Sair</button>
       </header>
+      <AgendamentosManager />
       <ServicosManager />
       <HorariosManager />
     </div>
+  );
+}
+
+// ---------------- Agendamentos ----------------
+function AgendamentosManager() {
+  const [lista, setLista] = useState<Agendamento[]>([]);
+  useEffect(() => ouvirAgendamentos(setLista), []);
+
+  const pendentes = lista.filter((a) => a.status === "pendente");
+  const confirmados = lista.filter((a) => a.status === "confirmado");
+
+  async function confirmar(a: Agendamento) {
+    await confirmarAgendamento(a.id);
+    const nome = a.clienteNome.split(" ")[0];
+    const msg =
+      `Olá, ${nome}! Seu horário está confirmado.\n\n` +
+      `• ${a.servicoNome}\n• ${a.diaLabel} às ${a.hora}\n\nTe espero!`;
+    window.open(wppUrl(zap(a.clienteWhatsapp), msg), "_blank");
+  }
+
+  async function recusar(a: Agendamento, verbo: string) {
+    if (confirm(`${verbo} o horário de ${a.clienteNome} (${a.diaLabel} · ${a.hora})?`)) {
+      await recusarAgendamento(a.id);
+    }
+  }
+
+  return (
+    <section className="admin-card">
+      <h2 className="adm-section">Agendamentos</h2>
+
+      <div className="ag-grupo-label">Pendentes ({pendentes.length})</div>
+      {pendentes.length === 0 && <p className="adm-muted">Nenhum pedido pendente.</p>}
+      {pendentes.map((a) => (
+        <div className="ag-item" key={a.id}>
+          <div className="ag-info">
+            <b>{a.clienteNome}</b>
+            <span>{a.servicoNome} · {brl(a.servicoPreco)}</span>
+            <span className="ag-quando">{a.diaLabel} · {a.hora}</span>
+          </div>
+          <div className="ag-acoes">
+            <button className="adm-btn ag-confirmar" onClick={() => confirmar(a)}>Confirmar</button>
+            <button className="adm-mini adm-mini-danger" onClick={() => recusar(a, "Recusar")}>Recusar</button>
+          </div>
+        </div>
+      ))}
+
+      {confirmados.length > 0 && (
+        <>
+          <div className="ag-grupo-label">Confirmados</div>
+          {confirmados.map((a) => (
+            <div className="ag-item" key={a.id}>
+              <div className="ag-info">
+                <b>
+                  {a.clienteNome} <span className="ag-tag-ok">confirmado</span>
+                </b>
+                <span>{a.servicoNome} · {brl(a.servicoPreco)}</span>
+                <span className="ag-quando">{a.diaLabel} · {a.hora}</span>
+              </div>
+              <div className="ag-acoes">
+                <a className="adm-mini" href={`https://wa.me/${zap(a.clienteWhatsapp)}`} target="_blank" rel="noopener">WhatsApp</a>
+                <button className="adm-mini adm-mini-danger" onClick={() => recusar(a, "Cancelar")}>Cancelar</button>
+              </div>
+            </div>
+          ))}
+        </>
+      )}
+    </section>
   );
 }
 
