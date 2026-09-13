@@ -16,8 +16,8 @@ const fraunces = Fraunces({
 });
 
 export const metadata: Metadata = {
-  title: "Carin Oliveira · Nail Designer",
-  description: "Agende seu horário 💅 Alongamento, gel e nail art em São Paulo.",
+  title: "Carin · Nail Designer",
+  description: "Agende seu horário. Alongamento, gel e nail art em Sorocaba.",
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {

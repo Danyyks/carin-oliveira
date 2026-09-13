@@ -1,20 +1,15 @@
-import { Camera } from "lucide-react";
 import type { StudioConfig } from "@/config/studio";
+import Avatar from "./Avatar";
 import { VerifiedIcon } from "./icons";
 
 export default function Profile({ studio }: { studio: StudioConfig }) {
   return (
     <div className="profile">
-      <div className="avatar">
-        <span>{studio.nome.trim().charAt(0)}</span>
-        <div className="cam">
-          <Camera size={13} strokeWidth={2.2} />
-        </div>
-      </div>
+      <Avatar nome={studio.nome} foto={studio.foto} />
       <div className="name">
         {studio.nome} <VerifiedIcon />
       </div>
-      <div className="handle">@{studio.instagram}</div>
+      <div className="role">{studio.titulo}</div>
       <p className="bio">
         {studio.bio.map((linha, i) => (
           <span key={i}>

@@ -84,6 +84,13 @@ a {
   font-weight: 500;
   text-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
 }
+.avatar-foto {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  background-size: cover;
+  background-position: center;
+}
 .avatar .cam {
   position: absolute;
   right: 1px;
@@ -114,6 +121,14 @@ a {
   font-weight: 600;
   font-size: 0.92rem;
   margin-top: 2px;
+}
+.role {
+  margin-top: 4px;
+  color: var(--accent-deep);
+  font-weight: 700;
+  font-size: 0.72rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
 }
 .bio {
   color: var(--text-muted);
@@ -255,6 +270,32 @@ a {
 }
 .t-insta .tico {
   background: rgba(255, 255, 255, 0.22);
+}
+
+/* bloco da loja (revendedora O Boticário) */
+.t-loja {
+  flex-direction: row;
+  align-items: center;
+  gap: 14px;
+  padding: 15px 18px;
+  background: linear-gradient(135deg, #0a7a49, #065f38);
+  color: #fff;
+  border: none;
+}
+.t-loja .tico {
+  background: rgba(255, 255, 255, 0.2);
+  color: #fff;
+  flex-shrink: 0;
+}
+.t-loja .txt {
+  flex: 1;
+}
+.t-loja .tsub {
+  color: rgba(255, 255, 255, 0.85);
+}
+.t-loja .arrow {
+  color: #fff;
+  opacity: 0.9;
 }
 
 /* serviços */

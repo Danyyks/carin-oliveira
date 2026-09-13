@@ -1,4 +1,4 @@
-import { CalendarDays, Sparkles, MapPin, Clock } from "lucide-react";
+import { CalendarDays, Sparkles, MapPin, Clock, ShoppingBag } from "lucide-react";
 import type { StudioConfig } from "@/config/studio";
 import { brl, wppUrl } from "@/lib/utils";
 import { WhatsappIcon, InstagramIcon } from "./icons";
@@ -73,6 +73,19 @@ export default function BentoGrid({
       </div>
 
       <Gallery itens={studio.galeria} />
+
+      {studio.loja ? (
+        <a className="tile t-loja wide" href={studio.loja.url} target="_blank" rel="noopener">
+          <div className="tico">
+            <ShoppingBag size={20} strokeWidth={2} />
+          </div>
+          <div className="txt">
+            <div className="ttitle">{studio.loja.titulo}</div>
+            <div className="tsub">{studio.loja.sub}</div>
+          </div>
+          <span className="arrow">→</span>
+        </a>
+      ) : null}
 
       <a className="tile compact" href={maps} target="_blank" rel="noopener">
         <div className="tico ic-rose">

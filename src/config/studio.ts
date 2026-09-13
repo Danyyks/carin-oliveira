@@ -13,10 +13,15 @@ export type Servico = {
 
 export type GaleriaItem = { cls: string; nome: string };
 
+export type Loja = { url: string; titulo: string; sub: string };
+
 export type StudioConfig = {
   nome: string;
+  titulo: string; // ex.: "Nail Designer"
+  foto?: string; // caminho da foto de perfil em /public (ex.: "/carin.jpg")
   whatsapp: string; // DDI+DDD+número, só dígitos
   instagram: string; // sem @
+  emailDono: string; // recebe aviso de agendamento pendente (Etapa 6)
   enderecoTexto: string;
   bairro: string;
   horario: string;
@@ -24,19 +29,23 @@ export type StudioConfig = {
   bio: string[];
   servicos: Servico[];
   galeria: GaleriaItem[];
+  loja?: Loja;
 };
 
 export const studio: StudioConfig = {
-  nome: "Carin Oliveira",
-  whatsapp: "5511999999999",
-  instagram: "carinoliveira.nails",
-  enderecoTexto: "Rua das Flores, 123 - Vila Mariana, São Paulo - SP",
-  bairro: "Vila Mariana, SP",
+  nome: "Carin",
+  titulo: "Nail Designer",
+  foto: "/carin.jpg",
+  whatsapp: "5511933400707", // provisório (WhatsApp do Dany, p/ testes)
+  instagram: "carinoliveira9",
+  emailDono: "danyy.jonathan@gmail.com", // provisório (e-mail do Dany, p/ testes)
+  enderecoTexto: "Rua Diniz Goes da Silva, 260 - casa 10, Sorocaba - SP",
+  bairro: "Sorocaba, SP",
   horario: "Ter a Sáb · 9–19h",
   horarios: ["09:00", "10:30", "13:00", "14:30", "16:00", "17:30"],
   bio: [
-    "Nail Designer · Alongamento, gel e nail art",
-    "Atendimento com hora marcada · São Paulo",
+    "Alongamento, gel e nail art",
+    "Atendimento com hora marcada · Sorocaba",
   ],
   servicos: [
     { nome: "Manicure tradicional", desc: "Corte, cutícula e esmaltação", dur: "45 min", preco: 35 },
@@ -53,4 +62,10 @@ export const studio: StudioConfig = {
     { cls: "sw-lav", nome: "Lavanda" },
     { cls: "sw-red", nome: "Cereja" },
   ],
+  // Loja virtual (revendedora O Boticário).
+  loja: {
+    url: "https://minhaloja.grupoboticario.com.br/loja-carinoliveiraalmeidamarques-26635836?utm_source=app_divulgar&utm_medium=mld",
+    titulo: "O Boticário",
+    sub: "Minha loja virtual · perfumes e presentes",
+  },
 };
