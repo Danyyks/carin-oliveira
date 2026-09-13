@@ -3,7 +3,10 @@ import type { StudioConfig } from "@/config/studio";
 import { brl, wppUrl } from "@/lib/utils";
 import { WhatsappIcon, InstagramIcon } from "./icons";
 import { MarkBoticario, MarkEudora, MarkOui, MarkBerenice } from "./BrandMarks";
-import Gallery from "./Gallery";
+
+// Selos estilizados de reserva, na mesma ordem de loja.marcas (usados só até
+// os logos oficiais serem fornecidos pela Carin em /public/marcas).
+const SELOS_RESERVA = [MarkBoticario, MarkEudora, MarkOui, MarkBerenice];
 
 export default function BentoGrid({
   studio,
@@ -73,8 +76,6 @@ export default function BentoGrid({
         </div>
       </div>
 
-      <Gallery itens={studio.galeria} />
-
       {studio.loja ? (
         <a
           className="tile t-loja wide"
@@ -87,6 +88,9 @@ export default function BentoGrid({
           <div className="loja-top">
             <div className="tico">
               <ShoppingBag size={20} strokeWidth={2} />
+              {studio.loja.simbolo ? (
+                <span className="loja-simbolo" style={{ backgroundImage: `url(${studio.loja.simbolo})` }} />
+              ) : null}
             </div>
             <div className="txt">
               <div className="ttitle">{studio.loja.titulo}</div>
@@ -94,23 +98,24 @@ export default function BentoGrid({
             </div>
             <span className="arrow">→</span>
           </div>
-          <div className="loja-marcas" aria-hidden="true">
-            <span className="loja-marcas-label">marcas que eu trabalho</span>
-            <div className="loja-marcas-row">
-              <span className="marca-badge">
-                <MarkBoticario />
-              </span>
-              <span className="marca-badge">
-                <MarkEudora />
-              </span>
-              <span className="marca-badge">
-                <MarkOui />
-              </span>
-              <span className="marca-badge">
-                <MarkBerenice />
-              </span>
+          {studio.loja.marcas && studio.loja.marcas.length > 0 ? (
+            <div className="loja-marcas" aria-hidden="true">
+              <span className="loja-marcas-label">marcas que eu trabalho</span>
+              <div className="loja-marcas-row">
+                {studio.loja.marcas.map((m, i) => {
+                  const Selo = SELOS_RESERVA[i] ?? MarkBoticario;
+                  return (
+                    <span className="marca-badge" key={m.nome} title={m.nome}>
+                      <Selo />
+                      {m.logo ? (
+                        <span className="marca-logo" style={{ backgroundImage: `url(${m.logo})` }} />
+                      ) : null}
+                    </span>
+                  );
+                })}
+              </div>
             </div>
-          </div>
+          ) : null}
         </a>
       ) : null}
 

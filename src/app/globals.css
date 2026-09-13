@@ -313,9 +313,18 @@ a {
   gap: 14px;
 }
 .t-loja .tico {
+  position: relative;
   background: rgba(255, 255, 255, 0.2);
   color: #fff;
   flex-shrink: 0;
+  overflow: hidden;
+}
+/* símbolo oficial do Boticário (quando o arquivo existir) cobre o ícone genérico */
+.loja-simbolo {
+  position: absolute;
+  inset: 0;
+  background-size: cover;
+  background-position: center;
 }
 .t-loja .txt {
   flex: 1;
@@ -349,6 +358,7 @@ a {
   gap: 10px;
 }
 .marca-badge {
+  position: relative;
   width: 42px;
   height: 42px;
   border-radius: 50%;
@@ -357,11 +367,20 @@ a {
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
+  overflow: hidden;
   box-shadow: 0 6px 14px -8px rgba(0, 0, 0, 0.5);
   transition: transform 0.18s cubic-bezier(0.2, 0.8, 0.2, 1);
 }
 .marca-badge svg {
   display: block;
+}
+/* logo oficial (quando o arquivo existir em /public) cobre o selo estilizado */
+.marca-logo {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  background-size: cover;
+  background-position: center;
 }
 .tile.t-loja:hover .marca-badge {
   transform: translateY(-2px);
@@ -450,102 +469,6 @@ a {
 .svc-row .mini:hover {
   background: var(--accent);
   color: #fff;
-}
-
-/* galeria — vitrine com fotos passando */
-.t-gal {
-  padding: 16px 0 16px;
-  overflow: hidden;
-  gap: 13px;
-  cursor: default;
-}
-.gal-head {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 0 17px;
-}
-.gal-head b {
-  font-weight: 700;
-  font-size: 0.98rem;
-}
-.gal-head span {
-  color: var(--text-muted);
-  font-size: 0.78rem;
-  display: inline-flex;
-  align-items: center;
-  gap: 5px;
-}
-.gal-viewport {
-  overflow: hidden;
-  padding-left: 17px;
-  -webkit-mask-image: linear-gradient(90deg, transparent, #000 7%, #000 93%, transparent);
-  mask-image: linear-gradient(90deg, transparent, #000 7%, #000 93%, transparent);
-}
-.gal-track {
-  display: flex;
-  width: max-content;
-  animation: slide 30s linear infinite;
-}
-.t-gal:hover .gal-track {
-  animation-play-state: paused;
-}
-.gal-track .g {
-  width: 112px;
-  height: 112px;
-  border-radius: 15px;
-  flex-shrink: 0;
-  position: relative;
-  overflow: hidden;
-  margin-right: 9px;
-}
-.gal-track .g::after {
-  content: "";
-  position: absolute;
-  inset: 0;
-  background: radial-gradient(120% 80% at 30% 15%, rgba(255, 255, 255, 0.4), transparent 55%);
-}
-.gal-track .g .cap {
-  position: absolute;
-  left: 8px;
-  bottom: 7px;
-  z-index: 2;
-  font-size: 0.66rem;
-  font-weight: 600;
-  color: #fff;
-  background: rgba(0, 0, 0, 0.3);
-  padding: 2px 8px;
-  border-radius: 99px;
-  backdrop-filter: blur(3px);
-}
-@keyframes slide {
-  from {
-    transform: translateX(0);
-  }
-  to {
-    transform: translateX(-50%);
-  }
-}
-.sw-nude {
-  background: linear-gradient(150deg, #f7e4d9, #e7b79e);
-}
-.sw-rose {
-  background: linear-gradient(150deg, #fbd4e2, #e88fb0);
-}
-.sw-french {
-  background: linear-gradient(150deg, #fdf6f8, #f0d3de 60%, #e3b9c8);
-}
-.sw-wine {
-  background: linear-gradient(150deg, #9a4e68, #7a2e48);
-}
-.sw-glow {
-  background: linear-gradient(150deg, #eed7ce, #d6a48c);
-}
-.sw-lav {
-  background: linear-gradient(150deg, #ead9ec, #c79ecb);
-}
-.sw-red {
-  background: linear-gradient(150deg, #e88a93, #c2596a);
 }
 
 /* ---------- SHEET DE AGENDAMENTO ---------- */
