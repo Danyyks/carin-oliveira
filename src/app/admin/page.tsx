@@ -348,8 +348,9 @@ function HorariosManager() {
     try {
       await salvarAgenda({ dias });
       setMsg({ ok: true, texto: "Horários salvos!" });
-    } catch {
-      setMsg({ ok: false, texto: "Não consegui salvar. Verifique a conexão e tente de novo." });
+    } catch (e) {
+      const code = (e as { code?: string })?.code;
+      setMsg({ ok: false, texto: `Não consegui salvar${code ? ` (${code})` : ""}. Tente de novo.` });
     } finally {
       setSalvando(false);
     }
