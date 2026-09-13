@@ -319,7 +319,7 @@ const HORARIOS_POSSIVEIS = [
 
 function HorariosManager() {
   const [dias, setDias] = useState<Record<string, string[]>>({});
-  const [salvo, setSalvo] = useState(false);
+  const [msg, setMsg] = useState<{ ok: boolean; texto: string } | null>(null);
   const [salvando, setSalvando] = useState(false);
 
   useEffect(() => {
@@ -334,7 +334,7 @@ function HorariosManager() {
   }, []);
 
   function toggle(diaK: string, h: string) {
-    setSalvo(false);
+    setMsg(null);
     setDias((prev) => {
       const atuais = prev[diaK] || [];
       const novo = atuais.includes(h) ? atuais.filter((x) => x !== h) : [...atuais, h].sort();
@@ -344,9 +344,12 @@ function HorariosManager() {
 
   async function salvar() {
     setSalvando(true);
+    setMsg(null);
     try {
       await salvarAgenda({ dias });
-      setSalvo(true);
+      setMsg({ ok: true, texto: "Horários salvos!" });
+    } catch {
+      setMsg({ ok: false, texto: "Não consegui salvar. Verifique a conexão e tente de novo." });
     } finally {
       setSalvando(false);
     }
@@ -375,7 +378,7 @@ function HorariosManager() {
       </div>
       <div className="adm-actions">
         <button className="adm-btn" onClick={salvar} disabled={salvando}>{salvando ? "Salvando…" : "Salvar horários"}</button>
-        {salvo && <span className="adm-ok">Salvo!</span>}
+        {msg && <span className={msg.ok ? "adm-ok" : "adm-erro"}>{msg.texto}</span>}
       </div>
     </section>
   );
