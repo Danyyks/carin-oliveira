@@ -2,6 +2,7 @@ import { CalendarDays, Sparkles, MapPin, Clock, ShoppingBag } from "lucide-react
 import type { StudioConfig } from "@/config/studio";
 import { brl, wppUrl } from "@/lib/utils";
 import { WhatsappIcon, InstagramIcon } from "./icons";
+import { MarkBoticario, MarkEudora, MarkOui, MarkBerenice } from "./BrandMarks";
 import Gallery from "./Gallery";
 
 export default function BentoGrid({
@@ -75,15 +76,41 @@ export default function BentoGrid({
       <Gallery itens={studio.galeria} />
 
       {studio.loja ? (
-        <a className="tile t-loja wide" href={studio.loja.url} target="_blank" rel="noopener">
-          <div className="tico">
-            <ShoppingBag size={20} strokeWidth={2} />
+        <a
+          className="tile t-loja wide"
+          href={studio.loja.url}
+          target="_blank"
+          rel="noopener"
+          aria-label={`${studio.loja.titulo} — ${studio.loja.sub}. Marcas: O Boticário, Eudora, O.U.I. Paris e Quem disse, Berenice? Abre em nova aba.`}
+        >
+          <div className="loja-glow" aria-hidden="true" />
+          <div className="loja-top">
+            <div className="tico">
+              <ShoppingBag size={20} strokeWidth={2} />
+            </div>
+            <div className="txt">
+              <div className="ttitle">{studio.loja.titulo}</div>
+              <div className="tsub">{studio.loja.sub}</div>
+            </div>
+            <span className="arrow">→</span>
           </div>
-          <div className="txt">
-            <div className="ttitle">{studio.loja.titulo}</div>
-            <div className="tsub">{studio.loja.sub}</div>
+          <div className="loja-marcas" aria-hidden="true">
+            <span className="loja-marcas-label">marcas que eu trabalho</span>
+            <div className="loja-marcas-row">
+              <span className="marca-badge">
+                <MarkBoticario />
+              </span>
+              <span className="marca-badge">
+                <MarkEudora />
+              </span>
+              <span className="marca-badge">
+                <MarkOui />
+              </span>
+              <span className="marca-badge">
+                <MarkBerenice />
+              </span>
+            </div>
           </div>
-          <span className="arrow">→</span>
         </a>
       ) : null}
 
