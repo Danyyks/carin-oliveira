@@ -11,7 +11,7 @@ Fazemos **uma etapa de cada vez**, juntos. Cada etapa entrega algo testável.
 | 4 | **Serviços & disponibilidade** | Login do painel + CRUD de serviços/combos/promoções + definição de dias/horários; site lê serviços reais | ⏳ próxima |
 | 5 | **Agendamento** | Fluxo pedido → pendente → confirma/recusa; anti-duplicidade; tempo real | ⬜ |
 | 6 | **Notificações** | E-mail (EmailJS) + push (FCM + API route) + `wa.me` de confirmação | ⬜ |
-| 7 | **PWA** | Instalável, sempre logada, manifest + service worker + ícones | ⬜ |
+| 7 | **PWA do admin** | "Painel Carin" instalável (manifest/ícone/SW só em /admin); público não instalável | ✅ feito (adiantado) |
 | 8 | **Mapa + polish + go-live** | Mini-mapa; dados e fotos reais da Carin; domínio; deploy final | ⬜ |
 
 ## Como trabalhamos cada etapa

@@ -607,3 +607,290 @@ a {
     transition: none !important;
   }
 }
+
+/* ============================================================
+   PAINEL /admin
+   ============================================================ */
+.admin {
+  max-width: 680px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding-bottom: 40px;
+}
+.admin-center {
+  min-height: 80vh;
+  justify-content: center;
+}
+.admin-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+.adm-title {
+  font-family: var(--font-inter), sans-serif;
+  font-size: 1.5rem;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+}
+.adm-muted {
+  color: var(--text-muted);
+  font-size: 0.9rem;
+}
+.admin-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  padding: 22px;
+  box-shadow: 0 10px 26px -20px var(--shadow);
+}
+.admin-login {
+  width: 100%;
+  max-width: 380px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.adm-section {
+  font-family: var(--font-inter), sans-serif;
+  font-size: 1.15rem;
+  font-weight: 700;
+  margin-bottom: 6px;
+}
+.adm-form {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin: 14px 0 18px;
+}
+.adm-row2 {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+.adm-field {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  font-weight: 600;
+}
+.adm-input {
+  font-family: var(--font-inter), sans-serif;
+  font-size: 0.95rem;
+  color: var(--text);
+  background: var(--surface-2);
+  border: 1.5px solid var(--border);
+  border-radius: 12px;
+  padding: 11px 13px;
+  width: 100%;
+}
+.adm-input:focus {
+  outline: none;
+  border-color: var(--accent-soft);
+}
+.adm-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+.adm-btn {
+  background: var(--accent);
+  color: #fff;
+  border: none;
+  font-weight: 700;
+  font-size: 0.95rem;
+  padding: 12px 22px;
+  border-radius: 12px;
+  cursor: pointer;
+  box-shadow: 0 8px 20px -10px var(--shadow);
+  transition: transform 0.15s, opacity 0.2s;
+}
+.adm-btn:hover {
+  transform: translateY(-1px);
+}
+.adm-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+.adm-btn-ghost {
+  background: var(--surface-2);
+  color: var(--text);
+  border: 1px solid var(--border);
+  font-weight: 600;
+  font-size: 0.9rem;
+  padding: 10px 18px;
+  border-radius: 12px;
+  cursor: pointer;
+}
+.adm-erro {
+  color: #e5484d;
+  font-size: 0.86rem;
+  font-weight: 600;
+}
+.adm-ok {
+  color: #1fa855;
+  font-size: 0.88rem;
+  font-weight: 700;
+}
+.adm-list {
+  display: flex;
+  flex-direction: column;
+}
+.adm-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 12px 2px;
+  border-top: 1px solid var(--border);
+}
+.adm-item:first-child {
+  border-top: none;
+}
+.adm-item-info b {
+  font-weight: 700;
+  font-size: 0.96rem;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.adm-item-info span {
+  color: var(--text-muted);
+  font-size: 0.8rem;
+}
+.adm-tag {
+  font-size: 0.66rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--accent-deep);
+  background: var(--surface-2);
+  padding: 2px 7px;
+  border-radius: 99px;
+}
+.adm-item-right {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-shrink: 0;
+}
+.adm-preco {
+  font-weight: 700;
+  color: var(--accent-deep);
+}
+.adm-mini {
+  background: var(--surface-2);
+  color: var(--text);
+  border: none;
+  font-weight: 600;
+  font-size: 0.8rem;
+  padding: 7px 12px;
+  border-radius: 9px;
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s;
+}
+.adm-mini:hover {
+  background: var(--accent);
+  color: #fff;
+}
+.adm-mini-danger:hover {
+  background: #e5484d;
+}
+.adm-dias {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  margin: 14px 0 18px;
+}
+.adm-dia-label {
+  font-weight: 700;
+  font-size: 0.9rem;
+  margin-bottom: 8px;
+}
+.adm-dia .chips {
+  gap: 7px;
+}
+
+/* engrenagem discreta de acesso ao painel (dev) */
+.app-foot {
+  display: flex;
+  justify-content: center;
+  padding: 20px 0 4px;
+}
+.admin-gear {
+  display: inline-flex;
+  padding: 8px;
+  border-radius: 8px;
+  color: var(--text-muted);
+  opacity: 0.32;
+  transition: opacity 0.2s, color 0.2s;
+}
+.admin-gear:hover {
+  opacity: 0.9;
+  color: var(--accent-deep);
+}
+
+/* botão de instalar o app (Painel Carin) */
+.adm-install-wrap {
+  max-width: 680px;
+  margin: 0 auto;
+  display: flex;
+  justify-content: center;
+  padding: 2px 0 8px;
+}
+.adm-install {
+  background: var(--accent);
+  color: #fff;
+  border: none;
+  font-weight: 700;
+  font-size: 0.9rem;
+  padding: 10px 20px;
+  border-radius: 999px;
+  cursor: pointer;
+  box-shadow: 0 8px 20px -10px var(--shadow);
+}
+.adm-install-hint {
+  color: var(--text-muted);
+  font-size: 0.82rem;
+  text-align: center;
+  max-width: 340px;
+  line-height: 1.5;
+}
+
+/* seções de serviços (Serviços / Combos / Promoções) — site público */
+.svc-grupo-label {
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--accent-deep);
+  margin: 12px 0 2px;
+}
+.svc-grupo:first-child .svc-grupo-label {
+  margin-top: 0;
+}
+.svc-grupo .svc-row:first-of-type {
+  border-top: none;
+}
+
+/* seções de serviços — painel /admin */
+.adm-grupo-label {
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--accent-deep);
+  margin: 16px 0 2px;
+}
+.adm-grupo:first-child .adm-grupo-label {
+  margin-top: 4px;
+}
+.adm-grupo .adm-item:first-of-type {
+  border-top: none;
+}

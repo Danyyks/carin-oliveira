@@ -6,7 +6,6 @@
 export type Servico = {
   nome: string;
   desc: string;
-  dur: string;
   preco: number;
   tipo?: "servico" | "combo" | "promocao";
 };
@@ -50,10 +49,10 @@ export const studio: StudioConfig = {
     "Atendimento com hora marcada · Sorocaba",
   ],
   servicos: [
-    { nome: "Manicure tradicional", desc: "Corte, cutícula e esmaltação", dur: "45 min", preco: 35 },
-    { nome: "Esmaltação em gel", desc: "Brilho e durabilidade", dur: "1h", preco: 65 },
-    { nome: "Alongamento", desc: "Fibra ou gel, do seu jeito", dur: "2h", preco: 120 },
-    { nome: "Nail Art", desc: "Desenhos e pedrarias", dur: "1h15", preco: 45 },
+    { nome: "Manicure tradicional", desc: "Corte, cutícula e esmaltação", preco: 35 },
+    { nome: "Esmaltação em gel", desc: "Brilho e durabilidade", preco: 65 },
+    { nome: "Alongamento", desc: "Fibra ou gel, do seu jeito", preco: 120 },
+    { nome: "Nail Art", desc: "Desenhos e pedrarias", preco: 45 },
   ],
   // Loja virtual (revendedora O Boticário). Imagem de fundo criada pela Carin.
   loja: {

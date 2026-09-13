@@ -1,17 +1,19 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import type { StudioConfig } from "@/config/studio";
+import type { StudioConfig, Servico } from "@/config/studio";
 import { brl, wppUrl, proximosDias, type Dia } from "@/lib/utils";
 import { WhatsappIcon } from "./icons";
 
 export default function BookingSheet({
   studio,
+  servicos,
   open,
   preset,
   onClose,
 }: {
   studio: StudioConfig;
+  servicos: Servico[];
   open: boolean;
   preset: number | null;
   onClose: () => void;
@@ -50,7 +52,7 @@ export default function BookingSheet({
 
   function confirmar() {
     if (!pronto) return;
-    const s = studio.servicos[svc!];
+    const s = servicos[svc!];
     const primeiroNome = studio.nome.split(" ")[0];
     const msg =
       `Olá, ${primeiroNome}! Vim pela sua bio.\n\n` +
@@ -75,12 +77,10 @@ export default function BookingSheet({
             <span className="n">1</span>Serviço
           </div>
           <div className="chips">
-            {studio.servicos.map((s, i) => (
+            {servicos.map((s, i) => (
               <button key={i} type="button" className={`chip${svc === i ? " active" : ""}`} onClick={() => setSvc(i)}>
                 {s.nome}
-                <small>
-                  {s.dur} · {brl(s.preco)}
-                </small>
+                <small>{brl(s.preco)}</small>
               </button>
             ))}
           </div>
@@ -122,9 +122,9 @@ export default function BookingSheet({
         {pronto ? (
           <div className="summary">
             <span>
-              <b>{studio.servicos[svc!].nome}</b> · {dia} · <b>{hora}</b>
+              <b>{servicos[svc!].nome}</b> · {dia} · <b>{hora}</b>
             </span>
-            <span>{brl(studio.servicos[svc!].preco)}</span>
+            <span>{brl(servicos[svc!].preco)}</span>
           </div>
         ) : (
           <div className="summary empty">Selecione as opções acima</div>
