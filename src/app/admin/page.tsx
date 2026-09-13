@@ -2,7 +2,15 @@
 
 import { useEffect, useState, type FormEvent } from "react";
 import { useAuth } from "@/hooks/useAuth";
+import { auth } from "@/lib/firebase";
 import { brl, wppUrl } from "@/lib/utils";
+
+// Diagnóstico: código do erro do Firestore + se há login ativo no momento.
+function detalheErro(e: unknown) {
+  const code = (e as { code?: string })?.code || "erro";
+  const uid = auth.currentUser?.uid;
+  return `${code} · ${uid ? "login: " + uid.slice(0, 6) : "SEM login"}`;
+}
 import {
   ouvirServicos,
   addServico,
@@ -205,6 +213,7 @@ function ServicosManager() {
   const [form, setForm] = useState(FORM_VAZIO);
   const [editId, setEditId] = useState<string | null>(null);
   const [salvando, setSalvando] = useState(false);
+  const [erroServ, setErroServ] = useState("");
 
   useEffect(() => ouvirServicos(setLista), []);
 
@@ -223,11 +232,14 @@ function ServicosManager() {
     const preco = parseFloat(String(form.preco).replace(",", "."));
     if (!form.nome.trim() || Number.isNaN(preco)) return;
     setSalvando(true);
+    setErroServ("");
     const data = { nome: form.nome.trim(), desc: form.desc.trim(), preco, tipo: form.tipo };
     try {
       if (editId) await updateServico(editId, data);
       else await addServico({ ...data, ordem: lista.length });
       cancelar();
+    } catch (e) {
+      setErroServ(`Não consegui salvar (${detalheErro(e)}).`);
     } finally {
       setSalvando(false);
     }
@@ -269,6 +281,7 @@ function ServicosManager() {
           {editId && (
             <button type="button" className="adm-btn-ghost" onClick={cancelar}>Cancelar</button>
           )}
+          {erroServ && <span className="adm-erro">{erroServ}</span>}
         </div>
       </form>
 
@@ -349,8 +362,7 @@ function HorariosManager() {
       await salvarAgenda({ dias });
       setMsg({ ok: true, texto: "Horários salvos!" });
     } catch (e) {
-      const code = (e as { code?: string })?.code;
-      setMsg({ ok: false, texto: `Não consegui salvar${code ? ` (${code})` : ""}. Tente de novo.` });
+      setMsg({ ok: false, texto: `Não consegui salvar (${detalheErro(e)}).` });
     } finally {
       setSalvando(false);
     }
