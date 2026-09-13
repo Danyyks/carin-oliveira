@@ -1,0 +1,55 @@
+rules_version = '2';
+
+// Regras de segurança do Firestore — Carin (link na bio + agendamento).
+// Modelo: só a Carin (dona) escreve serviços/horários e gerencia agendamentos;
+// o público lê o que é público e só CRIA pedidos de agendamento (nunca edita),
+// o que garante o anti-agendamento-duplicado (id determinístico "data_hora").
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // UID do login administrador (por enquanto o do Dany, p/ testes).
+    function isDono() {
+      return request.auth != null
+        && request.auth.uid == 'O3f8AEuQ2LRmUP59lFSAud5eEj83';
+    }
+
+    // Config do estúdio: leitura pública, escrita só da dona.
+    match /config/{doc} {
+      allow read: if true;
+      allow write: if isDono();
+    }
+
+    // Serviços/combos/promoções: leitura pública, escrita só da dona.
+    match /servicos/{id} {
+      allow read: if true;
+      allow write: if isDono();
+    }
+
+    // Disponibilidade (dias/horários abertos, bloqueios): leitura pública, escrita só da dona.
+    match /disponibilidade/{doc=**} {
+      allow read: if true;
+      allow write: if isDono();
+    }
+
+    // Agendamentos:
+    // - qualquer um pode CRIAR um pedido (com validação e status "pendente");
+    // - NINGUÉM (além da dona) pode editar/apagar -> um 2º create no mesmo id falha,
+    //   impedindo dois clientes pegarem o mesmo horário;
+    // - só a dona lê a lista e confirma/recusa (update/delete).
+    match /agendamentos/{id} {
+      allow read: if isDono();
+      allow update, delete: if isDono();
+      allow create: if
+        request.resource.data.status == 'pendente'
+        && request.resource.data.keys().hasAll(
+             ['servicoId', 'clienteNome', 'clienteWhatsapp', 'data', 'hora', 'status', 'criadoEm'])
+        && request.resource.data.clienteNome is string
+        && request.resource.data.clienteNome.size() > 1
+        && request.resource.data.clienteNome.size() <= 80
+        && request.resource.data.clienteWhatsapp is string
+        && request.resource.data.data is string
+        && request.resource.data.hora is string;
+    }
+  }
+}
