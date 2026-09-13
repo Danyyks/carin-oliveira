@@ -1,19 +1,11 @@
-# Logos das marcas (loja O Boticário)
+# Imagens da loja (revendedora O Boticário)
 
-Coloque aqui os **arquivos oficiais** dos logos das marcas que a Carin revende
-(fornecidos pelo portal de revendedora do Grupo Boticário / kit de marca).
+O bento da loja virtual usa uma **imagem de fundo** (banner) criada pela Carin,
+com o texto sobreposto pelo próprio site ("Acompanhe minha lojinha virtual" / "Perfumes e presentes").
 
-**Formato preferido:** SVG. Alternativa: PNG com fundo transparente, quadrado.
+- **`loja-fundo.jpg`** — banner usado no site (otimizado: 1200×480, ~49K).
+  Apontado em `src/config/studio.ts` → `loja.fundo`.
 
-**Nomes esperados** (é só apontar o caminho em `src/config/studio.ts` → `loja.simbolo` e `loja.marcas[].logo`):
-
-| Arquivo sugerido        | Onde aparece                          |
-|-------------------------|---------------------------------------|
-| `boticario.svg`         | símbolo no cabeçalho + 1º selo        |
-| `eudora.svg`            | 2º selo                               |
-| `oui.svg`               | 3º selo                               |
-| `berenice.svg`          | 4º selo                               |
-
-Enquanto os arquivos não estiverem aqui, o site mostra **selos estilizados de reserva**
-(desenhados por nós, não são os logos oficiais). Assim que você soltar os arquivos e
-ajustar os caminhos no config, os logos oficiais aparecem automaticamente.
+Para trocar o banner: gere uma imagem na proporção **5:2** (ex.: 1200×480 ou 1500×600),
+salve aqui e atualize o caminho em `loja.fundo`. Deixe o texto **fora** da imagem
+(o site sobrepõe) e as artes na metade de cima (a base ganha um degradê escuro para o texto).

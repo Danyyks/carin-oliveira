@@ -11,17 +11,11 @@ export type Servico = {
   tipo?: "servico" | "combo" | "promocao";
 };
 
-export type MarcaLoja = {
-  nome: string;
-  logo?: string; // caminho do logo oficial em /public (ex.: "/marcas/eudora.svg"); vazio = usa selo estilizado
-};
-
 export type Loja = {
   url: string;
   titulo: string;
   sub: string;
-  simbolo?: string; // símbolo oficial do Boticário p/ o cabeçalho (ex.: "/marcas/boticario.svg")
-  marcas?: MarcaLoja[];
+  fundo?: string; // imagem de fundo do banner em /public (ex.: "/marcas/loja-fundo.jpg")
 };
 
 export type StudioConfig = {
@@ -61,19 +55,11 @@ export const studio: StudioConfig = {
     { nome: "Alongamento", desc: "Fibra ou gel, do seu jeito", dur: "2h", preco: 120 },
     { nome: "Nail Art", desc: "Desenhos e pedrarias", dur: "1h15", preco: 45 },
   ],
-  // Loja virtual (revendedora O Boticário).
-  // Os logos oficiais devem ser fornecidos pela Carin (arquivos em /public/marcas).
-  // Enquanto `simbolo`/`logo` estiverem vazios, mostramos selos estilizados de reserva.
+  // Loja virtual (revendedora O Boticário). Imagem de fundo criada pela Carin.
   loja: {
     url: "https://minhaloja.grupoboticario.com.br/loja-carinoliveiraalmeidamarques-26635836?utm_source=app_divulgar&utm_medium=mld",
-    titulo: "O Boticário",
-    sub: "Minha loja virtual · perfumes e presentes",
-    simbolo: undefined, // ex.: "/marcas/boticario.svg" quando o arquivo estiver em /public/marcas
-    marcas: [
-      { nome: "O Boticário", logo: undefined }, // ex.: "/marcas/boticario.svg"
-      { nome: "Eudora", logo: undefined }, // ex.: "/marcas/eudora.svg"
-      { nome: "O.U.I. Paris", logo: undefined }, // ex.: "/marcas/oui.svg"
-      { nome: "Quem disse, Berenice?", logo: undefined }, // ex.: "/marcas/berenice.svg"
-    ],
+    titulo: "Acompanhe minha lojinha virtual",
+    sub: "Perfumes e presentes",
+    fundo: "/marcas/loja-fundo.jpg",
   },
 };

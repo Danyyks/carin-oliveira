@@ -272,133 +272,59 @@ a {
   background: rgba(255, 255, 255, 0.22);
 }
 
-/* bloco da loja (revendedora O Boticário) — vitrine das marcas */
+/* bloco da loja (revendedora O Boticário) — banner com imagem de fundo */
 .t-loja {
   position: relative;
-  flex-direction: column;
-  align-items: stretch;
-  gap: 13px;
-  padding: 15px 17px 16px;
-  background: linear-gradient(160deg, #0e8a55 0%, #0a7a49 45%, #075f3c 100%);
-  color: #fff;
+  display: block;
+  aspect-ratio: 5 / 2;
+  padding: 0;
   border: none;
   overflow: hidden;
-  isolation: isolate;
-}
-/* brilho que varre lentamente, tipo luz de vitrine */
-.loja-glow {
-  position: absolute;
-  inset: -45%;
-  background: radial-gradient(closest-side, rgba(255, 255, 255, 0.22), rgba(255, 255, 255, 0) 70%);
-  animation: loja-sweep 9s ease-in-out infinite;
-  pointer-events: none;
-  z-index: 0;
-}
-@keyframes loja-sweep {
-  0%,
-  100% {
-    transform: translate(-20%, -6%);
-    opacity: 0.45;
-  }
-  50% {
-    transform: translate(20%, 6%);
-    opacity: 0.8;
-  }
-}
-.loja-top {
-  position: relative;
-  z-index: 1;
-  display: flex;
-  align-items: center;
-  gap: 14px;
-}
-.t-loja .tico {
-  position: relative;
-  background: rgba(255, 255, 255, 0.2);
   color: #fff;
-  flex-shrink: 0;
-  overflow: hidden;
-}
-/* símbolo oficial do Boticário (quando o arquivo existir) cobre o ícone genérico */
-.loja-simbolo {
-  position: absolute;
-  inset: 0;
+  background-color: #0a7a49; /* reserva, caso a imagem não carregue */
   background-size: cover;
   background-position: center;
 }
-.t-loja .txt {
-  flex: 1;
-  min-width: 0;
+/* escurecimento sutil p/ elegância + legibilidade do texto na base */
+.loja-scrim {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    0deg,
+    rgba(10, 4, 8, 0.96) 0%,
+    rgba(10, 4, 8, 0.82) 18%,
+    rgba(10, 4, 8, 0.5) 34%,
+    rgba(10, 4, 8, 0.16) 50%,
+    rgba(10, 4, 8, 0) 64%
+  );
+}
+.loja-info {
+  position: absolute;
+  inset: auto 0 0 0;
+  z-index: 1;
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 15px 18px;
+}
+.t-loja .ttitle {
+  font-size: 1.06rem;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  text-shadow: 0 1px 8px rgba(0, 0, 0, 0.45);
 }
 .t-loja .tsub {
-  color: rgba(255, 255, 255, 0.85);
+  margin-top: 2px;
+  font-size: 0.84rem;
+  color: rgba(255, 255, 255, 0.9);
+  text-shadow: 0 1px 8px rgba(0, 0, 0, 0.45);
 }
 .t-loja .arrow {
-  color: #fff;
-  opacity: 0.9;
-}
-.loja-marcas {
-  position: relative;
-  z-index: 1;
-  padding-top: 12px;
-  border-top: 1px solid rgba(255, 255, 255, 0.18);
-}
-.loja-marcas-label {
-  display: block;
-  font-size: 0.64rem;
-  font-weight: 700;
-  letter-spacing: 0.13em;
-  text-transform: uppercase;
-  color: rgba(255, 255, 255, 0.72);
-  margin-bottom: 10px;
-}
-.loja-marcas-row {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
-.marca-badge {
-  position: relative;
-  width: 42px;
-  height: 42px;
-  border-radius: 50%;
-  background: #fff;
-  display: flex;
-  align-items: center;
-  justify-content: center;
   flex-shrink: 0;
-  overflow: hidden;
-  box-shadow: 0 6px 14px -8px rgba(0, 0, 0, 0.5);
-  transition: transform 0.18s cubic-bezier(0.2, 0.8, 0.2, 1);
-}
-.marca-badge svg {
-  display: block;
-}
-/* logo oficial (quando o arquivo existir em /public) cobre o selo estilizado */
-.marca-logo {
-  position: absolute;
-  inset: 0;
-  border-radius: 50%;
-  background-size: cover;
-  background-position: center;
-}
-.tile.t-loja:hover .marca-badge {
-  transform: translateY(-2px);
-}
-.tile.t-loja:hover .marca-badge:nth-child(2) {
-  transition-delay: 0.03s;
-}
-.tile.t-loja:hover .marca-badge:nth-child(3) {
-  transition-delay: 0.06s;
-}
-.tile.t-loja:hover .marca-badge:nth-child(4) {
-  transition-delay: 0.09s;
-}
-@media (max-width: 380px) {
-  .marca-badge {
-    width: 38px;
-    height: 38px;
-  }
+  color: #fff;
+  opacity: 0.95;
+  text-shadow: 0 1px 8px rgba(0, 0, 0, 0.45);
 }
 
 /* serviços */
