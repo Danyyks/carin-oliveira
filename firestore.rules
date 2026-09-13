@@ -8,10 +8,11 @@ rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
 
-    // UID do login administrador (por enquanto o do Dany, p/ testes).
+    // UIDs autorizados como administradores (Console → Authentication → Users).
     function isDono() {
-      return request.auth != null
-        && request.auth.uid == 'O3f8AEuQ2LRmUP59lFSAud5eEj83';
+      return request.auth != null && request.auth.uid in [
+        'gMc4YUVXxTNTbWpkCtFLiFyOd1y2' // suellengarcia.silva@gmail.com
+      ];
     }
 
     // Config do estúdio: leitura pública, escrita só da dona.

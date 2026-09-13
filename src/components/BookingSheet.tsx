@@ -5,6 +5,7 @@ import { Check } from "lucide-react";
 import type { StudioConfig, Servico } from "@/config/studio";
 import { brl, proximosDias, type Dia } from "@/lib/utils";
 import { ouvirAgenda, ouvirSlotsOcupados, criarAgendamento } from "@/lib/db";
+import { enviarEmailPedido } from "@/lib/email";
 
 export default function BookingSheet({
   studio,
@@ -112,6 +113,17 @@ export default function BookingSheet({
         hora: hora!,
         diaLabel: diaSel!.label,
       });
+      // Avisa a dona por e-mail (não bloqueia o sucesso se o e-mail falhar).
+      try {
+        await enviarEmailPedido({
+          cliente_nome: nome.trim(),
+          cliente_whatsapp: whatsapp.trim(),
+          servico: s.nome,
+          quando: `${diaSel!.label} às ${hora}`,
+        });
+      } catch {
+        // pedido já foi criado; ignora falha do e-mail
+      }
       setSucesso(true);
     } catch {
       setErro("Esse horário acabou de ser reservado. Escolha outro, por favor.");
