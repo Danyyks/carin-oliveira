@@ -91,20 +91,6 @@ a {
   background-size: cover;
   background-position: center;
 }
-.avatar .cam {
-  position: absolute;
-  right: 1px;
-  bottom: 1px;
-  width: 25px;
-  height: 25px;
-  border-radius: 50%;
-  background: var(--surface);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: var(--text-muted);
-  box-shadow: 0 2px 6px var(--shadow);
-}
 .name {
   font-size: 1.45rem;
   font-weight: 800;
@@ -382,14 +368,6 @@ a {
   transform: translateX(3px);
   opacity: 1;
 }
-.t-horario {
-  flex-direction: row;
-  align-items: center;
-  gap: 12px;
-  padding: 14px 16px;
-  cursor: default;
-}
-
 /* serviços */
 .t-serv {
   cursor: default;
@@ -881,24 +859,6 @@ a {
 }
 
 /* engrenagem discreta de acesso ao painel (dev) */
-.app-foot {
-  display: flex;
-  justify-content: center;
-  padding: 20px 0 4px;
-}
-.admin-gear {
-  display: inline-flex;
-  padding: 8px;
-  border-radius: 8px;
-  color: var(--text-muted);
-  opacity: 0.32;
-  transition: opacity 0.2s, color 0.2s;
-}
-.admin-gear:hover {
-  opacity: 0.9;
-  color: var(--accent-deep);
-}
-
 /* botão de instalar o app (Painel Carin) */
 .adm-install-wrap {
   max-width: 680px;

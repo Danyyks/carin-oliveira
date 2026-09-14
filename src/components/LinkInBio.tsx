@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Settings } from "lucide-react";
 import type { StudioConfig, Servico } from "@/config/studio";
 import { ouvirServicos } from "@/lib/db";
 import Profile from "./Profile";
@@ -38,13 +37,6 @@ export default function LinkInBio({ studio }: { studio: StudioConfig }) {
       <Profile studio={studio} />
       <BentoGrid studio={studio} servicos={servicos} onBook={book} />
       <BookingSheet studio={studio} servicos={servicos} open={open} preset={preset} onClose={() => setOpen(false)} />
-
-      {/* Acesso discreto ao painel (só durante o desenvolvimento; some no go-live). */}
-      <footer className="app-foot">
-        <a href="/admin" className="admin-gear" aria-label="Painel da administradora">
-          <Settings size={17} strokeWidth={2} />
-        </a>
-      </footer>
     </div>
   );
 }

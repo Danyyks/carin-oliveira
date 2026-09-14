@@ -50,10 +50,10 @@ export async function ouvirMensagensEmPrimeiroPlano(): Promise<(() => void) | vo
   if (!(await notificacoesSuportadas())) return;
   const messaging = getMessaging(app);
   return onMessage(messaging, (payload) => {
-    const d = payload.data || {};
+    const n = payload.notification;
     try {
-      new Notification(d.title || "Novo agendamento", {
-        body: d.body || "Você tem um pedido pendente.",
+      new Notification(n?.title || "Novo agendamento", {
+        body: n?.body || "Você tem um pedido pendente.",
         icon: "/icon-192.png",
       });
     } catch {

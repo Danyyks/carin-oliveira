@@ -32,18 +32,6 @@ export async function POST(req: Request) {
     const tokens = snap.docs.map((d) => d.id).filter(Boolean);
     if (tokens.length === 0) return NextResponse.json({ ok: true, enviados: 0 });
 
-    // Conta os pedidos pendentes para a bolinha (badge) no ícone do app.
-    let pendentes = 0;
-    try {
-      const pend = await dbAdmin
-        .collection("agendamentos")
-        .where("status", "==", "pendente")
-        .get();
-      pendentes = pend.size;
-    } catch {
-      /* se falhar a contagem, segue sem badge */
-    }
-
     const quando = [body.diaLabel, body.hora].filter(Boolean).join(" às ");
     const corpo =
       [body.clienteNome, body.servicoNome].filter(Boolean).join(" · ") +
@@ -51,13 +39,17 @@ export async function POST(req: Request) {
 
     const res = await getMessaging(app).sendEachForMulticast({
       tokens,
-      // Mensagem só de dados: o service worker monta a notificação (evita duplicar).
-      data: {
-        title: "Novo agendamento",
-        body: corpo || "Você tem um pedido pendente.",
-        badge: String(pendentes),
+      // Mensagem "notification" (webpush): o SO exibe a notificação na tela
+      // automaticamente — funciona no Android E no iPhone (iOS 16.4+ instalado).
+      webpush: {
+        notification: {
+          title: "Novo agendamento",
+          body: corpo || "Você tem um pedido pendente.",
+          icon: "/icon-192.png",
+        },
+        fcmOptions: { link: "/admin" },
+        headers: { Urgency: "high" },
       },
-      webpush: { headers: { Urgency: "high" }, fcmOptions: { link: "/admin" } },
     });
 
     // Remove tokens que não valem mais (app desinstalado, permissão revogada).

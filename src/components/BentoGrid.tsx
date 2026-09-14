@@ -1,4 +1,4 @@
-import { CalendarDays, Sparkles, MapPin, Clock } from "lucide-react";
+import { CalendarDays, Sparkles, MapPin } from "lucide-react";
 import type { StudioConfig, Servico } from "@/config/studio";
 import { brl, wppUrl } from "@/lib/utils";
 import { WhatsappIcon, InstagramIcon } from "./icons";
@@ -129,16 +129,6 @@ export default function BentoGrid({
             Como chegar <span className="arrow">→</span>
           </span>
         </a>
-      </div>
-
-      <div className="tile t-horario wide">
-        <div className="tico ic-rose">
-          <Clock size={18} strokeWidth={2} />
-        </div>
-        <div className="mapa-txt">
-          <b>Horário de atendimento</b>
-          <span>{studio.horario}</span>
-        </div>
       </div>
     </div>
   );

@@ -1,7 +1,12 @@
 /* Service worker do Firebase Cloud Messaging (push em segundo plano).
  * Fica na RAIZ pública (escopo "/") — é onde o FCM procura por ele.
  * As chaves abaixo são identificadores PÚBLICOS do projeto (não são segredo);
- * a segurança fica nas regras do Firestore e na chave de servidor (Vercel). */
+ * a segurança fica nas regras do Firestore e na chave de servidor (Vercel).
+ *
+ * Estratégia: o servidor manda uma mensagem do tipo "notification" (webpush).
+ * Assim o próprio FCM/SO exibe a notificação na tela automaticamente — inclusive
+ * no iPhone (iOS 16.4+ com o app instalado na tela inicial), que NÃO exibe de
+ * forma confiável as mensagens "só de dados". O clique abre /admin (fcmOptions.link). */
 importScripts("https://www.gstatic.com/firebasejs/12.19.0/firebase-app-compat.js");
 importScripts("https://www.gstatic.com/firebasejs/12.19.0/firebase-messaging-compat.js");
 
@@ -14,37 +19,6 @@ firebase.initializeApp({
   appId: "1:145566063485:web:9c8089e743f05491e80a14",
 });
 
-const messaging = firebase.messaging();
-
-// Chega um pedido com o app fechado / em segundo plano: mostra a notificação na tela.
-messaging.onBackgroundMessage((payload) => {
-  const d = payload.data || {};
-
-  // Bolinha (badge) no ícone do app com o nº de pendentes — onde houver suporte.
-  const n = Number(d.badge);
-  if (self.navigator && "setAppBadge" in self.navigator && Number.isFinite(n)) {
-    if (n > 0) self.navigator.setAppBadge(n).catch(() => {});
-    else self.navigator.clearAppBadge && self.navigator.clearAppBadge().catch(() => {});
-  }
-
-  self.registration.showNotification(d.title || "Novo agendamento", {
-    body: d.body || "Você tem um pedido pendente.",
-    icon: "/icon-192.png",
-    badge: "/icon-192.png",
-    tag: "novo-agendamento",
-    data: { url: "/admin" },
-  });
-});
-
-// Ao tocar na notificação, abre ou foca o painel.
-self.addEventListener("notificationclick", (event) => {
-  event.notification.close();
-  event.waitUntil(
-    clients.matchAll({ type: "window", includeUncontrolled: true }).then((wins) => {
-      for (const w of wins) {
-        if (w.url.includes("/admin") && "focus" in w) return w.focus();
-      }
-      if (clients.openWindow) return clients.openWindow("/admin");
-    })
-  );
-});
+// Inicializar o messaging registra o handler que exibe as mensagens
+// "notification" automaticamente quando o app está em segundo plano.
+firebase.messaging();
