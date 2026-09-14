@@ -27,11 +27,15 @@ export type ServicoInput = Omit<ServicoDoc, "id">;
 
 /** Escuta os serviços em tempo real (ordenados por `ordem`). */
 export function ouvirServicos(cb: (servicos: ServicoDoc[]) => void) {
-  return onSnapshot(collection(db, "servicos"), (snap) => {
-    const list = snap.docs.map((d) => ({ id: d.id, ...(d.data() as Omit<ServicoDoc, "id">) }));
-    list.sort((a, b) => (a.ordem ?? 0) - (b.ordem ?? 0));
-    cb(list);
-  });
+  return onSnapshot(
+    collection(db, "servicos"),
+    (snap) => {
+      const list = snap.docs.map((d) => ({ id: d.id, ...(d.data() as Omit<ServicoDoc, "id">) }));
+      list.sort((a, b) => (a.ordem ?? 0) - (b.ordem ?? 0));
+      cb(list);
+    },
+    (e) => console.error("ouvirServicos:", e),
+  );
 }
 export const addServico = (data: ServicoInput) => addDoc(collection(db, "servicos"), data);
 export const updateServico = (id: string, data: Partial<ServicoInput>) =>
@@ -43,9 +47,11 @@ export const removeServico = (id: string) => deleteDoc(doc(db, "servicos", id));
 export type Agenda = { dias: Record<string, string[]> };
 
 export function ouvirAgenda(cb: (agenda: Agenda) => void) {
-  return onSnapshot(doc(db, "disponibilidade", "regras"), (d) => {
-    cb((d.data() as Agenda) ?? { dias: {} });
-  });
+  return onSnapshot(
+    doc(db, "disponibilidade", "regras"),
+    (d) => cb((d.data() as Agenda) ?? { dias: {} }),
+    (e) => console.error("ouvirAgenda:", e),
+  );
 }
 export const salvarAgenda = (agenda: Agenda) =>
   setDoc(doc(db, "disponibilidade", "regras"), agenda);
@@ -69,15 +75,18 @@ export type NovoAgendamento = Omit<Agendamento, "id" | "status">;
  * dados do cliente). Usado no site para esconder horários indisponíveis.
  */
 export function ouvirSlotsOcupados(cb: (ocupados: Set<string>) => void) {
-  return onSnapshot(collection(db, "slots"), (snap) => {
-    cb(new Set(snap.docs.map((d) => d.id)));
-  });
+  return onSnapshot(
+    collection(db, "slots"),
+    (snap) => cb(new Set(snap.docs.map((d) => d.id))),
+    (e) => console.error("ouvirSlotsOcupados:", e),
+  );
 }
 
 /**
  * Cria o pedido: grava o slot público + o agendamento privado de forma atômica.
- * Se o slot já existir, a regra (create-only) faz o batch inteiro falhar — é o
- * que impede dois clientes pegarem o mesmo horário.
+ * Se o horário já existir, o `set` vira um `update` no doc existente — e a regra
+ * `update` (só a dona) barra o batch inteiro. É o que impede dois clientes
+ * pegarem o mesmo horário (o id determinístico "data_hora" garante a colisão).
  */
 export async function criarAgendamento(a: NovoAgendamento) {
   const id = `${a.data}_${a.hora}`;
@@ -99,11 +108,15 @@ export async function criarAgendamento(a: NovoAgendamento) {
 
 /** Escuta os agendamentos (só a dona lê) em tempo real, ordenados por data/hora. */
 export function ouvirAgendamentos(cb: (ags: Agendamento[]) => void) {
-  return onSnapshot(collection(db, "agendamentos"), (snap) => {
-    const list = snap.docs.map((d) => ({ id: d.id, ...(d.data() as Omit<Agendamento, "id">) }));
-    list.sort((a, b) => (a.data + a.hora).localeCompare(b.data + b.hora));
-    cb(list);
-  });
+  return onSnapshot(
+    collection(db, "agendamentos"),
+    (snap) => {
+      const list = snap.docs.map((d) => ({ id: d.id, ...(d.data() as Omit<Agendamento, "id">) }));
+      list.sort((a, b) => (a.data + a.hora).localeCompare(b.data + b.hora));
+      cb(list);
+    },
+    (e) => console.error("ouvirAgendamentos:", e),
+  );
 }
 
 /** Confirma o agendamento (slot + registro viram "confirmado"). */

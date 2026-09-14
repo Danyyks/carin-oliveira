@@ -51,7 +51,9 @@ service cloud.firestore {
       allow read: if true;
       allow create: if request.resource.data.status == 'pendente'
         && request.resource.data.data is string
-        && request.resource.data.hora is string;
+        && request.resource.data.hora is string
+        // o id TEM que ser "data_hora" (trava a duplicidade mesmo fora do app)
+        && id == request.resource.data.data + '_' + request.resource.data.hora;
       allow update, delete: if isDono();
     }
 
@@ -60,13 +62,23 @@ service cloud.firestore {
     match /agendamentos/{id} {
       allow read, update, delete: if isDono();
       allow create: if request.resource.data.status == 'pendente'
+        // o id TEM que ser "data_hora" (trava a duplicidade mesmo fora do app)
+        && id == request.resource.data.data + '_' + request.resource.data.hora
         && request.resource.data.servicoNome is string
+        && request.resource.data.servicoNome.size() <= 80
+        && request.resource.data.servicoPreco is number
         && request.resource.data.clienteNome is string
         && request.resource.data.clienteNome.size() > 1
         && request.resource.data.clienteNome.size() <= 80
         && request.resource.data.clienteWhatsapp is string
+        && request.resource.data.clienteWhatsapp.size() >= 8
+        && request.resource.data.clienteWhatsapp.size() <= 25
         && request.resource.data.data is string
-        && request.resource.data.hora is string;
+        && request.resource.data.data.size() == 10
+        && request.resource.data.hora is string
+        && request.resource.data.hora.size() <= 5
+        && request.resource.data.diaLabel is string
+        && request.resource.data.diaLabel.size() <= 40;
     }
   }
 }

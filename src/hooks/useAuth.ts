@@ -15,13 +15,14 @@ export function useAuth() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const unsub = onAuthStateChanged(auth, (u) => {
-      setUser(u);
-      setLoading(false);
-    });
     // Defesa: se a autenticação não inicializar (ex.: contexto inseguro),
     // não deixa a tela presa no "Carregando…" pra sempre.
     const t = setTimeout(() => setLoading(false), 6000);
+    const unsub = onAuthStateChanged(auth, (u) => {
+      setUser(u);
+      setLoading(false);
+      clearTimeout(t); // já resolveu antes do timeout
+    });
     return () => {
       unsub();
       clearTimeout(t);

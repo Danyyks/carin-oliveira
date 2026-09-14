@@ -8,9 +8,10 @@
   --surface: #ffffff;
   --surface-2: #fdf1f5;
   --text: #2a2328;
-  --text-muted: #8c7b84;
+  --text-muted: #736069; /* AA sobre branco (~4.9:1) */
   --accent: #e85d8e;
   --accent-deep: #c43f72;
+  --accent-cta: #c43f72; /* fundo sólido + texto branco (AA) */
   --accent-soft: #f7cadb;
   --border: rgba(42, 35, 40, 0.07);
   --shadow: rgba(196, 63, 114, 0.16);
@@ -27,6 +28,7 @@
     --text-muted: #bba3ad;
     --accent: #f27ca6;
     --accent-deep: #f492b6;
+    --accent-cta: #c43f72; /* fundo sólido + texto branco (AA) */
     --accent-soft: #7a3e54;
     --border: rgba(246, 237, 241, 0.1);
     --shadow: rgba(0, 0, 0, 0.5);
@@ -328,6 +330,9 @@ a {
   height: 160px;
   border: 0;
   display: block;
+  /* o mapa é só visual: não captura o toque (evita "prender" a rolagem no
+     celular). Para navegar de verdade, o botão "Como chegar" abre o Maps. */
+  pointer-events: none;
 }
 .mapa-bar {
   display: flex;
@@ -428,13 +433,14 @@ a {
   border: none;
   font-weight: 600;
   font-size: 0.78rem;
-  padding: 7px 12px;
+  padding: 8px 14px;
+  min-height: 40px;
   border-radius: 10px;
   cursor: pointer;
   transition: background 0.15s, color 0.15s;
 }
 .svc-row .mini:hover {
-  background: var(--accent);
+  background: var(--accent-cta);
   color: #fff;
 }
 
@@ -546,8 +552,8 @@ a {
   border-color: var(--accent-soft);
 }
 .chip.active {
-  background: var(--accent);
-  border-color: var(--accent);
+  background: var(--accent-cta);
+  border-color: var(--accent-cta);
   color: #fff;
 }
 .chip.active small {
@@ -741,7 +747,7 @@ a {
   flex-wrap: wrap;
 }
 .adm-btn {
-  background: var(--accent);
+  background: var(--accent-cta);
   color: #fff;
   border: none;
   font-weight: 700;
@@ -751,9 +757,13 @@ a {
   cursor: pointer;
   box-shadow: 0 8px 20px -10px var(--shadow);
   transition: transform 0.15s, opacity 0.2s;
+  min-height: 44px;
 }
 .adm-btn:hover {
   transform: translateY(-1px);
+}
+.adm-btn:active {
+  transform: scale(0.97);
 }
 .adm-btn:disabled {
   opacity: 0.6;
@@ -831,7 +841,10 @@ a {
   border: none;
   font-weight: 600;
   font-size: 0.8rem;
-  padding: 7px 12px;
+  padding: 8px 14px;
+  min-height: 40px;
+  display: inline-flex;
+  align-items: center;
   border-radius: 9px;
   cursor: pointer;
   transition: background 0.15s, color 0.15s;
@@ -868,7 +881,7 @@ a {
   padding: 2px 0 8px;
 }
 .adm-install {
-  background: var(--accent);
+  background: var(--accent-cta);
   color: #fff;
   border: none;
   font-weight: 700;
@@ -922,7 +935,15 @@ a {
 .sheet-campos {
   display: flex;
   flex-direction: column;
-  gap: 9px;
+  gap: 12px;
+}
+.sheet-field {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  font-size: 0.76rem;
+  font-weight: 600;
+  color: var(--text-muted);
 }
 .sheet-input {
   font-family: inherit;
@@ -951,7 +972,7 @@ a {
 .sheet-btn {
   margin-top: 16px;
   width: 100%;
-  background: var(--accent);
+  background: var(--accent-cta);
   color: #fff;
   border: none;
   padding: 15px;

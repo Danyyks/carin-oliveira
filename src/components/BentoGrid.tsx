@@ -43,7 +43,7 @@ export default function BentoGrid({
           <div className="ttitle">Agendar horário</div>
           <div className="tsub">Serviço, dia e horário em segundos</div>
         </div>
-        <span className="arrow">→</span>
+        <span className="arrow" aria-hidden="true">→</span>
       </button>
 
       <a className="tile compact t-wpp" href={wpp} target="_blank" rel="noopener">
@@ -104,7 +104,7 @@ export default function BentoGrid({
               <div className="ttitle">{studio.loja.titulo}</div>
               <div className="tsub">{studio.loja.sub}</div>
             </div>
-            <span className="arrow">→</span>
+            <span className="arrow" aria-hidden="true">→</span>
           </div>
         </a>
       ) : null}
@@ -126,7 +126,7 @@ export default function BentoGrid({
             <span>{studio.enderecoTexto}</span>
           </div>
           <span className="mapa-cta">
-            Como chegar <span className="arrow">→</span>
+            Como chegar <span className="arrow" aria-hidden="true">→</span>
           </span>
         </a>
       </div>

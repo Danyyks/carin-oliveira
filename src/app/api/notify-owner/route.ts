@@ -1,6 +1,11 @@
 // API que avisa a dona (push) quando chega um novo agendamento.
 // Roda no servidor da Vercel usando o Firebase Admin SDK.
 // A credencial vem da env FIREBASE_SERVICE_ACCOUNT (JSON inteiro da chave privada).
+//
+// Segurança: o endpoint é público (o cliente não está logado), então NÃO confia no
+// corpo do request. Ele recebe só o id do agendamento, confirma no Firestore que o
+// documento existe e está "pendente", e monta a mensagem a partir dos dados reais —
+// assim ninguém consegue disparar push falso/spam sem criar um agendamento de verdade.
 import { NextResponse } from "next/server";
 import { cert, getApps, initializeApp, type App } from "firebase-admin/app";
 import { getFirestore } from "firebase-admin/firestore";
@@ -18,23 +23,29 @@ function adminApp(): App {
 
 export async function POST(req: Request) {
   try {
-    const body = (await req.json().catch(() => ({}))) as {
-      clienteNome?: string;
-      servicoNome?: string;
-      diaLabel?: string;
-      hora?: string;
-    };
+    const body = (await req.json().catch(() => ({}))) as { agendamentoId?: string };
+    const agendamentoId = typeof body.agendamentoId === "string" ? body.agendamentoId : "";
+    if (!agendamentoId || agendamentoId.length > 40) {
+      return NextResponse.json({ ok: false }, { status: 400 });
+    }
 
     const app = adminApp();
     const dbAdmin = getFirestore(app);
+
+    // Só notifica um agendamento que existe de fato e está pendente.
+    const ag = await dbAdmin.collection("agendamentos").doc(agendamentoId).get();
+    const dados = ag.data();
+    if (!ag.exists || !dados || dados.status !== "pendente") {
+      return NextResponse.json({ ok: false }, { status: 404 });
+    }
 
     const snap = await dbAdmin.collection("pushTokens").get();
     const tokens = snap.docs.map((d) => d.id).filter(Boolean);
     if (tokens.length === 0) return NextResponse.json({ ok: true, enviados: 0 });
 
-    const quando = [body.diaLabel, body.hora].filter(Boolean).join(" às ");
+    const quando = [dados.diaLabel, dados.hora].filter(Boolean).join(" às ");
     const corpo =
-      [body.clienteNome, body.servicoNome].filter(Boolean).join(" · ") +
+      [dados.clienteNome, dados.servicoNome].filter(Boolean).join(" · ") +
       (quando ? ` — ${quando}` : "");
 
     const res = await getMessaging(app).sendEachForMulticast({
@@ -69,6 +80,7 @@ export async function POST(req: Request) {
 
     return NextResponse.json({ ok: true, enviados: res.successCount });
   } catch (e) {
-    return NextResponse.json({ ok: false, erro: (e as Error).message }, { status: 500 });
+    console.error("notify-owner:", e);
+    return NextResponse.json({ ok: false }, { status: 500 });
   }
 }

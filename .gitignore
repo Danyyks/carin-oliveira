@@ -15,6 +15,10 @@ dist/
 .env*.local
 serviceAccountKey.json
 firebase-service-account.json
+carin-nail-firebase-adminsdk-*.json
+
+# Cofre de credenciais (NUNCA vai pro GitHub — fica só na sua máquina)
+credenciais/
 
 # Firebase
 .firebase/

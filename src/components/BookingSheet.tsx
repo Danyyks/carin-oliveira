@@ -103,7 +103,7 @@ export default function BookingSheet({
     setErro("");
     try {
       const s = servicos[svc!];
-      await criarAgendamento({
+      const agendamentoId = await criarAgendamento({
         servicoNome: s.nome,
         servicoPreco: s.preco,
         clienteNome: nome.trim(),
@@ -113,16 +113,12 @@ export default function BookingSheet({
         diaLabel: diaSel!.label,
       });
       // Avisa a dona por push (não bloqueia o sucesso se o aviso falhar).
+      // Manda só o id; o servidor lê os dados reais no Firestore.
       try {
         await fetch("/api/notify-owner", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            clienteNome: nome.trim(),
-            servicoNome: s.nome,
-            diaLabel: diaSel!.label,
-            hora,
-          }),
+          body: JSON.stringify({ agendamentoId }),
         });
       } catch {
         // pedido já foi criado; ignora falha do aviso
@@ -219,8 +215,14 @@ export default function BookingSheet({
                 <span className="n">4</span>Seus dados
               </div>
               <div className="sheet-campos">
-                <input className="sheet-input" placeholder="Seu nome" value={nome} onChange={(e) => setNome(e.target.value)} autoComplete="name" />
-                <input className="sheet-input" placeholder="WhatsApp com DDD" inputMode="tel" value={whatsapp} onChange={(e) => setWhatsapp(e.target.value)} autoComplete="tel" />
+                <label className="sheet-field">
+                  <span>Nome</span>
+                  <input className="sheet-input" placeholder="ex.: Maria Silva" value={nome} onChange={(e) => setNome(e.target.value)} autoComplete="name" />
+                </label>
+                <label className="sheet-field">
+                  <span>WhatsApp (com DDD)</span>
+                  <input className="sheet-input" placeholder="ex.: 11 99999-8888" inputMode="tel" value={whatsapp} onChange={(e) => setWhatsapp(e.target.value)} autoComplete="tel" />
+                </label>
               </div>
             </div>
 
