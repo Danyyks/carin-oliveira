@@ -19,6 +19,14 @@ const messaging = firebase.messaging();
 // Chega um pedido com o app fechado / em segundo plano: mostra a notificação na tela.
 messaging.onBackgroundMessage((payload) => {
   const d = payload.data || {};
+
+  // Bolinha (badge) no ícone do app com o nº de pendentes — onde houver suporte.
+  const n = Number(d.badge);
+  if (self.navigator && "setAppBadge" in self.navigator && Number.isFinite(n)) {
+    if (n > 0) self.navigator.setAppBadge(n).catch(() => {});
+    else self.navigator.clearAppBadge && self.navigator.clearAppBadge().catch(() => {});
+  }
+
   self.registration.showNotification(d.title || "Novo agendamento", {
     body: d.body || "Você tem um pedido pendente.",
     icon: "/icon-192.png",
