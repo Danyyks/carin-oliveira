@@ -4,6 +4,12 @@ import { useEffect, useState, type FormEvent } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { auth } from "@/lib/firebase";
 import { brl, wppUrl } from "@/lib/utils";
+import {
+  ativarNotificacoes,
+  notificacoesSuportadas,
+  permissaoAtual,
+  ouvirMensagensEmPrimeiroPlano,
+} from "@/lib/push";
 
 // Diagnóstico: código do erro do Firestore + se há login ativo no momento.
 function detalheErro(e: unknown) {
@@ -122,9 +128,72 @@ function Dashboard({ email, logout }: { email: string; logout: () => Promise<voi
         <button className="adm-btn-ghost" onClick={() => logout()}>Sair</button>
       </header>
       <AgendamentosManager />
+      <NotificacoesCard />
       <ServicosManager />
       <HorariosManager />
     </div>
+  );
+}
+
+// ---------------- Notificações (push) ----------------
+type EstadoPush = "carregando" | "indisponivel" | "off" | "ativando" | "ok" | "erro";
+
+function NotificacoesCard() {
+  const [estado, setEstado] = useState<EstadoPush>("carregando");
+  const [msg, setMsg] = useState("");
+
+  useEffect(() => {
+    let vivo = true;
+    (async () => {
+      const suporta = await notificacoesSuportadas();
+      if (!vivo) return;
+      if (!suporta) return setEstado("indisponivel");
+      setEstado(permissaoAtual() === "granted" ? "ok" : "off");
+    })();
+    // Aviso na tela mesmo com o painel aberto.
+    const p = ouvirMensagensEmPrimeiroPlano();
+    return () => {
+      vivo = false;
+      p.then((unsub) => unsub?.());
+    };
+  }, []);
+
+  async function ativar() {
+    setEstado("ativando");
+    setMsg("");
+    try {
+      await ativarNotificacoes();
+      setEstado("ok");
+    } catch (e) {
+      setEstado("erro");
+      setMsg((e as Error).message || "Não consegui ativar.");
+    }
+  }
+
+  if (estado === "carregando") return null;
+
+  return (
+    <section className="admin-card">
+      <h2 className="adm-section">Notificações</h2>
+      {estado === "ok" ? (
+        <p className="adm-ok">Ativadas neste aparelho. Você recebe um aviso na tela a cada novo pedido.</p>
+      ) : estado === "indisponivel" ? (
+        <p className="adm-muted">
+          Este aparelho não suporta notificações por aqui. No iPhone, <b>instale o app na tela inicial</b> (menu
+          Compartilhar → Adicionar à Tela de Início) e abra por ele para ativar.
+        </p>
+      ) : (
+        <>
+          <p className="adm-muted">Receba um aviso na tela sempre que chegar um novo agendamento.</p>
+          <div className="adm-actions">
+            <button className="adm-btn" onClick={ativar} disabled={estado === "ativando"}>
+              {estado === "ativando" ? "Ativando…" : "Ativar notificações"}
+            </button>
+            {estado === "erro" && <span className="adm-erro">{msg}</span>}
+          </div>
+        </>
+      )}
+    </section>
   );
 }
 
@@ -135,6 +204,17 @@ function AgendamentosManager() {
 
   const pendentes = lista.filter((a) => a.status === "pendente");
   const confirmados = lista.filter((a) => a.status === "confirmado");
+
+  // Bolinha no ícone do app (igual app nativo) com o nº de pedidos pendentes.
+  useEffect(() => {
+    const nav = navigator as Navigator & {
+      setAppBadge?: (n?: number) => Promise<void>;
+      clearAppBadge?: () => Promise<void>;
+    };
+    if (!("setAppBadge" in nav)) return;
+    if (pendentes.length > 0) nav.setAppBadge?.(pendentes.length).catch(() => {});
+    else nav.clearAppBadge?.().catch(() => {});
+  }, [pendentes.length]);
 
   async function confirmar(a: Agendamento) {
     await confirmarAgendamento(a.id);

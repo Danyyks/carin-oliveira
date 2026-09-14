@@ -23,8 +23,8 @@ Link na bio estilo bento, mobile-first, com cara de app top, cujo **foco princip
 ## Como a Carin é avisada (todos grátis)
 | Canal | Papel |
 |---|---|
-| 🔔 Push no app (FCM) | **Principal** — instantâneo, app fechado |
-| 📧 E-mail (EmailJS) | Backup — chega mesmo com tudo fechado |
+| 🔔 Push no app (FCM) | **Principal** — notificação na tela, app fechado |
+| 🔴 Bolinha (badge) no ícone | Contador de pendentes, igual app nativo |
 | 🖥️ Painel em tempo real | Ao vivo, com o app aberto |
 | 💬 WhatsApp (`wa.me`) | Confirmação pro cliente (1 toque da Carin) |
 
@@ -36,4 +36,3 @@ Link na bio estilo bento, mobile-first, com cara de app top, cujo **foco princip
 - A confirmação pro cliente é **1 toque da Carin**, não envio automático (isso exigiria a API paga do WhatsApp).
 - O horário **trava quando o cliente pede**; se ele some, a Carin libera no painel.
 - No **iPhone**, o push exige o **app instalado na tela** (iOS 16.4+) e permissão. No Android funciona sempre.
-- O primeiro e-mail pode cair no spam — marcar "não é spam" uma vez resolve.

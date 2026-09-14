@@ -121,3 +121,9 @@ export async function recusarAgendamento(id: string) {
   batch.delete(doc(db, "agendamentos", id));
   await batch.commit();
 }
+
+// ---------- Push (token do aparelho da dona) ----------
+// O id do doc é o próprio token (evita duplicar); a API na Vercel lê essa
+// coleção para disparar o push. Só a dona (isDono) escreve — ver regras.
+export const salvarPushToken = (token: string) =>
+  setDoc(doc(db, "pushTokens", token), { criadoEm: serverTimestamp() }, { merge: true });

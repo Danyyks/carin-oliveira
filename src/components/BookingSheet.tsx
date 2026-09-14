@@ -5,7 +5,6 @@ import { Check } from "lucide-react";
 import type { StudioConfig, Servico } from "@/config/studio";
 import { brl, proximosDias, type Dia } from "@/lib/utils";
 import { ouvirAgenda, ouvirSlotsOcupados, criarAgendamento } from "@/lib/db";
-import { enviarEmailPedido } from "@/lib/email";
 
 export default function BookingSheet({
   studio,
@@ -113,16 +112,20 @@ export default function BookingSheet({
         hora: hora!,
         diaLabel: diaSel!.label,
       });
-      // Avisa a dona por e-mail (não bloqueia o sucesso se o e-mail falhar).
+      // Avisa a dona por push (não bloqueia o sucesso se o aviso falhar).
       try {
-        await enviarEmailPedido({
-          cliente_nome: nome.trim(),
-          cliente_whatsapp: whatsapp.trim(),
-          servico: s.nome,
-          quando: `${diaSel!.label} às ${hora}`,
+        await fetch("/api/notify-owner", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            clienteNome: nome.trim(),
+            servicoNome: s.nome,
+            diaLabel: diaSel!.label,
+            hora,
+          }),
         });
       } catch {
-        // pedido já foi criado; ignora falha do e-mail
+        // pedido já foi criado; ignora falha do aviso
       }
       setSucesso(true);
     } catch {

@@ -23,7 +23,6 @@ export type StudioConfig = {
   foto?: string; // caminho da foto de perfil em /public (ex.: "/carin.jpg")
   whatsapp: string; // DDI+DDD+número, só dígitos
   instagram: string; // sem @
-  emailDono: string; // recebe aviso de agendamento pendente (Etapa 6)
   enderecoTexto: string;
   bairro: string;
   horario: string;
@@ -39,7 +38,6 @@ export const studio: StudioConfig = {
   foto: "/carin.jpg",
   whatsapp: "5511933400707", // provisório (WhatsApp do Dany, p/ testes)
   instagram: "carinoliveira9",
-  emailDono: "danyy.jonathan@gmail.com", // provisório (e-mail do Dany, p/ testes)
   enderecoTexto: "Rua Diniz Goes da Silva, 260 - casa 10, Sorocaba - SP",
   bairro: "Sorocaba, SP",
   horario: "Ter a Sáb · 9–19h",

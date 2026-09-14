@@ -17,7 +17,6 @@ Para a Carin há **um único tenant**. Multi-tenant (por slug/subdomínio) fica 
 | Envio do push | API route no Next.js (Vercel) | grátis (sem cartão) |
 | Hospedagem | Vercel | grátis (Hobby) |
 | WhatsApp | link `wa.me` | grátis |
-| E-mail | EmailJS | grátis (200/mês) |
 
 > **Sem Cloud Functions** (exigem plano pago). A lógica roda no cliente com **regras de segurança** do Firestore; o push é disparado por uma **API route na Vercel** usando o Firebase Admin SDK (service account em variável de ambiente do servidor).
 
@@ -51,8 +50,8 @@ O id do agendamento é **determinístico**: `${data}_${hora}`. As regras de segu
   - **read / update(status) / delete** só da Carin.
 
 ## Notificações
-1. **Push (principal):** ao criar o agendamento, o cliente chama `POST /api/notify-owner` (API route na Vercel) → servidor envia FCM para os `fcmTokens` da Carin.
-2. **E-mail (backup):** EmailJS dispara do navegador na criação do pedido.
+1. **Push (principal):** ao criar o agendamento, o cliente chama `POST /api/notify-owner` (API route na Vercel) → servidor envia FCM para os `fcmTokens` da Carin → **notificação na tela** do celular mesmo com o app fechado.
+2. **Bolinha (badge) no ícone:** o painel observa os pendentes em tempo real e usa a Badge API (`navigator.setAppBadge(n)` / `clearAppBadge()`) pra mostrar o número no ícone do app, igual app nativo.
 3. **Confirmação ao cliente:** ao confirmar no painel, monta um link `wa.me/<numero>` com a mensagem pronta — a Carin toca enviar.
 
 ## PWA

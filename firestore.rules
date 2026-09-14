@@ -21,6 +21,12 @@ service cloud.firestore {
       allow write: if isDono();
     }
 
+    // Tokens de push (aparelhos da dona): só a dona lê/escreve.
+    // A API na Vercel usa o Admin SDK (ignora estas regras) para disparar o push.
+    match /pushTokens/{id} {
+      allow read, write: if isDono();
+    }
+
     // Serviços/combos/promoções: leitura pública, escrita só da dona.
     match /servicos/{id} {
       allow read: if true;

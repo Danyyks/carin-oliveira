@@ -6,7 +6,7 @@ Registro curto das decisões e o **porquê** — para não reabrir discussão de
 O uso real é o link na bio do Instagram. Referências: bento.me, Linktree, atom.bio — mas a engine é **nossa** (visão de SaaS próprio).
 
 ### 2. Tudo no plano gratuito
-Firebase Spark + Vercel + `wa.me` + EmailJS + FCM. **Sem Cloud Functions** (exigem plano pago) — lógica no cliente + regras de segurança; push por API route na Vercel.
+Firebase Spark + Vercel + `wa.me` + FCM. **Sem Cloud Functions** (exigem plano pago) — lógica no cliente + regras de segurança; push por API route na Vercel.
 
 ### 3. Agendamento: modelo pedido → confirmação
 O cliente pede, a Carin confirma. Mantém ela no controle e evita choque de horário. Ver [`fluxo-agendamento.md`](fluxo-agendamento.md).
@@ -17,8 +17,8 @@ Envio 100% automático exigiria a **API oficial paga** do WhatsApp. No grátis, 
 ### 5. Anti-duplicidade sem transação
 Id do agendamento determinístico (`data_hora`) + regra `create`-only. Segundo `create` no mesmo horário falha. Simples e grátis.
 
-### 6. Aviso da Carin: push como principal, e-mail de backup
-Push (FCM) dá a sensação de app nativo. E-mail (EmailJS) garante o aviso mesmo com tudo fechado. Painel em tempo real quando aberto.
+### 6. Aviso da Carin: push nativo (tela + bolinha no ícone)
+Push (FCM) dá a sensação de app nativo: notificação na tela do celular mesmo com o app fechado + bolinha (badge) no ícone com o número de pendentes. Painel em tempo real quando aberto. O e-mail foi descartado — o push cobre o caso "app fechado" com muito mais cara de app nativo.
 
 ### 7. Painel como PWA, sempre logado
 Firebase Auth com persistência local + instalação na tela. Também destrava o push no iPhone (iOS 16.4+ exige app instalado).

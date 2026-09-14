@@ -9,7 +9,7 @@ Modelo **pedido → confirmação**. O cliente pede, o horário fica reservado, 
 2. Digita nome + WhatsApp (validado) e "Finalizar" (cliente)
               │  o horário vira PENDENTE e some da tabela na hora
               ▼
-3. Carin é avisada                                 (🔔 push + 📧 e-mail + 🖥️ painel)
+3. Carin é avisada                                 (🔔 push na tela + bolinha no ícone + 🖥️ painel)
               ▼
 4. Carin abre o painel (já logada) e Confirma      (painel /admin)
               │  ou Recusa → o horário volta a ficar livre
