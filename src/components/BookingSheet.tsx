@@ -156,14 +156,18 @@ export default function BookingSheet({
               <div className="step-label">
                 <span className="n">1</span>Serviço
               </div>
-              <div className="chips">
-                {servicos.map((s, i) => (
-                  <button key={i} type="button" className={`chip${svc === i ? " active" : ""}`} onClick={() => setSvc(i)}>
-                    {s.nome}
-                    <small>{brl(s.preco)}</small>
-                  </button>
-                ))}
-              </div>
+              {servicos.length === 0 ? (
+                <p className="sheet-vazio">Os serviços ainda vão ser cadastrados. Volte em breve!</p>
+              ) : (
+                <div className="chips">
+                  {servicos.map((s, i) => (
+                    <button key={i} type="button" className={`chip${svc === i ? " active" : ""}`} onClick={() => setSvc(i)}>
+                      {s.nome}
+                      <small>{brl(s.preco)}</small>
+                    </button>
+                  ))}
+                </div>
+              )}
             </div>
 
             <div className="step">

@@ -59,35 +59,37 @@ export default function BentoGrid({
         <span className="ttitle">Instagram</span>
       </a>
 
-      <div className="tile t-serv wide">
-        <div className="head">
-          <div className="tico ic-rose">
-            <Sparkles size={19} strokeWidth={2} />
-          </div>
-          <b>Serviços &amp; valores</b>
-        </div>
-        <div className="svc-list">
-          {grupos.map((g) => (
-            <div className="svc-grupo" key={g.tipo}>
-              {mostrarLabels && <div className="svc-grupo-label">{g.label}</div>}
-              {g.itens.map(({ s, i }) => (
-                <div className="svc-row" key={i}>
-                  <div className="info">
-                    <b>{s.nome}</b>
-                    <span>{s.desc}</span>
-                  </div>
-                  <div className="right">
-                    <span className="price">{brl(s.preco)}</span>
-                    <button className="mini" onClick={() => onBook(i)}>
-                      Agendar
-                    </button>
-                  </div>
-                </div>
-              ))}
+      {servicos.length > 0 && (
+        <div className="tile t-serv wide">
+          <div className="head">
+            <div className="tico ic-rose">
+              <Sparkles size={19} strokeWidth={2} />
             </div>
-          ))}
+            <b>Serviços &amp; valores</b>
+          </div>
+          <div className="svc-list">
+            {grupos.map((g) => (
+              <div className="svc-grupo" key={g.tipo}>
+                {mostrarLabels && <div className="svc-grupo-label">{g.label}</div>}
+                {g.itens.map(({ s, i }) => (
+                  <div className="svc-row" key={i}>
+                    <div className="info">
+                      <b>{s.nome}</b>
+                      <span>{s.desc}</span>
+                    </div>
+                    <div className="right">
+                      <span className="price">{brl(s.preco)}</span>
+                      <button className="mini" onClick={() => onBook(i)}>
+                        Agendar
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ))}
+          </div>
         </div>
-      </div>
+      )}
 
       {studio.loja ? (
         <a

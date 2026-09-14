@@ -46,12 +46,9 @@ export const studio: StudioConfig = {
     "Alongamento, gel e nail art",
     "Atendimento com hora marcada · Sorocaba",
   ],
-  servicos: [
-    { nome: "Manicure tradicional", desc: "Corte, cutícula e esmaltação", preco: 35 },
-    { nome: "Esmaltação em gel", desc: "Brilho e durabilidade", preco: 65 },
-    { nome: "Alongamento", desc: "Fibra ou gel, do seu jeito", preco: 120 },
-    { nome: "Nail Art", desc: "Desenhos e pedrarias", preco: 45 },
-  ],
+  // Vazio de propósito: a dona cadastra os serviços reais pelo painel /admin.
+  // Enquanto estiver vazio, a seção "Serviços & valores" some do site.
+  servicos: [],
   // Loja virtual (revendedora O Boticário). Imagem de fundo criada pela Carin.
   loja: {
     url: "https://minhaloja.grupoboticario.com.br/loja-carinoliveiraalmeidamarques-26635836?utm_source=app_divulgar&utm_medium=mld",
