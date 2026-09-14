@@ -327,6 +327,69 @@ a {
   text-shadow: 0 1px 8px rgba(0, 0, 0, 0.45);
 }
 
+/* mini-mapa + horário */
+.t-mapa {
+  padding: 0;
+  overflow: hidden;
+  cursor: default;
+}
+.t-mapa:hover {
+  transform: none;
+  box-shadow: 0 10px 26px -18px var(--shadow);
+}
+.mapa-frame {
+  width: 100%;
+  height: 160px;
+  border: 0;
+  display: block;
+}
+.mapa-bar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 13px 15px;
+  color: inherit;
+  text-decoration: none;
+  border-top: 1px solid var(--border);
+}
+.mapa-txt {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+}
+.mapa-txt b {
+  font-size: 0.92rem;
+  letter-spacing: -0.01em;
+}
+.mapa-txt span {
+  font-size: 0.78rem;
+  color: var(--text-muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.mapa-cta {
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--accent-deep);
+}
+.mapa-bar:hover .mapa-cta .arrow {
+  transform: translateX(3px);
+  opacity: 1;
+}
+.t-horario {
+  flex-direction: row;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 16px;
+  cursor: default;
+}
+
 /* serviços */
 .t-serv {
   cursor: default;

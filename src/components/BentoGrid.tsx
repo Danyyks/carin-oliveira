@@ -19,6 +19,7 @@ export default function BentoGrid({
   );
   const insta = `https://instagram.com/${studio.instagram}`;
   const maps = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(studio.enderecoTexto)}`;
+  const mapaEmbed = `https://maps.google.com/maps?q=${encodeURIComponent(studio.enderecoTexto)}&z=16&output=embed`;
 
   // Agrupa os serviços por tipo, preservando o índice original (usado no agendamento).
   const SECOES = [
@@ -108,20 +109,36 @@ export default function BentoGrid({
         </a>
       ) : null}
 
-      <a className="tile compact" href={maps} target="_blank" rel="noopener">
+      <div className="tile t-mapa wide">
+        <iframe
+          className="mapa-frame"
+          src={mapaEmbed}
+          title={`Mapa — ${studio.enderecoTexto}`}
+          loading="lazy"
+          referrerPolicy="no-referrer-when-downgrade"
+        />
+        <a className="mapa-bar" href={maps} target="_blank" rel="noopener">
+          <div className="tico ic-rose">
+            <MapPin size={18} strokeWidth={2} />
+          </div>
+          <div className="mapa-txt">
+            <b>{studio.bairro}</b>
+            <span>{studio.enderecoTexto}</span>
+          </div>
+          <span className="mapa-cta">
+            Como chegar <span className="arrow">→</span>
+          </span>
+        </a>
+      </div>
+
+      <div className="tile t-horario wide">
         <div className="tico ic-rose">
-          <MapPin size={19} strokeWidth={2} />
+          <Clock size={18} strokeWidth={2} />
         </div>
-        <span className="ttitle">{studio.bairro}</span>
-        <span className="arrow">→</span>
-      </a>
-      <div className="tile compact" style={{ cursor: "default" }}>
-        <div className="tico ic-rose">
-          <Clock size={19} strokeWidth={2} />
+        <div className="mapa-txt">
+          <b>Horário de atendimento</b>
+          <span>{studio.horario}</span>
         </div>
-        <span className="ttitle" style={{ fontSize: ".86rem" }}>
-          {studio.horario}
-        </span>
       </div>
     </div>
   );
