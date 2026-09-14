@@ -11,7 +11,7 @@ service cloud.firestore {
     // UIDs autorizados como administradores (Console → Authentication → Users).
     function isDono() {
       return request.auth != null && request.auth.uid in [
-        'gMc4YUVXxTNTbWpkCtFLiFyOd1y2' // suellengarcia.silva@gmail.com
+        'aJjdWk0k7uhX341j326rxNXi9No2' // conta principal da dona (Carin)
       ];
     }
 

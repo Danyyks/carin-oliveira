@@ -10,7 +10,7 @@ Fazemos **uma etapa de cada vez**, juntos. Cada etapa entrega algo testável.
 | 3 | **Firebase** | Projeto Firestore + Auth; modelo de dados; regras de segurança | ✅ feito |
 | 4 | **Serviços & disponibilidade** | Login do painel + CRUD de serviços/combos/promoções + definição de dias/horários; site lê serviços reais | ⏳ próxima |
 | 5 | **Agendamento** | Fluxo pedido → pendente → confirma/recusa; anti-duplicidade; tempo real | ✅ feito |
-| 6 | **Notificações** | `wa.me` de confirmação ✅ + **push (FCM) — notificação na tela + bolinha (badge) no ícone do app** | ⏳ em andamento (e-mail removido) |
+| 6 | **Notificações** | `wa.me` de confirmação ✅ + **push (FCM): notificação na tela + bolinha (badge) no ícone** ✅ (no ar; falta teste no celular) | ✅ feito |
 | 7 | **PWA do admin** | "Painel Carin" instalável (manifest/ícone/SW só em /admin); público não instalável | ✅ feito (adiantado) |
 | 8 | **Mapa + polish + go-live** | Mini-mapa; dados e fotos reais da Carin; domínio; deploy final | ⬜ |
 
