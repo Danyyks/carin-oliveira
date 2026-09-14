@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, type FormEvent } from "react";
+import { useCallback, useEffect, useState, type FormEvent } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { auth } from "@/lib/firebase";
 import { brl, wppUrl } from "@/lib/utils";
@@ -142,23 +142,9 @@ function NotificacoesCard() {
   const [estado, setEstado] = useState<EstadoPush>("carregando");
   const [msg, setMsg] = useState("");
 
-  useEffect(() => {
-    let vivo = true;
-    (async () => {
-      const suporta = await notificacoesSuportadas();
-      if (!vivo) return;
-      if (!suporta) return setEstado("indisponivel");
-      setEstado(permissaoAtual() === "granted" ? "ok" : "off");
-    })();
-    // Aviso na tela mesmo com o painel aberto.
-    const p = ouvirMensagensEmPrimeiroPlano();
-    return () => {
-      vivo = false;
-      p.then((unsub) => unsub?.());
-    };
-  }, []);
-
-  async function ativar() {
+  // Pede permissão (se preciso), gera o token e SALVA no Firestore.
+  // Só vira "ok" depois que o token foi realmente salvo — não basta a permissão.
+  const ativar = useCallback(async () => {
     setEstado("ativando");
     setMsg("");
     try {
@@ -166,11 +152,38 @@ function NotificacoesCard() {
       setEstado("ok");
     } catch (e) {
       setEstado("erro");
-      setMsg((e as Error).message || "Não consegui ativar.");
+      const code = (e as { code?: string })?.code;
+      setMsg((e as Error).message + (code ? ` [${code}]` : ""));
     }
-  }
+  }, []);
 
-  if (estado === "carregando") return null;
+  useEffect(() => {
+    let vivo = true;
+    (async () => {
+      const suporta = await notificacoesSuportadas();
+      if (!vivo) return;
+      if (!suporta) return setEstado("indisponivel");
+      // Já tem permissão? Re-gera e re-salva o token pra garantir que está no banco
+      // (o token pode ter rotacionado, ou a gravação anterior ter falhado).
+      if (permissaoAtual() === "granted") ativar();
+      else setEstado("off");
+    })();
+    // Aviso na tela mesmo com o painel aberto.
+    const p = ouvirMensagensEmPrimeiroPlano();
+    return () => {
+      vivo = false;
+      p.then((unsub) => unsub?.());
+    };
+  }, [ativar]);
+
+  if (estado === "carregando" || estado === "ativando") {
+    return (
+      <section className="admin-card">
+        <h2 className="adm-section">Notificações</h2>
+        <p className="adm-muted">Configurando as notificações neste aparelho…</p>
+      </section>
+    );
+  }
 
   return (
     <section className="admin-card">
@@ -184,10 +197,14 @@ function NotificacoesCard() {
         </p>
       ) : (
         <>
-          <p className="adm-muted">Receba um aviso na tela sempre que chegar um novo agendamento.</p>
+          <p className="adm-muted">
+            {estado === "erro"
+              ? "Não consegui ativar neste aparelho. Toque para tentar de novo:"
+              : "Receba um aviso na tela sempre que chegar um novo agendamento."}
+          </p>
           <div className="adm-actions">
-            <button className="adm-btn" onClick={ativar} disabled={estado === "ativando"}>
-              {estado === "ativando" ? "Ativando…" : "Ativar notificações"}
+            <button className="adm-btn" onClick={ativar}>
+              {estado === "erro" ? "Tentar de novo" : "Ativar notificações"}
             </button>
             {estado === "erro" && <span className="adm-erro">{msg}</span>}
           </div>
