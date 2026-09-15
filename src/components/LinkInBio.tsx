@@ -20,7 +20,7 @@ export default function LinkInBio({ studio }: { studio: StudioConfig }) {
       ouvirServicos((list) => {
         if (list.length) {
           setServicos(
-            list.map((s) => ({ nome: s.nome, desc: s.desc, preco: s.preco, tipo: s.tipo })),
+            list.map((s) => ({ nome: s.nome, desc: s.desc, preco: s.preco, destaque: s.destaque })),
           );
         }
       }),

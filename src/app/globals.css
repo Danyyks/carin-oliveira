@@ -416,6 +416,20 @@ a {
   color: var(--text-muted);
   font-size: 0.76rem;
 }
+/* selo "Mais pedido" (site e painel) */
+.svc-selo {
+  display: inline-block;
+  margin-left: 8px;
+  font-size: 0.58rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--accent-deep);
+  background: var(--accent-soft);
+  padding: 2px 8px;
+  border-radius: 999px;
+  vertical-align: middle;
+}
 .svc-row .right {
   display: flex;
   align-items: center;
@@ -773,6 +787,23 @@ a {
   color: var(--text-muted);
   font-weight: 600;
 }
+.adm-check {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  font-size: 0.88rem;
+  font-weight: 500;
+  color: var(--text);
+  cursor: pointer;
+  user-select: none;
+}
+.adm-check input {
+  width: 18px;
+  height: 18px;
+  accent-color: var(--accent-cta);
+  cursor: pointer;
+  flex-shrink: 0;
+}
 .adm-input {
   font-family: var(--font-inter), sans-serif;
   font-size: 0.95rem;
@@ -944,38 +975,6 @@ a {
   text-align: center;
   max-width: 340px;
   line-height: 1.5;
-}
-
-/* seções de serviços (Serviços / Combos / Promoções) — site público */
-.svc-grupo-label {
-  font-size: 0.7rem;
-  font-weight: 700;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-  color: var(--accent-deep);
-  margin: 12px 0 2px;
-}
-.svc-grupo:first-child .svc-grupo-label {
-  margin-top: 0;
-}
-.svc-grupo .svc-row:first-of-type {
-  border-top: none;
-}
-
-/* seções de serviços — painel /admin */
-.adm-grupo-label {
-  font-size: 0.72rem;
-  font-weight: 700;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-  color: var(--accent-deep);
-  margin: 16px 0 2px;
-}
-.adm-grupo:first-child .adm-grupo-label {
-  margin-top: 4px;
-}
-.adm-grupo .adm-item:first-of-type {
-  border-top: none;
 }
 
 /* ---------- Agendamento: formulário do sheet ---------- */

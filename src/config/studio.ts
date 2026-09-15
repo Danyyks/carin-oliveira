@@ -7,7 +7,7 @@ export type Servico = {
   nome: string;
   desc: string;
   preco: number;
-  tipo?: "servico" | "combo" | "promocao";
+  destaque?: boolean; // "Mais pedido": ganha selo e aparece no topo
 };
 
 export type Loja = {

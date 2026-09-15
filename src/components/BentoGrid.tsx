@@ -21,17 +21,16 @@ export default function BentoGrid({
   const maps = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(studio.enderecoTexto)}`;
   const mapaEmbed = `https://maps.google.com/maps?q=${encodeURIComponent(studio.enderecoTexto)}&z=16&output=embed`;
 
-  // Agrupa os serviços por tipo, preservando o índice original (usado no agendamento).
-  const SECOES = [
-    { tipo: "servico", label: "Serviços" },
-    { tipo: "combo", label: "Combos" },
-    { tipo: "promocao", label: "Promoções" },
-  ] as const;
-  const grupos = SECOES.map((sec) => ({
-    ...sec,
-    itens: servicos.map((s, i) => ({ s, i })).filter(({ s }) => (s.tipo ?? "servico") === sec.tipo),
-  })).filter((g) => g.itens.length > 0);
-  const mostrarLabels = grupos.length > 1;
+  // Tabela única: destacados primeiro, depois em ordem alfabética.
+  // Preserva o índice original de cada serviço (usado no agendamento).
+  const itens = servicos
+    .map((s, i) => ({ s, i }))
+    .sort((a, b) => {
+      const da = a.s.destaque ? 0 : 1;
+      const db = b.s.destaque ? 0 : 1;
+      if (da !== db) return da - db;
+      return a.s.nome.localeCompare(b.s.nome, "pt-BR");
+    });
 
   return (
     <div className="bento">
@@ -68,23 +67,21 @@ export default function BentoGrid({
             <b>Serviços &amp; valores</b>
           </div>
           <div className="svc-list">
-            {grupos.map((g) => (
-              <div className="svc-grupo" key={g.tipo}>
-                {mostrarLabels && <div className="svc-grupo-label">{g.label}</div>}
-                {g.itens.map(({ s, i }) => (
-                  <div className="svc-row" key={i}>
-                    <div className="info">
-                      <b>{s.nome}</b>
-                      <span>{s.desc}</span>
-                    </div>
-                    <div className="right">
-                      <span className="price">{brl(s.preco)}</span>
-                      <button className="mini" onClick={() => onBook(i)}>
-                        Agendar
-                      </button>
-                    </div>
-                  </div>
-                ))}
+            {itens.map(({ s, i }) => (
+              <div className="svc-row" key={i}>
+                <div className="info">
+                  <b>
+                    {s.nome}
+                    {s.destaque && <span className="svc-selo">Mais pedido</span>}
+                  </b>
+                  <span>{s.desc}</span>
+                </div>
+                <div className="right">
+                  <span className="price">{brl(s.preco)}</span>
+                  <button className="mini" onClick={() => onBook(i)}>
+                    Agendar
+                  </button>
+                </div>
               </div>
             ))}
           </div>

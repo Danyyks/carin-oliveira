@@ -13,26 +13,32 @@ import {
 import { db } from "./firebase";
 
 // ---------- Serviços ----------
-export type TipoServico = "servico" | "combo" | "promocao";
-
 export type ServicoDoc = {
   id: string;
   nome: string;
   desc: string;
   preco: number;
-  tipo: TipoServico;
-  ordem: number;
+  destaque: boolean; // "Mais pedido": ganha selo e aparece no topo da lista
 };
 export type ServicoInput = Omit<ServicoDoc, "id">;
 
-/** Escuta os serviços em tempo real (ordenados por `ordem`). */
+/** Ordena a tabela de preços: destacados primeiro, depois em ordem alfabética. */
+export function ordenarServicos<T extends { nome: string; destaque?: boolean }>(list: T[]): T[] {
+  return [...list].sort((a, b) => {
+    const da = a.destaque ? 0 : 1;
+    const db = b.destaque ? 0 : 1;
+    if (da !== db) return da - db;
+    return a.nome.localeCompare(b.nome, "pt-BR");
+  });
+}
+
+/** Escuta os serviços em tempo real (destacados primeiro, depois alfabética). */
 export function ouvirServicos(cb: (servicos: ServicoDoc[]) => void) {
   return onSnapshot(
     collection(db, "servicos"),
     (snap) => {
       const list = snap.docs.map((d) => ({ id: d.id, ...(d.data() as Omit<ServicoDoc, "id">) }));
-      list.sort((a, b) => (a.ordem ?? 0) - (b.ordem ?? 0));
-      cb(list);
+      cb(ordenarServicos(list));
     },
     (e) => console.error("ouvirServicos:", e),
   );

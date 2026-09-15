@@ -29,7 +29,6 @@ import {
   confirmarAgendamento,
   recusarAgendamento,
   type ServicoDoc,
-  type TipoServico,
   type Agendamento,
 } from "@/lib/db";
 
@@ -299,17 +298,7 @@ function AgendamentosManager() {
 }
 
 // ---------------- Serviços ----------------
-const TIPOS: { v: TipoServico; label: string }[] = [
-  { v: "servico", label: "Serviço" },
-  { v: "combo", label: "Combo" },
-  { v: "promocao", label: "Promoção" },
-];
-const SECOES: { tipo: TipoServico; label: string }[] = [
-  { tipo: "servico", label: "Serviços" },
-  { tipo: "combo", label: "Combos" },
-  { tipo: "promocao", label: "Promoções" },
-];
-const FORM_VAZIO = { nome: "", desc: "", preco: "", tipo: "servico" as TipoServico };
+const FORM_VAZIO = { nome: "", desc: "", preco: "", destaque: false };
 
 function ServicosManager() {
   const [lista, setLista] = useState<ServicoDoc[]>([]);
@@ -322,7 +311,7 @@ function ServicosManager() {
 
   function editar(s: ServicoDoc) {
     setEditId(s.id);
-    setForm({ nome: s.nome, desc: s.desc, preco: String(s.preco), tipo: s.tipo });
+    setForm({ nome: s.nome, desc: s.desc, preco: String(s.preco), destaque: !!s.destaque });
     window.scrollTo({ top: 0, behavior: "smooth" });
   }
   function cancelar() {
@@ -336,10 +325,10 @@ function ServicosManager() {
     if (!form.nome.trim() || Number.isNaN(preco)) return;
     setSalvando(true);
     setErroServ("");
-    const data = { nome: form.nome.trim(), desc: form.desc.trim(), preco, tipo: form.tipo };
+    const data = { nome: form.nome.trim(), desc: form.desc.trim(), preco, destaque: form.destaque };
     try {
       if (editId) await updateServico(editId, data);
-      else await addServico({ ...data, ordem: lista.length });
+      else await addServico(data);
       cancelar();
     } catch (e) {
       setErroServ(`Não consegui salvar (${detalheErro(e)}).`);
@@ -354,7 +343,7 @@ function ServicosManager() {
 
   return (
     <section className="admin-card">
-      <h2 className="adm-section">Serviços &amp; valores</h2>
+      <h2 className="adm-section">Tabela de preços</h2>
 
       <form className="adm-form" onSubmit={submit}>
         <div className="adm-row2">
@@ -363,21 +352,17 @@ function ServicosManager() {
             <input className="adm-input" value={form.nome} onChange={(e) => setForm({ ...form, nome: e.target.value })} required />
           </label>
           <label className="adm-field">
-            <span>Tipo</span>
-            <select className="adm-input" value={form.tipo} onChange={(e) => setForm({ ...form, tipo: e.target.value as TipoServico })}>
-              {TIPOS.map((t) => (
-                <option key={t.v} value={t.v}>{t.label}</option>
-              ))}
-            </select>
+            <span>Preço (R$)</span>
+            <input className="adm-input" inputMode="decimal" value={form.preco} onChange={(e) => setForm({ ...form, preco: e.target.value })} placeholder="ex.: 65" required />
           </label>
         </div>
         <label className="adm-field">
           <span>Descrição</span>
           <input className="adm-input" value={form.desc} onChange={(e) => setForm({ ...form, desc: e.target.value })} placeholder="ex.: Brilho e durabilidade" />
         </label>
-        <label className="adm-field">
-          <span>Preço (R$)</span>
-          <input className="adm-input" inputMode="decimal" value={form.preco} onChange={(e) => setForm({ ...form, preco: e.target.value })} placeholder="ex.: 65" required />
+        <label className="adm-check">
+          <input type="checkbox" checked={form.destaque} onChange={(e) => setForm({ ...form, destaque: e.target.checked })} />
+          <span>Destacar como “Mais pedido” (aparece no topo)</span>
         </label>
         <div className="adm-actions">
           <button className="adm-btn" disabled={salvando}>{editId ? "Salvar alterações" : "Adicionar serviço"}</button>
@@ -390,28 +375,22 @@ function ServicosManager() {
 
       <div className="adm-list">
         {lista.length === 0 && <p className="adm-muted">Nenhum serviço ainda. Adicione o primeiro acima.</p>}
-        {SECOES.map((sec) => {
-          const itens = lista.filter((s) => (s.tipo ?? "servico") === sec.tipo);
-          if (!itens.length) return null;
-          return (
-            <div className="adm-grupo" key={sec.tipo}>
-              <div className="adm-grupo-label">{sec.label}</div>
-              {itens.map((s) => (
-                <div className="adm-item" key={s.id}>
-                  <div className="adm-item-info">
-                    <b>{s.nome}</b>
-                    <span>{s.desc}</span>
-                  </div>
-                  <div className="adm-item-right">
-                    <span className="adm-preco">{brl(s.preco)}</span>
-                    <button className="adm-mini" onClick={() => editar(s)}>Editar</button>
-                    <button className="adm-mini adm-mini-danger" onClick={() => excluir(s)}>Excluir</button>
-                  </div>
-                </div>
-              ))}
+        {lista.map((s) => (
+          <div className="adm-item" key={s.id}>
+            <div className="adm-item-info">
+              <b>
+                {s.nome}
+                {s.destaque && <span className="svc-selo">Mais pedido</span>}
+              </b>
+              <span>{s.desc}</span>
             </div>
-          );
-        })}
+            <div className="adm-item-right">
+              <span className="adm-preco">{brl(s.preco)}</span>
+              <button className="adm-mini" onClick={() => editar(s)}>Editar</button>
+              <button className="adm-mini adm-mini-danger" onClick={() => excluir(s)}>Excluir</button>
+            </div>
+          </div>
+        ))}
       </div>
     </section>
   );
