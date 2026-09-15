@@ -57,10 +57,12 @@ export const salvarAgenda = (agenda: Agenda) =>
   setDoc(doc(db, "disponibilidade", "regras"), agenda);
 
 // ---------- Agendamentos ----------
+export type ServicoAgendado = { nome: string; preco: number };
+
 export type Agendamento = {
   id: string; // = `${data}_${hora}` (id determinístico = trava anti-duplicidade)
-  servicoNome: string;
-  servicoPreco: number;
+  servicos: ServicoAgendado[]; // um ou mais serviços no mesmo horário
+  total: number; // soma dos preços
   clienteNome: string;
   clienteWhatsapp: string;
   data: string; // YYYY-MM-DD

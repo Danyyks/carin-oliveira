@@ -10,6 +10,7 @@ import {
   permissaoAtual,
   ouvirMensagensEmPrimeiroPlano,
 } from "@/lib/push";
+import { msgConfirmacao, msgRecusa, msgCancelamento } from "@/lib/mensagens";
 
 // Diagnóstico: código do erro do Firestore + se há login ativo no momento.
 function detalheErro(e: unknown) {
@@ -233,19 +234,24 @@ function AgendamentosManager() {
     else nav.clearAppBadge?.().catch(() => {});
   }, [pendentes.length]);
 
+  // Confirma e abre o WhatsApp do cliente com a mensagem de confirmação pronta.
   async function confirmar(a: Agendamento) {
     await confirmarAgendamento(a.id);
-    const nome = a.clienteNome.split(" ")[0];
-    const msg =
-      `Olá, ${nome}! Seu horário está confirmado.\n\n` +
-      `• ${a.servicoNome}\n• ${a.diaLabel} às ${a.hora}\n\nTe espero!`;
-    window.open(wppUrl(zap(a.clienteWhatsapp), msg), "_blank");
+    window.open(wppUrl(zap(a.clienteWhatsapp), msgConfirmacao(a)), "_blank");
   }
 
-  async function recusar(a: Agendamento, verbo: string) {
-    if (confirm(`${verbo} o horário de ${a.clienteNome} (${a.diaLabel} · ${a.hora})?`)) {
-      await recusarAgendamento(a.id);
-    }
+  // Recusa um pedido pendente + abre o WhatsApp com a mensagem de recusa.
+  async function recusar(a: Agendamento) {
+    if (!confirm(`Recusar o pedido de ${a.clienteNome} (${a.diaLabel} · ${a.hora})?\nVai abrir o WhatsApp com um aviso pronto para o cliente.`)) return;
+    await recusarAgendamento(a.id);
+    window.open(wppUrl(zap(a.clienteWhatsapp), msgRecusa(a)), "_blank");
+  }
+
+  // Cancela um agendamento confirmado + abre o WhatsApp com a mensagem de cancelamento.
+  async function cancelar(a: Agendamento) {
+    if (!confirm(`Cancelar o agendamento de ${a.clienteNome} (${a.diaLabel} · ${a.hora})?\nVai abrir o WhatsApp com um aviso pronto para o cliente.`)) return;
+    await recusarAgendamento(a.id);
+    window.open(wppUrl(zap(a.clienteWhatsapp), msgCancelamento(a)), "_blank");
   }
 
   return (
@@ -258,12 +264,12 @@ function AgendamentosManager() {
         <div className="ag-item" key={a.id}>
           <div className="ag-info">
             <b>{a.clienteNome}</b>
-            <span>{a.servicoNome} · {brl(a.servicoPreco)}</span>
+            <span>{a.servicos.map((s) => s.nome).join(", ")} · {brl(a.total)}</span>
             <span className="ag-quando">{a.diaLabel} · {a.hora}</span>
           </div>
           <div className="ag-acoes">
             <button className="adm-btn ag-confirmar" onClick={() => confirmar(a)}>Confirmar</button>
-            <button className="adm-mini adm-mini-danger" onClick={() => recusar(a, "Recusar")}>Recusar</button>
+            <button className="adm-mini adm-mini-danger" onClick={() => recusar(a)}>Recusar</button>
           </div>
         </div>
       ))}
@@ -277,12 +283,12 @@ function AgendamentosManager() {
                 <b>
                   {a.clienteNome} <span className="ag-tag-ok">confirmado</span>
                 </b>
-                <span>{a.servicoNome} · {brl(a.servicoPreco)}</span>
+                <span>{a.servicos.map((s) => s.nome).join(", ")} · {brl(a.total)}</span>
                 <span className="ag-quando">{a.diaLabel} · {a.hora}</span>
               </div>
               <div className="ag-acoes">
                 <a className="adm-mini" href={`https://wa.me/${zap(a.clienteWhatsapp)}`} target="_blank" rel="noopener">WhatsApp</a>
-                <button className="adm-mini adm-mini-danger" onClick={() => recusar(a, "Cancelar")}>Cancelar</button>
+                <button className="adm-mini adm-mini-danger" onClick={() => cancelar(a)}>Cancelar</button>
               </div>
             </div>
           ))}

@@ -19,7 +19,7 @@ export default function BookingSheet({
   preset: number | null;
   onClose: () => void;
 }) {
-  const [svc, setSvc] = useState<number | null>(null);
+  const [svcs, setSvcs] = useState<number[]>([]); // índices dos serviços escolhidos
   const [diaSel, setDiaSel] = useState<Dia | null>(null);
   const [hora, setHora] = useState<string | null>(null);
   const [nome, setNome] = useState("");
@@ -39,8 +39,12 @@ export default function BookingSheet({
   useEffect(() => ouvirSlotsOcupados((o) => setOcupados(o)), []);
 
   useEffect(() => {
-    if (open && preset != null) setSvc(preset);
+    if (open && preset != null) setSvcs([preset]);
   }, [open, preset]);
+
+  function toggleServico(i: number) {
+    setSvcs((prev) => (prev.includes(i) ? prev.filter((x) => x !== i) : [...prev, i]));
+  }
 
   useEffect(() => {
     document.body.style.overflow = open ? "hidden" : "";
@@ -63,7 +67,7 @@ export default function BookingSheet({
     const t = setTimeout(() => {
       setSucesso(false);
       setErro("");
-      setSvc(null);
+      setSvcs([]);
       setDiaSel(null);
       setHora(null);
       setNome("");
@@ -95,17 +99,20 @@ export default function BookingSheet({
 
   const nomeOk = nome.trim().length >= 2;
   const whatsappOk = whatsapp.replace(/\D/g, "").length >= 10;
-  const pronto = svc != null && !!diaSel && !!hora && nomeOk && whatsappOk;
+  const pronto = svcs.length > 0 && !!diaSel && !!hora && nomeOk && whatsappOk;
+
+  // Serviços escolhidos + total (na ordem em que aparecem na lista).
+  const escolhidos = servicos.filter((_, i) => svcs.includes(i));
+  const total = escolhidos.reduce((soma, s) => soma + s.preco, 0);
 
   async function finalizar() {
     if (!pronto) return;
     setEnviando(true);
     setErro("");
     try {
-      const s = servicos[svc!];
       const agendamentoId = await criarAgendamento({
-        servicoNome: s.nome,
-        servicoPreco: s.preco,
+        servicos: escolhidos.map((s) => ({ nome: s.nome, preco: s.preco })),
+        total,
         clienteNome: nome.trim(),
         clienteWhatsapp: whatsapp.trim(),
         data: diaSel!.key,
@@ -154,14 +161,15 @@ export default function BookingSheet({
 
             <div className="step">
               <div className="step-label">
-                <span className="n">1</span>Serviço
+                <span className="n">1</span>Serviços
+                <span className="step-hint">pode escolher mais de um</span>
               </div>
               {servicos.length === 0 ? (
                 <p className="sheet-vazio">Os serviços ainda vão ser cadastrados. Volte em breve!</p>
               ) : (
                 <div className="chips">
                   {servicos.map((s, i) => (
-                    <button key={i} type="button" className={`chip${svc === i ? " active" : ""}`} onClick={() => setSvc(i)}>
+                    <button key={i} type="button" className={`chip${svcs.includes(i) ? " active" : ""}`} onClick={() => toggleServico(i)}>
                       {s.nome}
                       <small>{brl(s.preco)}</small>
                     </button>
@@ -233,9 +241,9 @@ export default function BookingSheet({
             {pronto ? (
               <div className="summary">
                 <span>
-                  <b>{servicos[svc!].nome}</b> · {diaSel!.label} · <b>{hora}</b>
+                  <b>{escolhidos.map((s) => s.nome).join(", ")}</b> · {diaSel!.label} · <b>{hora}</b>
                 </span>
-                <span>{brl(servicos[svc!].preco)}</span>
+                <span>{brl(total)}</span>
               </div>
             ) : (
               <div className="summary empty">Preencha os passos acima para finalizar.</div>

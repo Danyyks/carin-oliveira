@@ -64,9 +64,10 @@ service cloud.firestore {
       allow create: if request.resource.data.status == 'pendente'
         // o id TEM que ser "data_hora" (trava a duplicidade mesmo fora do app)
         && id == request.resource.data.data + '_' + request.resource.data.hora
-        && request.resource.data.servicoNome is string
-        && request.resource.data.servicoNome.size() <= 80
-        && request.resource.data.servicoPreco is number
+        && request.resource.data.servicos is list
+        && request.resource.data.servicos.size() >= 1
+        && request.resource.data.servicos.size() <= 15
+        && request.resource.data.total is number
         && request.resource.data.clienteNome is string
         && request.resource.data.clienteNome.size() > 1
         && request.resource.data.clienteNome.size() <= 80

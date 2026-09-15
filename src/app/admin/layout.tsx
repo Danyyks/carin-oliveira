@@ -11,7 +11,7 @@ export const metadata: Metadata = {
   icons: { apple: "/apple-touch-icon.png" },
 };
 
-export const viewport: Viewport = { themeColor: "#C43F72" };
+export const viewport: Viewport = { themeColor: "#6d28b8" };
 
 export default function AdminLayout({ children }: LayoutProps<"/admin">) {
   return (
