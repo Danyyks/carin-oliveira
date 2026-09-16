@@ -11,6 +11,7 @@ import {
   ouvirMensagensEmPrimeiroPlano,
 } from "@/lib/push";
 import { msgConfirmacao, msgRecusa, msgCancelamento } from "@/lib/mensagens";
+import AssinaturaDSS from "@/components/AssinaturaDSS";
 
 // Diagnóstico: código do erro do Firestore + se há login ativo no momento.
 function detalheErro(e: unknown) {
@@ -131,6 +132,7 @@ function Dashboard({ email, logout }: { email: string; logout: () => Promise<voi
       <NotificacoesCard />
       <ServicosManager />
       <HorariosManager />
+      <AssinaturaDSS />
     </div>
   );
 }

@@ -6,6 +6,7 @@ import { ouvirServicos } from "@/lib/db";
 import Profile from "./Profile";
 import BentoGrid from "./BentoGrid";
 import BookingSheet from "./BookingSheet";
+import AssinaturaDSS from "./AssinaturaDSS";
 
 // Orquestrador do link na bio: monta a página a partir do config,
 // lê os serviços reais do Firestore (com a lista do config como reserva)
@@ -37,6 +38,7 @@ export default function LinkInBio({ studio }: { studio: StudioConfig }) {
       <Profile studio={studio} />
       <BentoGrid studio={studio} servicos={servicos} onBook={book} />
       <BookingSheet studio={studio} servicos={servicos} open={open} preset={preset} onClose={() => setOpen(false)} />
+      <AssinaturaDSS />
     </div>
   );
 }

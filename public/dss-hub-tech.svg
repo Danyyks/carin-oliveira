@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 405 405">
+<title>DSS Hub Tech — Símbolo Monocromático Refinado</title>
+<g transform="translate(-162,-121)"><rect x="162" y="121" width="405" height="405" rx="96" fill="#18394B"/>
+<line x1="329.85" y1="289.27" x2="303.63" y2="263.38" stroke="#FFFFFF" stroke-width="9" stroke-linecap="round"/>
+<line x1="398.15" y1="289.27" x2="424.37" y2="263.38" stroke="#FFFFFF" stroke-width="9" stroke-linecap="round"/>
+<line x1="330.06" y1="356.94" x2="303.51" y2="383.49" stroke="#FFFFFF" stroke-width="9" stroke-linecap="round"/>
+<line x1="397.94" y1="356.94" x2="424.49" y2="383.49" stroke="#FFFFFF" stroke-width="9" stroke-linecap="round"/>
+<circle cx="364" cy="323" r="48" fill="#FFFFFF"/>
+<circle cx="283" cy="243" r="29" fill="#FFFFFF"/>
+<circle cx="445" cy="243" r="29" fill="#FFFFFF"/>
+<circle cx="283" cy="404" r="29" fill="#FFFFFF"/>
+<circle cx="445" cy="404" r="29" fill="#FFFFFF"/></g>
+</svg>

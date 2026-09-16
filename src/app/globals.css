@@ -60,6 +60,27 @@ a {
   margin: 0 auto;
 }
 
+/* assinatura do desenvolvedor (rodapé, discreta) */
+.assinatura {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  margin-top: 24px;
+  font-size: 0.72rem;
+  color: var(--text-muted);
+  opacity: 0.75;
+}
+.assinatura-logo {
+  border-radius: 5px;
+  flex-shrink: 0;
+  display: block;
+}
+.assinatura b {
+  font-weight: 600;
+  color: var(--text-muted);
+}
+
 /* ---------- PERFIL ---------- */
 .profile {
   text-align: center;
