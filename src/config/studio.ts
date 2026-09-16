@@ -36,7 +36,7 @@ export const studio: StudioConfig = {
   nome: "Carin",
   titulo: "Nail Designer",
   foto: "/carin.jpg",
-  whatsapp: "5511933400707", // provisório (WhatsApp do Dany, p/ testes)
+  whatsapp: "5515991552752", // WhatsApp da Carin (dona)
   instagram: "carinoliveira9",
   enderecoTexto: "Rua Diniz Goes da Silva, 260 - casa 10, Sorocaba - SP",
   bairro: "Sorocaba, SP",
