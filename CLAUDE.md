@@ -71,7 +71,10 @@ firestore.rules           # regras de segurança do Firestore
 
 ### Dados (Firestore)
 - `servicos/{id}` — serviços/combos/promoções (público lê; só a dona escreve)
-- `disponibilidade/regras` — dias/horários por dia da semana
+- `disponibilidade/regras` — `dias` (horários por dia da semana) + `bloqueios` (folgas: datas
+  `YYYY-MM-DD` em que a dona não atende). `salvarAgenda` e `salvarBloqueios` usam `merge` (um não
+  apaga o outro). O site (`BookingSheet`) esconde os dias bloqueados; o painel tem o card "Folgas"
+  (mini-calendário — `CalendarioFolgas`)
 - `slots/{data_hora}` — horários ocupados, **público** (só data/hora/status, sem dados do cliente)
 - `agendamentos/{data_hora}` — pedido com dados do cliente (só a dona lê/gerencia)
 - `pushTokens/{token}` — tokens de push da dona (só a dona)

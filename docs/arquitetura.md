@@ -30,9 +30,10 @@ servicos/{id}
   nome, descricao, preco, duracao(min), tipo(servico|combo|promocao),
   ativo, ordem
 
-disponibilidade/regras       # dias/horários que ela atende (por dia da semana)
-  seg: [ "09:00", "10:30", ... ], ter: [...], ...
-disponibilidade/bloqueios/{data}   # exceções (folga, feriado, horário fechado)
+disponibilidade/regras       # dias/horários + folgas (doc único)
+  dias: { "1": ["09:00","10:30",...], "2": [...], ... }  # por dia da semana (0=dom..6=sáb)
+  bloqueios: ["2026-09-22", "2026-10-05"]                # folgas: datas específicas sem atendimento
+  # o painel edita dias e bloqueios de forma independente (salvarAgenda/salvarBloqueios com merge)
 
 agendamentos/{data_hora}     # id determinístico = `${data}_${hora}` (ex: 2026-09-14_14:30)
   servicoId, clienteNome, clienteWhatsapp, data, hora,

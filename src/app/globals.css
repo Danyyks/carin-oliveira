@@ -13,6 +13,8 @@
   --accent-deep: #c43f72;
   --accent-cta: #c43f72; /* fundo sólido + texto branco (AA) */
   --accent-soft: #f7cadb;
+  --folga-bg: #fbe4e6; /* dia de folga no calendário */
+  --folga-fg: #b02240;
   --border: rgba(42, 35, 40, 0.07);
   --shadow: rgba(196, 63, 114, 0.16);
   --ring: rgba(232, 93, 142, 0.5);
@@ -30,6 +32,8 @@
     --accent-deep: #f492b6;
     --accent-cta: #c43f72; /* fundo sólido + texto branco (AA) */
     --accent-soft: #7a3e54;
+    --folga-bg: #4a2028; /* dia de folga no calendário (escuro) */
+    --folga-fg: #f2a6b4;
     --border: rgba(246, 237, 241, 0.1);
     --shadow: rgba(0, 0, 0, 0.5);
     --ring: rgba(242, 124, 166, 0.55);
@@ -1133,4 +1137,112 @@ a {
   background: #e6f6ec;
   padding: 2px 7px;
   border-radius: 99px;
+}
+
+/* ---------- Folgas (mini-calendário do painel) ---------- */
+.cal-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin: 8px 0 12px;
+}
+.cal-nav {
+  border: none;
+  background: var(--surface-2);
+  color: var(--accent-deep);
+  width: 34px;
+  height: 34px;
+  border-radius: 10px;
+  font-size: 1.2rem;
+  line-height: 1;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.cal-nav:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+.cal-titulo {
+  font-weight: 600;
+  font-size: 0.98rem;
+}
+.cal-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 4px;
+}
+.cal-dow {
+  margin-bottom: 2px;
+}
+.cal-dow-cell {
+  text-align: center;
+  font-size: 0.66rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--text-muted);
+  padding-bottom: 2px;
+}
+.cal-dia {
+  aspect-ratio: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  background: transparent;
+  border-radius: 10px;
+  font-family: inherit;
+  font-size: 0.9rem;
+  color: var(--text);
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+.cal-dia:hover:not(:disabled) {
+  background: var(--surface-2);
+}
+.cal-dia:active:not(:disabled) {
+  transform: scale(0.92);
+}
+.cal-passado {
+  color: var(--text-muted);
+  opacity: 0.4;
+  cursor: default;
+}
+.cal-hoje {
+  outline: 2px solid var(--accent);
+  font-weight: 700;
+}
+.cal-folga,
+.cal-folga:hover:not(:disabled) {
+  background: var(--folga-bg);
+  color: var(--folga-fg);
+  font-weight: 700;
+}
+.cal-legenda {
+  display: flex;
+  gap: 16px;
+  flex-wrap: wrap;
+  margin-top: 14px;
+  font-size: 0.72rem;
+  color: var(--text-muted);
+}
+.cal-legenda span {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.cal-leg {
+  width: 13px;
+  height: 13px;
+  border-radius: 4px;
+  display: inline-block;
+  flex-shrink: 0;
+}
+.cal-leg-hoje {
+  outline: 2px solid var(--accent);
+}
+.cal-leg-folga {
+  background: var(--folga-bg);
+  border: 1px solid var(--folga-fg);
 }

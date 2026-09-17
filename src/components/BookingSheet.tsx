@@ -26,7 +26,7 @@ export default function BookingSheet({
   const [whatsapp, setWhatsapp] = useState("");
 
   const [baseDias, setBaseDias] = useState<Dia[]>([]);
-  const [agenda, setAgenda] = useState<{ dias: Record<string, string[]> }>({ dias: {} });
+  const [agenda, setAgenda] = useState<{ dias: Record<string, string[]>; bloqueios?: string[] }>({ dias: {} });
   const [ocupados, setOcupados] = useState<Set<string>>(new Set());
 
   const [enviando, setEnviando] = useState(false);
@@ -80,7 +80,9 @@ export default function BookingSheet({
   // não configurou nada, usa os horários padrão do config como reserva).
   const diasDisponiveis = useMemo(() => {
     const configurada = Object.values(agenda.dias).some((hs) => hs && hs.length > 0);
+    const bloqueadas = new Set(agenda.bloqueios ?? []); // folgas (datas)
     return baseDias
+      .filter((d) => !bloqueadas.has(d.key)) // pula os dias de folga
       .map((d) => {
         const hors = configurada ? agenda.dias[String(d.weekday)] || [] : studio.horarios;
         const livres = hors.filter((h) => !ocupados.has(`${d.key}_${h}`));

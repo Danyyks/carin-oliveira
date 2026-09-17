@@ -32,3 +32,6 @@ Modelo **pedido → confirmação**. O cliente pede, o horário fica reservado, 
 
 ## Detalhe anti-"reserva fantasma"
 Se o cliente pede e some sem concluir, o horário fica `pendente`. Como não usamos função agendada (paga) para expirar sozinho, a **Carin libera no painel** num toque. Simples e suficiente para o MVP.
+
+## Folgas (bloqueio de datas específicas)
+A agenda base é por **dia da semana**. Para folgar numa **data pontual** (viagem, imprevisto), a Carin usa o card **"Folgas"** no painel: um mini-calendário onde ela toca no dia para bloquear/liberar. Um dia bloqueado (`disponibilidade/regras.bloqueios`) **some do agendamento** no site, sem afetar os outros dias da mesma semana. É dia inteiro e reversível.

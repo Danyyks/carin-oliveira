@@ -48,19 +48,27 @@ export const updateServico = (id: string, data: Partial<ServicoInput>) =>
   updateDoc(doc(db, "servicos", id), data);
 export const removeServico = (id: string) => deleteDoc(doc(db, "servicos", id));
 
-// ---------- Disponibilidade (dias/horários) ----------
+// ---------- Disponibilidade (dias/horários + folgas) ----------
 // dias: chave = dia da semana ("0"=domingo ... "6"=sábado), valor = horários "HH:MM".
-export type Agenda = { dias: Record<string, string[]> };
+// bloqueios: datas específicas de folga ("YYYY-MM-DD") em que a dona não atende.
+export type Agenda = { dias: Record<string, string[]>; bloqueios?: string[] };
+
+const regrasRef = () => doc(db, "disponibilidade", "regras");
 
 export function ouvirAgenda(cb: (agenda: Agenda) => void) {
   return onSnapshot(
-    doc(db, "disponibilidade", "regras"),
+    regrasRef(),
     (d) => cb((d.data() as Agenda) ?? { dias: {} }),
     (e) => console.error("ouvirAgenda:", e),
   );
 }
+// Salva só os dias/horários, preservando as folgas (merge não apaga `bloqueios`).
 export const salvarAgenda = (agenda: Agenda) =>
-  setDoc(doc(db, "disponibilidade", "regras"), agenda);
+  setDoc(regrasRef(), { dias: agenda.dias }, { merge: true });
+
+// Salva só as folgas (datas), preservando os dias/horários.
+export const salvarBloqueios = (datas: string[]) =>
+  setDoc(regrasRef(), { bloqueios: datas }, { merge: true });
 
 // ---------- Agendamentos ----------
 export type ServicoAgendado = { nome: string; preco: number };
