@@ -154,9 +154,7 @@ function CardColapsavel({ titulo, resumo, children }: { titulo: string; resumo?:
         {resumo && <span className="adm-col-resumo">{resumo}</span>}
         <span className="adm-col-seta" aria-hidden="true">›</span>
       </button>
-      <div className="adm-col-body">
-        <div className="adm-col-inner">{children}</div>
-      </div>
+      {aberto && <div className="adm-col-inner">{children}</div>}
     </section>
   );
 }

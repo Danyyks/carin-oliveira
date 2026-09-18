@@ -38,8 +38,9 @@ Retoque de UI/UX (subagente ux-ui), só visual, sem tocar na lógica:
 ## ✅ Aplicado depois (18/09/2026) — painel em sanfonas
 
 O painel ficou longo (6 blocos). Agora as **seções de configuração** são colapsáveis:
-- Componente `CardColapsavel` (título clicável + setinha que gira + corpo que expande via
-  `grid-template-rows: 0fr→1fr`, animação suave). Classes `.adm-col*` em `globals.css`.
+- Componente `CardColapsavel` (título clicável + setinha que gira). **Fechado mostra só o título**
+  — o corpo só é renderizado quando aberto (`{aberto && …}`), com um fade suave de entrada
+  (`@keyframes adm-col-in`); todos os cards fechados ficam do mesmo tamanho. Classes `.adm-col*`.
 - Aplicado em Notificações, Tabela de preços, Dias e horários e Folgas — **fechadas por padrão**.
 - **Agendamentos** e **"+ Adicionar agendamento"** ficam **fora da sanfona**, sempre visíveis
   (é o que a dona consulta e para onde a notificação a leva).

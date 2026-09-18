@@ -846,17 +846,19 @@ a {
 .adm-col.aberto .adm-col-seta {
   transform: rotate(90deg);
 }
-.adm-col-body {
-  display: grid;
-  grid-template-rows: 0fr;
-  transition: grid-template-rows 0.28s ease;
-}
-.adm-col.aberto .adm-col-body {
-  grid-template-rows: 1fr;
-}
 .adm-col-inner {
-  overflow: hidden;
   padding: 0 22px 22px;
+  animation: adm-col-in 0.2s ease;
+}
+@keyframes adm-col-in {
+  from {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
 }
 .adm-form {
   display: flex;
