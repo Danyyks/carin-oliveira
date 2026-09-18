@@ -801,6 +801,63 @@ a {
   font-weight: 700;
   margin-bottom: 6px;
 }
+
+/* seções em sanfona (colapsáveis) — só as de configuração */
+.adm-col {
+  padding: 0;
+  overflow: hidden;
+}
+.adm-col-head {
+  width: 100%;
+  background: transparent;
+  border: none;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 18px 22px;
+  cursor: pointer;
+  text-align: left;
+  color: inherit;
+  font-family: inherit;
+  -webkit-tap-highlight-color: transparent;
+}
+.adm-col-head .adm-section {
+  margin-bottom: 0;
+  flex-shrink: 0;
+}
+.adm-col-resumo {
+  margin-left: auto;
+  font-size: 0.82rem;
+  color: var(--text-muted);
+  font-weight: 500;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  min-width: 0;
+}
+.adm-col-seta {
+  margin-left: 4px;
+  font-size: 1.35rem;
+  line-height: 1;
+  color: var(--accent-deep);
+  transition: transform 0.25s cubic-bezier(0.2, 0.8, 0.2, 1);
+  flex-shrink: 0;
+}
+.adm-col.aberto .adm-col-seta {
+  transform: rotate(90deg);
+}
+.adm-col-body {
+  display: grid;
+  grid-template-rows: 0fr;
+  transition: grid-template-rows 0.28s ease;
+}
+.adm-col.aberto .adm-col-body {
+  grid-template-rows: 1fr;
+}
+.adm-col-inner {
+  overflow: hidden;
+  padding: 0 22px 22px;
+}
 .adm-form {
   display: flex;
   flex-direction: column;

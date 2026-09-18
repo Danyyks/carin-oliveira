@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useState, type FormEvent } from "react";
+import { useCallback, useEffect, useState, type FormEvent, type ReactNode } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { auth } from "@/lib/firebase";
 import { brl, wppUrl, labelData } from "@/lib/utils";
@@ -142,6 +142,25 @@ function Dashboard({ email, logout }: { email: string; logout: () => Promise<voi
   );
 }
 
+// ---------------- Seção colapsável (sanfona) ----------------
+// Usada nas seções de CONFIGURAÇÃO (fechadas por padrão). Agendamentos fica fora,
+// sempre visível. O `resumo` mostra a info-chave mesmo com a seção fechada.
+function CardColapsavel({ titulo, resumo, children }: { titulo: string; resumo?: string; children: ReactNode }) {
+  const [aberto, setAberto] = useState(false);
+  return (
+    <section className={`admin-card adm-col${aberto ? " aberto" : ""}`}>
+      <button type="button" className="adm-col-head" onClick={() => setAberto((v) => !v)} aria-expanded={aberto}>
+        <span className="adm-section">{titulo}</span>
+        {resumo && <span className="adm-col-resumo">{resumo}</span>}
+        <span className="adm-col-seta" aria-hidden="true">›</span>
+      </button>
+      <div className="adm-col-body">
+        <div className="adm-col-inner">{children}</div>
+      </div>
+    </section>
+  );
+}
+
 // ---------------- Notificações (push) ----------------
 type EstadoPush = "carregando" | "indisponivel" | "off" | "ativando" | "ok" | "erro";
 
@@ -185,16 +204,15 @@ function NotificacoesCard() {
 
   if (estado === "carregando" || estado === "ativando") {
     return (
-      <section className="admin-card">
-        <h2 className="adm-section">Notificações</h2>
+      <CardColapsavel titulo="Notificações">
         <p className="adm-muted">Configurando as notificações neste aparelho…</p>
-      </section>
+      </CardColapsavel>
     );
   }
 
+  const resumo = estado === "ok" ? "ativadas" : estado === "indisponivel" ? "" : "desligadas";
   return (
-    <section className="admin-card">
-      <h2 className="adm-section">Notificações</h2>
+    <CardColapsavel titulo="Notificações" resumo={resumo}>
       {estado === "ok" ? (
         <p className="adm-ok">Ativadas neste aparelho. Você recebe um aviso na tela a cada novo pedido.</p>
       ) : estado === "indisponivel" ? (
@@ -217,7 +235,7 @@ function NotificacoesCard() {
           </div>
         </>
       )}
-    </section>
+    </CardColapsavel>
   );
 }
 
@@ -476,8 +494,7 @@ function ServicosManager() {
   }
 
   return (
-    <section className="admin-card">
-      <h2 className="adm-section">Tabela de preços</h2>
+    <CardColapsavel titulo="Tabela de preços" resumo={`${lista.length} ${lista.length === 1 ? "serviço" : "serviços"}`}>
 
       <form className="adm-form" onSubmit={submit}>
         <div className="adm-row2">
@@ -526,7 +543,7 @@ function ServicosManager() {
           </div>
         ))}
       </div>
-    </section>
+    </CardColapsavel>
   );
 }
 
@@ -584,9 +601,9 @@ function HorariosManager() {
     }
   }
 
+  const diasAtivos = Object.values(dias).filter((hs) => hs && hs.length).length;
   return (
-    <section className="admin-card">
-      <h2 className="adm-section">Dias e horários de atendimento</h2>
+    <CardColapsavel titulo="Dias e horários" resumo={diasAtivos ? `${diasAtivos} ${diasAtivos === 1 ? "dia" : "dias"}` : "nenhum"}>
       <p className="adm-muted">Toque nos horários que você atende em cada dia.</p>
       <div className="adm-dias">
         {DIAS.map((d) => (
@@ -609,7 +626,7 @@ function HorariosManager() {
         <button className="adm-btn" onClick={salvar} disabled={salvando}>{salvando ? "Salvando…" : "Salvar horários"}</button>
         {msg && <span className={msg.ok ? "adm-ok" : "adm-erro"}>{msg.texto}</span>}
       </div>
-    </section>
+    </CardColapsavel>
   );
 }
 
@@ -662,9 +679,9 @@ function CalendarioFolgas() {
   for (let i = 0; i < primeiroDiaSemana; i++) celulas.push(null);
   for (let d = 1; d <= totalDias; d++) celulas.push(d);
 
+  const folgasFuturas = bloqueios.filter((k) => k >= hojeKey).length;
   return (
-    <section className="admin-card">
-      <h2 className="adm-section">Folgas</h2>
+    <CardColapsavel titulo="Folgas" resumo={folgasFuturas ? `${folgasFuturas} ${folgasFuturas === 1 ? "folga" : "folgas"}` : "nenhuma"}>
       <p className="adm-muted">Toque num dia para marcar ou tirar uma folga. Nos dias de folga, o site não mostra horários.</p>
 
       <div className="cal-head">
@@ -698,6 +715,6 @@ function CalendarioFolgas() {
         <span><i className="cal-leg cal-leg-folga" />folga (sem atendimento)</span>
       </div>
       {erro && <p className="adm-erro">{erro}</p>}
-    </section>
+    </CardColapsavel>
   );
 }
