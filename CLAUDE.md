@@ -83,6 +83,12 @@ firestore.rules           # regras de segurança do Firestore
 O id do agendamento é **determinístico**: `` `${data}_${hora}` ``. As regras só permitem `create`
 (nunca `update`) para o público → um 2º `create` no mesmo horário falha. Simples e grátis.
 
+### Agendamento manual (a dona)
+Além dos pedidos do cliente, a dona pode registrar agendamentos da agenda dela pelo painel
+(botão "+ Adicionar agendamento" → `criarAgendamentoManual`), que entram já `confirmado`. As
+regras liberam `create` de `slots`/`agendamentos` para `isDono()` (o público segue só `pendente`).
+O `clienteWhatsapp` é opcional nesse caso — a UI esconde o botão/mensagem de WhatsApp quando vazio.
+
 ### Notificações (push)
 1. Cliente finaliza um agendamento em `BookingSheet` → `criarAgendamento` (batch: slot + agendamento).
 2. Em seguida, `BookingSheet` chama `POST /api/notify-owner`.

@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useState, type FormEvent } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { auth } from "@/lib/firebase";
-import { brl, wppUrl } from "@/lib/utils";
+import { brl, wppUrl, labelData } from "@/lib/utils";
 import {
   ativarNotificacoes,
   notificacoesSuportadas,
@@ -27,9 +27,11 @@ import {
   ouvirAgenda,
   salvarAgenda,
   salvarBloqueios,
+  ouvirSlotsOcupados,
   ouvirAgendamentos,
   confirmarAgendamento,
   recusarAgendamento,
+  criarAgendamentoManual,
   type ServicoDoc,
   type Agendamento,
 } from "@/lib/db";
@@ -130,6 +132,7 @@ function Dashboard({ email, logout }: { email: string; logout: () => Promise<voi
         <button className="adm-btn-ghost" onClick={() => logout()}>Sair</button>
       </header>
       <AgendamentosManager />
+      <NovoAgendamentoManual />
       <NotificacoesCard />
       <ServicosManager />
       <HorariosManager />
@@ -240,21 +243,21 @@ function AgendamentosManager() {
   // Confirma e abre o WhatsApp do cliente com a mensagem de confirmação pronta.
   async function confirmar(a: Agendamento) {
     await confirmarAgendamento(a.id);
-    window.open(wppUrl(zap(a.clienteWhatsapp), msgConfirmacao(a)), "_blank");
+    if (a.clienteWhatsapp) window.open(wppUrl(zap(a.clienteWhatsapp), msgConfirmacao(a)), "_blank");
   }
 
-  // Recusa um pedido pendente + abre o WhatsApp com a mensagem de recusa.
+  // Recusa um pedido pendente + abre o WhatsApp com a mensagem de recusa (se tiver).
   async function recusar(a: Agendamento) {
-    if (!confirm(`Recusar o pedido de ${a.clienteNome} (${a.diaLabel} · ${a.hora})?\nVai abrir o WhatsApp com um aviso pronto para o cliente.`)) return;
+    if (!confirm(`Recusar o pedido de ${a.clienteNome} (${a.diaLabel} · ${a.hora})?`)) return;
     await recusarAgendamento(a.id);
-    window.open(wppUrl(zap(a.clienteWhatsapp), msgRecusa(a)), "_blank");
+    if (a.clienteWhatsapp) window.open(wppUrl(zap(a.clienteWhatsapp), msgRecusa(a)), "_blank");
   }
 
-  // Cancela um agendamento confirmado + abre o WhatsApp com a mensagem de cancelamento.
+  // Cancela um agendamento confirmado + abre o WhatsApp com a mensagem de cancelamento (se tiver).
   async function cancelar(a: Agendamento) {
-    if (!confirm(`Cancelar o agendamento de ${a.clienteNome} (${a.diaLabel} · ${a.hora})?\nVai abrir o WhatsApp com um aviso pronto para o cliente.`)) return;
+    if (!confirm(`Cancelar o agendamento de ${a.clienteNome} (${a.diaLabel} · ${a.hora})?`)) return;
     await recusarAgendamento(a.id);
-    window.open(wppUrl(zap(a.clienteWhatsapp), msgCancelamento(a)), "_blank");
+    if (a.clienteWhatsapp) window.open(wppUrl(zap(a.clienteWhatsapp), msgCancelamento(a)), "_blank");
   }
 
   return (
@@ -290,13 +293,140 @@ function AgendamentosManager() {
                 <span className="ag-quando">{a.diaLabel} · {a.hora}</span>
               </div>
               <div className="ag-acoes">
-                <a className="adm-mini ag-whatsapp" href={`https://wa.me/${zap(a.clienteWhatsapp)}`} target="_blank" rel="noopener">WhatsApp</a>
+                {a.clienteWhatsapp && (
+                  <a className="adm-mini ag-whatsapp" href={`https://wa.me/${zap(a.clienteWhatsapp)}`} target="_blank" rel="noopener">WhatsApp</a>
+                )}
                 <button className="adm-mini adm-mini-danger" onClick={() => cancelar(a)}>Cancelar</button>
               </div>
             </div>
           ))}
         </>
       )}
+    </section>
+  );
+}
+
+// ---------------- Novo agendamento manual (a dona registra) ----------------
+function NovoAgendamentoManual() {
+  const [aberto, setAberto] = useState(false);
+  const [servicos, setServicos] = useState<ServicoDoc[]>([]);
+  const [ocupados, setOcupados] = useState<Set<string>>(new Set());
+  const [nome, setNome] = useState("");
+  const [whatsapp, setWhatsapp] = useState("");
+  const [svcSel, setSvcSel] = useState<string[]>([]);
+  const [data, setData] = useState("");
+  const [hora, setHora] = useState("");
+  const [salvando, setSalvando] = useState(false);
+  const [erro, setErro] = useState("");
+  const [ok, setOk] = useState(false);
+
+  useEffect(() => ouvirServicos(setServicos), []);
+  useEffect(() => ouvirSlotsOcupados(setOcupados), []);
+
+  const escolhidos = servicos.filter((s) => svcSel.includes(s.id));
+  const total = escolhidos.reduce((soma, s) => soma + s.preco, 0);
+  const hojeKey = new Date().toISOString().slice(0, 10);
+
+  function toggleSvc(id: string) {
+    setSvcSel((prev) => (prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]));
+  }
+  function limpar() {
+    setNome(""); setWhatsapp(""); setSvcSel([]); setData(""); setHora(""); setErro("");
+  }
+
+  async function salvar(e: FormEvent) {
+    e.preventDefault();
+    setErro("");
+    const wpp = whatsapp.replace(/\D/g, "");
+    if (nome.trim().length < 2) return setErro("Coloque o nome da cliente.");
+    if (escolhidos.length === 0) return setErro("Escolha pelo menos um serviço.");
+    if (!data || !hora) return setErro("Escolha a data e a hora.");
+    if (data < hojeKey) return setErro("Essa data já passou.");
+    if (whatsapp && wpp.length < 10) return setErro("WhatsApp incompleto (ou deixe em branco).");
+    if (ocupados.has(`${data}_${hora}`)) return setErro("Já existe um agendamento nesse horário.");
+
+    setSalvando(true);
+    try {
+      await criarAgendamentoManual({
+        servicos: escolhidos.map((s) => ({ nome: s.nome, preco: s.preco })),
+        total,
+        clienteNome: nome.trim(),
+        clienteWhatsapp: whatsapp.trim(),
+        data,
+        hora,
+        diaLabel: labelData(data),
+      });
+      limpar();
+      setAberto(false);
+      setOk(true);
+    } catch (e) {
+      setErro(`Não consegui salvar (${detalheErro(e)}).`);
+    } finally {
+      setSalvando(false);
+    }
+  }
+
+  if (!aberto) {
+    return (
+      <section className="admin-card">
+        <div className="adm-actions">
+          <button className="adm-btn" onClick={() => { setAberto(true); setOk(false); }}>+ Adicionar agendamento</button>
+          {ok && <span className="adm-ok">Agendamento adicionado!</span>}
+        </div>
+      </section>
+    );
+  }
+
+  return (
+    <section className="admin-card">
+      <h2 className="adm-section">Novo agendamento</h2>
+      <p className="adm-muted">Registre uma cliente da sua agenda manual. Entra já confirmado e trava o horário.</p>
+      <form className="adm-form" onSubmit={salvar}>
+        <div className="adm-row2">
+          <label className="adm-field">
+            <span>Nome da cliente</span>
+            <input className="adm-input" value={nome} onChange={(e) => setNome(e.target.value)} required />
+          </label>
+          <label className="adm-field">
+            <span>WhatsApp (opcional)</span>
+            <input className="adm-input" inputMode="tel" value={whatsapp} onChange={(e) => setWhatsapp(e.target.value)} placeholder="com DDD" />
+          </label>
+        </div>
+
+        <div className="adm-field">
+          <span>Serviços</span>
+          {servicos.length === 0 ? (
+            <p className="adm-muted">Cadastre um serviço primeiro (na seção abaixo).</p>
+          ) : (
+            <div className="chips">
+              {servicos.map((s) => (
+                <button type="button" key={s.id} className={`chip${svcSel.includes(s.id) ? " active" : ""}`} onClick={() => toggleSvc(s.id)}>
+                  {s.nome}<small>{brl(s.preco)}</small>
+                </button>
+              ))}
+            </div>
+          )}
+        </div>
+
+        <div className="adm-row2">
+          <label className="adm-field">
+            <span>Data</span>
+            <input className="adm-input" type="date" min={hojeKey} value={data} onChange={(e) => setData(e.target.value)} required />
+          </label>
+          <label className="adm-field">
+            <span>Hora</span>
+            <input className="adm-input" type="time" value={hora} onChange={(e) => setHora(e.target.value)} required />
+          </label>
+        </div>
+
+        {escolhidos.length > 0 && <p className="adm-muted">Total: <b>{brl(total)}</b></p>}
+
+        <div className="adm-actions">
+          <button className="adm-btn" disabled={salvando}>{salvando ? "Salvando…" : "Salvar agendamento"}</button>
+          <button type="button" className="adm-btn-ghost" onClick={() => { setAberto(false); limpar(); }}>Fechar</button>
+          {erro && <span className="adm-erro">{erro}</span>}
+        </div>
+      </form>
     </section>
   );
 }

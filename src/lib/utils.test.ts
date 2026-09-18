@@ -1,5 +1,16 @@
 import { describe, it, expect } from "vitest";
-import { brl, wppUrl, proximosDias } from "./utils";
+import { brl, wppUrl, proximosDias, labelData } from "./utils";
+
+describe("labelData", () => {
+  it("formata a data no padrão 'dia, DD/MM'", () => {
+    // 2026-09-19 é um sábado
+    expect(labelData("2026-09-19")).toBe("sáb, 19/09");
+  });
+  it("mantém zero à esquerda no dia e no mês", () => {
+    // 2026-01-05 é uma segunda
+    expect(labelData("2026-01-05")).toBe("seg, 05/01");
+  });
+});
 
 describe("brl", () => {
   it("formata inteiro com prefixo R$", () => {

@@ -45,8 +45,9 @@ O id do agendamento é **determinístico**: `${data}_${hora}`. As regras de segu
 
 ## Regras de segurança (resumo)
 - `config`, `servicos`, `disponibilidade`: **leitura pública**, **escrita só da Carin** (UID dela).
-- `agendamentos`:
-  - **create** público, com validação de campos e só em horário válido/livre;
+- `agendamentos` / `slots`:
+  - **create** público só de pedido `pendente`, com validação de campos e id determinístico;
+  - **create** direto (qualquer status) para a **Carin** (`isDono`) — usado no agendamento manual;
   - **update** proibido para o público (garante o anti-duplicidade);
   - **read / update(status) / delete** só da Carin.
 

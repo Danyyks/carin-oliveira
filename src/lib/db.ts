@@ -122,6 +122,29 @@ export async function criarAgendamento(a: NovoAgendamento) {
   return id;
 }
 
+/**
+ * A dona registra um agendamento da agenda MANUAL dela (cliente que marcou por
+ * fora). Entra já `confirmado` e trava o horário no site. Só a dona faz isso
+ * (as regras liberam create para isDono).
+ */
+export async function criarAgendamentoManual(a: NovoAgendamento) {
+  const id = `${a.data}_${a.hora}`;
+  const batch = writeBatch(db);
+  batch.set(doc(db, "slots", id), {
+    data: a.data,
+    hora: a.hora,
+    status: "confirmado",
+    criadoEm: serverTimestamp(),
+  });
+  batch.set(doc(db, "agendamentos", id), {
+    ...a,
+    status: "confirmado",
+    criadoEm: serverTimestamp(),
+  });
+  await batch.commit();
+  return id;
+}
+
 /** Escuta os agendamentos (só a dona lê) em tempo real, ordenados por data/hora. */
 export function ouvirAgendamentos(cb: (ags: Agendamento[]) => void) {
   return onSnapshot(

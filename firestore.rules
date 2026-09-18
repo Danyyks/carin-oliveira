@@ -49,11 +49,14 @@ service cloud.firestore {
     // dois pedidos no mesmo horário. Só a dona altera/apaga (confirmar/liberar).
     match /slots/{id} {
       allow read: if true;
-      allow create: if request.resource.data.status == 'pendente'
+      // A dona (isDono) pode criar direto (agendamento manual); o público só cria
+      // pedido "pendente" com id determinístico "data_hora".
+      allow create: if isDono() || (
+        request.resource.data.status == 'pendente'
         && request.resource.data.data is string
         && request.resource.data.hora is string
-        // o id TEM que ser "data_hora" (trava a duplicidade mesmo fora do app)
-        && id == request.resource.data.data + '_' + request.resource.data.hora;
+        && id == request.resource.data.data + '_' + request.resource.data.hora
+      );
       allow update, delete: if isDono();
     }
 
@@ -61,7 +64,10 @@ service cloud.firestore {
     // o público só CRIA o pedido (nunca edita/apaga).
     match /agendamentos/{id} {
       allow read, update, delete: if isDono();
-      allow create: if request.resource.data.status == 'pendente'
+      // A dona (isDono) cria direto (agendamento manual). O público só cria
+      // pedido "pendente" com id determinístico e campos validados.
+      allow create: if isDono() || (
+        request.resource.data.status == 'pendente'
         // o id TEM que ser "data_hora" (trava a duplicidade mesmo fora do app)
         && id == request.resource.data.data + '_' + request.resource.data.hora
         && request.resource.data.servicos is list
@@ -79,7 +85,8 @@ service cloud.firestore {
         && request.resource.data.hora is string
         && request.resource.data.hora.size() <= 5
         && request.resource.data.diaLabel is string
-        && request.resource.data.diaLabel.size() <= 40;
+        && request.resource.data.diaLabel.size() <= 40
+      );
     }
   }
 }

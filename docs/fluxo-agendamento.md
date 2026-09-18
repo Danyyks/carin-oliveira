@@ -35,3 +35,6 @@ Se o cliente pede e some sem concluir, o horário fica `pendente`. Como não usa
 
 ## Folgas (bloqueio de datas específicas)
 A agenda base é por **dia da semana**. Para folgar numa **data pontual** (viagem, imprevisto), a Carin usa o card **"Folgas"** no painel: um mini-calendário onde ela toca no dia para bloquear/liberar. Um dia bloqueado (`disponibilidade/regras.bloqueios`) **some do agendamento** no site, sem afetar os outros dias da mesma semana. É dia inteiro e reversível.
+
+## Agendamento manual (a dona registra)
+Para clientes que marcaram **por fora** (WhatsApp, agenda de papel), a Carin usa o botão **"+ Adicionar agendamento"** no painel: preenche nome, serviço(s), data e hora (WhatsApp opcional). O agendamento entra **já como `confirmado`** (`criarAgendamentoManual`), aparece na lista dela e **trava o horário** no site. Só a dona faz isso — as regras liberam `create` para `isDono()`; o público continua só podendo criar pedido `pendente`. Se o WhatsApp ficar vazio, os botões/mensagens de WhatsApp somem para aquele agendamento.
