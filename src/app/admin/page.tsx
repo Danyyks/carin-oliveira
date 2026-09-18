@@ -290,7 +290,7 @@ function AgendamentosManager() {
                 <span className="ag-quando">{a.diaLabel} · {a.hora}</span>
               </div>
               <div className="ag-acoes">
-                <a className="adm-mini" href={`https://wa.me/${zap(a.clienteWhatsapp)}`} target="_blank" rel="noopener">WhatsApp</a>
+                <a className="adm-mini ag-whatsapp" href={`https://wa.me/${zap(a.clienteWhatsapp)}`} target="_blank" rel="noopener">WhatsApp</a>
                 <button className="adm-mini adm-mini-danger" onClick={() => cancelar(a)}>Cancelar</button>
               </div>
             </div>

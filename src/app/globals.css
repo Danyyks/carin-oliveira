@@ -716,6 +716,10 @@ a {
   --surface-2: #f2eafb;
   --shadow: rgba(109, 40, 184, 0.18);
   --ring: rgba(139, 61, 217, 0.5);
+  --danger: #c0272c;
+  --danger-bg: rgba(229, 72, 77, 0.14);
+  --success-wpp: #1fa855;
+  --success-wpp-bg: rgba(31, 168, 85, 0.16);
 }
 /* fundo roxo pastel cobrindo a tela toda (por cima do rosa do body) */
 .admin::before {
@@ -738,6 +742,10 @@ a {
     --border: rgba(242, 237, 248, 0.1);
     --shadow: rgba(0, 0, 0, 0.5);
     --ring: rgba(185, 140, 240, 0.55);
+    --danger: #ff9095;
+    --danger-bg: rgba(229, 72, 77, 0.22);
+    --success-wpp: #3ddc84;
+    --success-wpp-bg: rgba(61, 220, 132, 0.2);
   }
   .admin::before {
     background: linear-gradient(180deg, #14101c 0%, #1d1428 100%);
@@ -945,7 +953,7 @@ a {
   font-weight: 600;
   font-size: 0.8rem;
   padding: 8px 14px;
-  min-height: 40px;
+  min-height: 44px;
   display: inline-flex;
   align-items: center;
   border-radius: 9px;
@@ -956,8 +964,13 @@ a {
   background: var(--accent);
   color: #fff;
 }
+.adm-mini-danger {
+  background: var(--danger-bg);
+  color: var(--danger);
+}
 .adm-mini-danger:hover {
-  background: #e5484d;
+  background: var(--danger);
+  color: #fff;
 }
 .adm-dias {
   display: flex;
@@ -1096,23 +1109,32 @@ a {
 }
 .ag-item {
   display: flex;
-  align-items: center;
-  justify-content: space-between;
+  flex-direction: column;
+  align-items: stretch;
   gap: 12px;
-  padding: 12px 2px;
+  padding: 14px 2px;
   border-top: 1px solid var(--border);
+}
+.ag-info {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  min-width: 0;
 }
 .ag-info b {
   font-weight: 700;
   font-size: 0.96rem;
   display: flex;
   align-items: center;
-  gap: 8px;
+  flex-wrap: wrap;
+  gap: 6px 8px;
+  overflow-wrap: anywhere;
 }
 .ag-info > span {
   display: block;
   color: var(--text-muted);
   font-size: 0.82rem;
+  overflow-wrap: anywhere;
 }
 .ag-quando {
   color: var(--accent-deep) !important;
@@ -1120,13 +1142,26 @@ a {
 }
 .ag-acoes {
   display: flex;
-  align-items: center;
+  align-items: stretch;
   gap: 8px;
-  flex-shrink: 0;
+  width: 100%;
+}
+.ag-acoes > * {
+  flex: 1;
+  justify-content: center;
+  text-align: center;
 }
 .ag-confirmar {
-  padding: 9px 16px;
-  font-size: 0.85rem;
+  padding: 10px 16px;
+  font-size: 0.88rem;
+}
+.ag-whatsapp {
+  background: var(--success-wpp-bg);
+  color: var(--success-wpp);
+}
+.ag-whatsapp:hover {
+  background: var(--success-wpp);
+  color: #fff;
 }
 .ag-tag-ok {
   font-size: 0.62rem;

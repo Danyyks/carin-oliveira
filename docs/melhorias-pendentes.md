@@ -23,6 +23,18 @@ próximo passo. Nada aqui é bloqueante para o uso atual.
 **Testes**
 - Vitest configurado + 26 testes das funções do "motor" (`brl`, `wppUrl`, `proximosDias`).
 
+## ✅ Aplicado depois (17/09/2026) — cards de agendamento no painel
+
+Retoque de UI/UX (subagente ux-ui), só visual, sem tocar na lógica:
+- **Fim do vazamento dos botões**: `.ag-item` empilha no mobile (info em cima ocupando a largura,
+  ações embaixo com os botões em `flex:1` dividindo o espaço) + `overflow-wrap` no nome/serviço.
+  Nomes longos não empurram mais os botões pra fora do card.
+- **Cores de ação semânticas** (tokens escopados em `.admin`, claro e escuro):
+  `--danger` / `--danger-bg` (Cancelar/Recusar/Excluir, vermelho suave já no estado normal — no
+  celular não há hover) e `--success-wpp` / `--success-wpp-bg` + classe `.ag-whatsapp` (verde do
+  WhatsApp). "Confirmar" segue com o roxo cheio (`.adm-btn`).
+- Alvo de toque dos botões pequenos subiu para **≥44px** (`.adm-mini`).
+
 ## ⏳ Próximos passos (por prioridade)
 
 ### Design
