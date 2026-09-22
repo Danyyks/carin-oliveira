@@ -42,6 +42,16 @@ function zap(raw: string) {
   return d.startsWith("55") ? d : "55" + d;
 }
 
+// Abre o WhatsApp de forma confiável — inclusive no iPhone (Safari e app instalado).
+// O iOS só deixa abrir uma aba nova se isso acontecer NO MESMO toque; por isso a
+// janela é aberta ANTES de esperar o Firebase (o chamador passa `win` já aberto).
+// Se o iPhone bloquear a aba mesmo assim (`win` nulo), navega na própria aba, que
+// nunca é bloqueada. Depois do await, é só apontar a janela para a URL.
+function abrirWhatsapp(win: Window | null, url: string) {
+  if (win && !win.closed) win.location.href = url;
+  else window.location.href = url;
+}
+
 export default function AdminPage() {
   const { user, loading, login, logout } = useAuth();
   const [contextoOk, setContextoOk] = useState(true);
@@ -257,23 +267,27 @@ function AgendamentosManager() {
   }, [pendentes.length]);
 
   // Confirma e abre o WhatsApp do cliente com a mensagem de confirmação pronta.
+  // A aba do WhatsApp é aberta ANTES do await, senão o iPhone bloqueia (ver abrirWhatsapp).
   async function confirmar(a: Agendamento) {
+    const win = a.clienteWhatsapp ? window.open("", "_blank") : null;
     await confirmarAgendamento(a.id);
-    if (a.clienteWhatsapp) window.open(wppUrl(zap(a.clienteWhatsapp), msgConfirmacao(a)), "_blank");
+    if (a.clienteWhatsapp) abrirWhatsapp(win, wppUrl(zap(a.clienteWhatsapp), msgConfirmacao(a)));
   }
 
   // Recusa um pedido pendente + abre o WhatsApp com a mensagem de recusa (se tiver).
   async function recusar(a: Agendamento) {
     if (!confirm(`Recusar o pedido de ${a.clienteNome} (${a.diaLabel} · ${a.hora})?`)) return;
+    const win = a.clienteWhatsapp ? window.open("", "_blank") : null;
     await recusarAgendamento(a.id);
-    if (a.clienteWhatsapp) window.open(wppUrl(zap(a.clienteWhatsapp), msgRecusa(a)), "_blank");
+    if (a.clienteWhatsapp) abrirWhatsapp(win, wppUrl(zap(a.clienteWhatsapp), msgRecusa(a)));
   }
 
   // Cancela um agendamento confirmado + abre o WhatsApp com a mensagem de cancelamento (se tiver).
   async function cancelar(a: Agendamento) {
     if (!confirm(`Cancelar o agendamento de ${a.clienteNome} (${a.diaLabel} · ${a.hora})?`)) return;
+    const win = a.clienteWhatsapp ? window.open("", "_blank") : null;
     await recusarAgendamento(a.id);
-    if (a.clienteWhatsapp) window.open(wppUrl(zap(a.clienteWhatsapp), msgCancelamento(a)), "_blank");
+    if (a.clienteWhatsapp) abrirWhatsapp(win, wppUrl(zap(a.clienteWhatsapp), msgCancelamento(a)));
   }
 
   return (

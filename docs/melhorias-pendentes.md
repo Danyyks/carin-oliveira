@@ -46,6 +46,23 @@ O painel ficou longo (6 blocos). Agora as **seções de configuração** são co
   (é o que a dona consulta e para onde a notificação a leva).
 - **Resumo no título** mesmo fechado (ex.: "8 serviços", "2 folgas", "6 dias", "ativadas").
 
+## ✅ Aplicado depois (22/09/2026) — WhatsApp não abria no iPhone ao confirmar
+
+Bug relatado em produção: no iPhone da Carin (app instalado), tocar em **Confirmar** marcava
+o agendamento, mas **não abria o WhatsApp** — a cliente não recebia a mensagem. No desktop
+funcionava.
+
+- **Causa**: o `window.open(...)` rodava **depois** do `await` da escrita no Firestore. O iOS
+  (Safari e, ainda mais, PWA instalado) só permite abrir aba nova **dentro do mesmo gesto de
+  toque**; feito "depois", ele bloqueia silenciosamente.
+- **Correção** (só em `admin/page.tsx`, sem tocar em banco/regras/visual): a aba do WhatsApp é
+  aberta **antes do `await`** (`window.open("", "_blank")` no toque) e só recebe a URL depois
+  que a confirmação grava. Helper `abrirWhatsapp(win, url)`: se o iPhone ainda bloquear a aba
+  (`win` nulo), navega na **própria aba** (que o iOS nunca bloqueia). Mesma correção em
+  **confirmar**, **recusar** e **cancelar**.
+- **Verificação final** é no iPhone da Carin (não reproduzível no desktop): confirmar um
+  agendamento de teste e ver o WhatsApp abrir com a mensagem pronta.
+
 ## ⏳ Próximos passos (por prioridade)
 
 ### Design
