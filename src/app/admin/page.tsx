@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useState, type FormEvent, type ReactNode } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { auth } from "@/lib/firebase";
-import { brl, wppUrl, labelData } from "@/lib/utils";
+import { brl, wppUrl, labelData, hojeKey } from "@/lib/utils";
 import {
   ativarNotificacoes,
   notificacoesSuportadas,
@@ -248,12 +248,39 @@ function NotificacoesCard() {
 }
 
 // ---------------- Agendamentos ----------------
+// "Hoje" que se atualiza sozinho: quando o app volta ao primeiro plano (o iPhone pausa o
+// PWA em segundo plano), quando a tela ganha foco e a cada minuto (virada do dia com o app
+// aberto). Sem isso o "hoje" só seria recalculado quando algo redesenhasse a tela, e os
+// agendamentos de ontem continuariam à mostra se o app ficasse aberto de um dia pro outro.
+// Se o valor não mudou, o React não redesenha nada.
+function useHoje() {
+  const [hoje, setHoje] = useState(hojeKey);
+  useEffect(() => {
+    const atualizar = () => setHoje(hojeKey());
+    document.addEventListener("visibilitychange", atualizar);
+    window.addEventListener("focus", atualizar);
+    window.addEventListener("pageshow", atualizar);
+    const timer = setInterval(atualizar, 60_000);
+    return () => {
+      document.removeEventListener("visibilitychange", atualizar);
+      window.removeEventListener("focus", atualizar);
+      window.removeEventListener("pageshow", atualizar);
+      clearInterval(timer);
+    };
+  }, []);
+  return hoje;
+}
+
 function AgendamentosManager() {
   const [lista, setLista] = useState<Agendamento[]>([]);
   useEffect(() => ouvirAgendamentos(setLista), []);
+  const hoje = useHoje();
 
   const pendentes = lista.filter((a) => a.status === "pendente");
-  const confirmados = lista.filter((a) => a.status === "confirmado");
+  // Confirmados somem do painel na virada do dia seguinte ao atendimento (opção B):
+  // fica visível o dia inteiro do agendamento e sai quando a data já passou. O
+  // registro continua salvo no banco (histórico), só não aparece mais na lista.
+  const confirmados = lista.filter((a) => a.status === "confirmado" && a.data >= hoje);
 
   // Bolinha no ícone do app (igual app nativo) com o nº de pedidos pendentes.
   useEffect(() => {

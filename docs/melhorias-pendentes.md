@@ -63,6 +63,24 @@ funcionava.
 - **Verificação final** é no iPhone da Carin (não reproduzível no desktop): confirmar um
   agendamento de teste e ver o WhatsApp abrir com a mensagem pronta.
 
+## ✅ Aplicado depois (23/09/2026) — confirmados antigos somem do painel
+
+A lista de **confirmados** ia acumulando pra sempre. Agora ela se limpa sozinha: um
+agendamento confirmado fica visível **o dia inteiro do atendimento** e **some na virada do
+dia seguinte** (opção B).
+
+- Helper `hojeKey()` em `utils.ts` (data de hoje "YYYY-MM-DD", mesma base de `proximosDias`).
+- Filtro no `AgendamentosManager`: `confirmado && a.data >= hoje` (comparação de string
+  já funciona no formato ISO). **Só esconde da lista** — o registro **continua salvo** no
+  banco (histórico preservado; nada é apagado).
+- Hook `useHoje()` mantém o "hoje" atualizado sozinho: ao voltar pro app (`visibilitychange`,
+  `focus`, `pageshow` — o iPhone pausa o PWA em segundo plano) e a cada minuto. Assim os de
+  ontem somem mesmo se o app ficar aberto de um dia pro outro.
+- Publicado em 24/09/2026.
+- **Pendentes** não são filtrados: um pedido antigo não confirmado continua aparecendo pra
+  a dona resolver.
+- +2 testes de `hojeKey` (30 no total).
+
 ## ⏳ Próximos passos (por prioridade)
 
 ### Design

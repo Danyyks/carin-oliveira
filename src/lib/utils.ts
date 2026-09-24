@@ -30,6 +30,12 @@ export function proximosDias(qtd = 6): Dia[] {
   return out;
 }
 
+/** Data de hoje no formato local "YYYY-MM-DD" (mesma base de proximosDias/labelData). */
+export function hojeKey(): string {
+  const d = new Date();
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+}
+
 /** Rótulo curto de uma data "YYYY-MM-DD" no mesmo formato dos dias (ex.: "sáb, 18/09"). */
 export function labelData(dataKey: string): string {
   const [y, m, d] = dataKey.split("-").map(Number);

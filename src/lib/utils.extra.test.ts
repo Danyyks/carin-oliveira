@@ -2,7 +2,7 @@
 // no utils.test.ts original (decimais/negativos em brl, caracteres
 // especiais em wppUrl, e mais profundidade em proximosDias).
 import { describe, it, expect } from "vitest";
-import { brl, wppUrl, proximosDias } from "./utils";
+import { brl, wppUrl, proximosDias, hojeKey } from "./utils";
 
 describe("brl - casos adicionais", () => {
   it("formata valor decimal com duas casas", () => {
@@ -137,5 +137,23 @@ describe("proximosDias - casos adicionais", () => {
     const dias = proximosDias(30);
     const keys = dias.map((d) => d.key);
     expect(new Set(keys).size).toBe(keys.length);
+  });
+});
+
+describe("hojeKey - data de hoje no formato do painel", () => {
+  it("retorna a data de hoje no formato YYYY-MM-DD com zero à esquerda", () => {
+    const d = new Date();
+    const esperado = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(
+      d.getDate(),
+    ).padStart(2, "0")}`;
+    expect(hojeKey()).toBe(esperado);
+    expect(hojeKey()).toMatch(/^\d{4}-\d{2}-\d{2}$/);
+  });
+
+  it("é anterior a amanhã e não é maior que qualquer dia futuro (regra do filtro do painel)", () => {
+    const [amanha] = proximosDias(1);
+    // um agendamento de amanhã ou depois NÃO é escondido; um de ontem é.
+    expect(hojeKey() < amanha.key).toBe(true);
+    expect(amanha.key >= hojeKey()).toBe(true);
   });
 });

@@ -25,6 +25,9 @@ Modelo **pedido → confirmação**. O cliente pede, o horário fica reservado, 
 - `confirmado` — Carin aceitou; ocupado de vez
 - `recusado` / `cancelado` — libera o horário de volta (o registro é removido)
 
+## Depois do atendimento
+O agendamento `confirmado` fica na lista do painel **o dia inteiro do atendimento** e **some na virada do dia seguinte**. É só um filtro de tela: o registro **continua no banco** (histórico) e nada é apagado. O painel recalcula o "hoje" sozinho (ao reabrir o app e a cada minuto), então funciona mesmo com o app aberto de um dia pro outro. Os pedidos `pendente` **não** somem — um pedido antigo sem resposta continua aparecendo para a Carin resolver.
+
 ## Por que "pedido → confirmação"?
 - A Carin mantém o controle de quem atende (comum em manicure).
 - Reservar na hora do pedido **evita dois clientes pedindo o mesmo horário**.
