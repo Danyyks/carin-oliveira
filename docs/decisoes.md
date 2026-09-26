@@ -14,6 +14,16 @@ O cliente pede, a Carin confirma. Mantém ela no controle e evita choque de hor�
 ### 4. Confirmação por WhatsApp = `wa.me` (1 toque da Carin)
 Envio 100% automático exigiria a **API oficial paga** do WhatsApp. No grátis, quem envia é a Carin, num toque, ao confirmar. Fica como upgrade futuro.
 
+**Envio automático — o que foi levantado em 26/09/2026** (a pergunta foi: "e se a Carin usar o WhatsApp Business?"):
+- Trocar para o **aplicativo** WhatsApp Business **não basta**: ele tem respostas automáticas (saudação, ausência, respostas rápidas), mas não deixa o nosso sistema enviar mensagens. Para isso é preciso a **API oficial da Meta** (WhatsApp Business Platform / Cloud API).
+- Com a API, a confirmação sairia sozinha do servidor (rota na Vercel) ao confirmar ou lançar, sem abrir o WhatsApp (e sem o problema do iPhone).
+- **Custo**: a Meta cobra por **mensagem de modelo entregue** (desde 01/07/2025); a categoria "utility" (confirmação de agendamento) fica em torno de **R$ 0,31 a R$ 0,38** no Brasil, segundo guias de terceiros (conferir na tabela oficial da Meta, publicada em planilha). É grátis quando a cliente escreveu primeiro nas últimas 24 h. Deixa de ser custo zero.
+- **Exigências**: mensagens em **modelo pré-aprovado** pela Meta (texto com campos variáveis, sem a liberdade de hoje); **consentimento** da cliente para receber no WhatsApp (aviso no formulário); conta Meta Business; token guardado na Vercel.
+- **Número da Carin**: pelo modo tradicional, o número passa a ser da API e deixa de funcionar no aplicativo. O **coexistence** permite manter o aplicativo Business e a API no **mesmo número** (app na versão 2.24.17 ou mais nova; deixam de funcionar recursos como lista de transmissão e mensagens temporárias), mas o cadastro é feito por um provedor ou Tech Provider.
+- **Não usar** serviços "não oficiais" que ligam pelo WhatsApp Web: violam os termos e podem **banir o número** dela, que é o canal de trabalho.
+- **Recomendação**: manter o envio em 1 toque (grátis, já padronizado) e só considerar a API se o volume crescer ou como recurso pago do futuro SaaS.
+- **Decisão (26/09/2026)**: o Dany decidiu **manter como está** (envio em 1 toque). A API fica como possibilidade futura.
+
 ### 5. Anti-duplicidade sem transação
 Id do agendamento determinístico (`data_hora`) + regra `create`-only. Segundo `create` no mesmo horário falha. Simples e grátis.
 

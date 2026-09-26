@@ -39,7 +39,7 @@ Uma página única (no estilo "link na bio") que a profissional coloca na bio do
 - Tabela de preços editável, com serviços em destaque
 - Definição dos dias e horários de atendimento
 - Folgas: bloqueio de datas específicas por um calendário
-- Agendamento manual, para registrar clientes que marcaram por fora
+- Agendamento manual, para registrar clientes que marcaram por fora, com os horários ocupados já apagados e a confirmação pronta para enviar pelo WhatsApp
 - Página pública responsiva, com tema claro e escuro
 
 ## Stack
@@ -62,7 +62,7 @@ Roda inteiramente no plano gratuito dos serviços, o que mantém o custo de oper
 
 ## Qualidade
 
-- Testes automatizados com Vitest nas funções principais
+- Testes automatizados com Vitest nas funções principais e nas telas do painel (Testing Library)
 - Documentação de arquitetura, fluxo e decisões na pasta `docs`
 - Histórico de commits organizado, uma entrega de cada vez
 

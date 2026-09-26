@@ -2,7 +2,7 @@
 // no utils.test.ts original (decimais/negativos em brl, caracteres
 // especiais em wppUrl, e mais profundidade em proximosDias).
 import { describe, it, expect } from "vitest";
-import { brl, wppUrl, proximosDias, hojeKey } from "./utils";
+import { brl, wppUrl, proximosDias, hojeKey, zap, diaDaSemana, labelData } from "./utils";
 
 describe("brl - casos adicionais", () => {
   it("formata valor decimal com duas casas", () => {
@@ -155,5 +155,49 @@ describe("hojeKey - data de hoje no formato do painel", () => {
     // um agendamento de amanhã ou depois NÃO é escondido; um de ontem é.
     expect(hojeKey() < amanha.key).toBe(true);
     expect(amanha.key >= hojeKey()).toBe(true);
+  });
+});
+
+describe("zap - número da cliente no formato do wa.me", () => {
+  it("tira máscara e espaços e coloca o DDI 55", () => {
+    expect(zap("(15) 99999-8888")).toBe("5515999998888");
+    expect(zap("15 99999-8888")).toBe("5515999998888");
+    expect(zap("15999998888")).toBe("5515999998888");
+  });
+
+  it("telefone fixo (10 dígitos) também recebe o 55", () => {
+    expect(zap("(15) 3333-4444")).toBe("551533334444");
+  });
+
+  it("não duplica o 55 quando o número já vem com DDI", () => {
+    expect(zap("5515999998888")).toBe("5515999998888");
+    expect(zap("+55 (15) 99999-8888")).toBe("5515999998888");
+    expect(zap("551533334444")).toBe("551533334444");
+  });
+
+  it("DDD 55 (RS) digitado sem DDI não é confundido com o código do país", () => {
+    expect(zap("(55) 99999-8888")).toBe("5555999998888");
+    expect(zap("(55) 3333-4444")).toBe("555533334444");
+    // com DDI também: 55 + DDD 55 + número
+    expect(zap("+55 (55) 99999-8888")).toBe("5555999998888");
+  });
+});
+
+describe("diaDaSemana - dia da semana de uma data YYYY-MM-DD", () => {
+  it("0 = domingo ... 6 = sábado", () => {
+    expect(diaDaSemana("2026-09-27")).toBe(0); // domingo
+    expect(diaDaSemana("2026-09-28")).toBe(1); // segunda
+    expect(diaDaSemana("2026-09-24")).toBe(4); // quinta
+    expect(diaDaSemana("2026-09-26")).toBe(6); // sábado
+  });
+
+  it("funciona na virada de mês e de ano", () => {
+    expect(diaDaSemana("2026-12-31")).toBe(4); // quinta
+    expect(diaDaSemana("2027-01-01")).toBe(5); // sexta
+  });
+
+  it("concorda com o rótulo mostrado no painel (labelData)", () => {
+    expect(labelData("2026-09-24").startsWith("qui")).toBe(true);
+    expect(labelData("2026-09-27").startsWith("dom")).toBe(true);
   });
 });

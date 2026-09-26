@@ -1,13 +1,13 @@
 // Mensagens de WhatsApp enviadas ao cliente (formatadas, sem emojis).
 // Usam o negrito do WhatsApp (*texto*) e bullets "•" — nada de emoji.
-import { brl } from "./utils";
+import { brl, wppUrl, zap } from "./utils";
 import { studio } from "@/config/studio";
 import type { Agendamento } from "./db";
 
 const mapsUrl = () =>
   `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(studio.enderecoTexto)}`;
 
-const primeiroNome = (nome: string) => nome.trim().split(/\s+/)[0];
+export const primeiroNome = (nome: string) => nome.trim().split(/\s+/)[0];
 
 const listaServicos = (ag: Agendamento) =>
   ag.servicos.map((s) => `• ${s.nome} — ${brl(s.preco)}`).join("\n");
@@ -31,6 +31,17 @@ export function msgConfirmacao(ag: Agendamento) {
     "Qualquer dúvida é só me chamar por aqui. Até breve!",
   );
   return linhas.join("\n");
+}
+
+/**
+ * Link do WhatsApp com a confirmação já escrita, pronto para a Carin tocar em "Enviar".
+ * Serve para qualquer agendamento confirmado, tanto o que veio do site quanto o
+ * lançado por ela manualmente. Devolve null quando não há WhatsApp (no manual o
+ * campo é opcional) — sem número não há para quem enviar.
+ */
+export function linkConfirmacao(ag: Agendamento): string | null {
+  if (!ag.clienteWhatsapp.replace(/\D/g, "")) return null;
+  return wppUrl(zap(ag.clienteWhatsapp), msgConfirmacao(ag));
 }
 
 /** Enviada quando a Carin RECUSA um pedido ainda pendente. */

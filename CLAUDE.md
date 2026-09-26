@@ -16,7 +16,7 @@ Guia para o Claude Code (e para qualquer dev) trabalhar neste repositório. Leia
 - **Tailwind v4** (CSS-first) — todo o design system está em `src/app/globals.css`
 - **Firebase**: Firestore (dados em tempo real), Auth (e-mail/senha), Cloud Messaging/FCM (push)
 - **firebase-admin** na API route (envio de push server-side)
-- **Vitest** (testes) · **Lucide** (ícones)
+- **Vitest** (testes; telas com jsdom + Testing Library) · **Lucide** (ícones)
 - Deploy na **Vercel** (auto-deploy no `git push` para `main`)
 
 ## Comandos
@@ -30,6 +30,10 @@ firebase deploy --only firestore:rules   # publica as regras do Firestore
 
 Deploy do app = `git push origin main` (a Vercel faz o resto).
 
+Testes: funções puras rodam em Node (`*.test.ts`). Telas usam `// @vitest-environment jsdom` no topo do
+`*.test.tsx`, com o banco trocado por `vi.mock("@/lib/db")` (exemplo: `admin/NovoAgendamentoManual.test.tsx`).
+Não dá pra testar o painel logado por automação (login real da dona), então a tela é testada assim.
+
 ## Estrutura
 
 ```
@@ -40,6 +44,9 @@ src/
     globals.css           # DESIGN SYSTEM completo (paleta rosa, claro/escuro, todos os estilos)
     admin/                # painel — PWA próprio ("Painel Carin"), só /admin é instalável
       page.tsx            # login + Dashboard (Agendamentos, Notificações, Serviços, Horários)
+      AgendamentosManager.tsx    # lista de Pendentes/Confirmados + Confirmar/Recusar/Cancelar + botão WhatsApp (tem teste de tela)
+      NovoAgendamentoManual.tsx  # "+ Adicionar agendamento": horários em botões + envio da confirmação (tem teste de tela)
+      detalheErro.ts      # diagnóstico curto de erro do Firestore, usado nos formulários
       layout.tsx          # metadata/manifest/apple do PWA
       RegisterSW.tsx      # registra o service worker (escopo /admin)
       InstallButton.tsx   # botão "instalar app" (+ dica no iOS)
@@ -54,7 +61,9 @@ src/
     firebase.ts           # init do Firebase (client)
     db.ts                 # camada Firestore (serviços, agenda, agendamentos, pushTokens)
     push.ts               # ativar notificações, getToken, onMessage
-    utils.ts              # helpers puros (brl, wppUrl, proximosDias) — têm testes
+    utils.ts              # helpers puros (brl, wppUrl, zap, proximosDias, hojeKey, diaDaSemana) — têm testes
+    mensagens.ts          # textos do WhatsApp (confirmação, recusa, cancelamento) + linkConfirmacao — têm testes
+    agendaDia.ts          # horários de um dia (livres, ocupados, exceções) p/ o agendamento manual — têm testes
   hooks/useAuth.ts        # estado de autenticação
   config/studio.ts        # DADOS DO CLIENTE (nome, whatsapp, endereço, serviços, lojinha)
 public/
@@ -88,6 +97,10 @@ Além dos pedidos do cliente, a dona pode registrar agendamentos da agenda dela 
 (botão "+ Adicionar agendamento" → `criarAgendamentoManual`), que entram já `confirmado`. As
 regras liberam `create` de `slots`/`agendamentos` para `isDono()` (o público segue só `pendente`).
 O `clienteWhatsapp` é opcional nesse caso — a UI esconde o botão/mensagem de WhatsApp quando vazio.
+No formulário (`admin/NovoAgendamentoManual.tsx`) os horários do dia aparecem como botões: ocupados
+apagados com o primeiro nome da cliente, "Outro horário" para exceções (`lib/agendaDia.ts`). Depois
+de salvar, aparece o botão "Enviar confirmação no WhatsApp" (`linkConfirmacao`) — botão tocado direto,
+não abertura automática, porque o iPhone bloqueia janela aberta fora do toque.
 
 ### Notificações (push)
 1. Cliente finaliza um agendamento em `BookingSheet` → `criarAgendamento` (batch: slot + agendamento).

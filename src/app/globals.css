@@ -607,6 +607,30 @@ a {
 .chip.active small {
   color: rgba(255, 255, 255, 0.85);
 }
+/* Painel, agendamento manual: horário ocupado fica apagado, sem clique, e mostra quem é */
+.adm-field .chip {
+  justify-content: center;
+}
+.chip.taken {
+  background: transparent;
+  border-style: dashed;
+  color: var(--text-muted);
+  opacity: 0.75;
+  cursor: not-allowed;
+}
+.chip.taken:hover {
+  border-color: var(--border);
+}
+.chip.taken small {
+  max-width: 9ch;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+/* "Outro horário": exceção fora da tabela da dona */
+.chip-outro {
+  border-style: dashed;
+}
 .day-chip {
   min-width: 56px;
 }
@@ -958,6 +982,18 @@ a {
   color: #1fa855;
   font-size: 0.88rem;
   font-weight: 700;
+}
+/* Depois de salvar um agendamento manual: aviso + botão de enviar a confirmação */
+.adm-salvo {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 10px;
+  margin-top: 14px;
+}
+.adm-salvo .adm-mini {
+  justify-content: center;
+  text-decoration: none;
 }
 .adm-list {
   display: flex;

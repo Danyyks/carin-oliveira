@@ -81,6 +81,38 @@ dia seguinte** (opção B).
   a dona resolver.
 - +2 testes de `hojeKey` (30 no total).
 
+## ✅ Aplicado depois (26/09/2026) — agendamento manual: horários em botões + confirmação pro WhatsApp
+
+Pedido da Carin: ao lançar uma cliente da agenda manual, ela precisava olhar a lista lá de cima
+pra ver quem já estava marcado (o formulário mostrava todos os horários iguais, num seletor
+nativo), e a cliente não recebia a mensagem de confirmação (o manual entra direto como
+confirmado e nunca passava pelo botão "Confirmar").
+
+- **Confirmação (prioridade)**: depois de salvar, botão "Enviar confirmação no WhatsApp" com a
+  mesma mensagem do "Confirmar" (`linkConfirmacao` em `mensagens.ts`). É um botão tocado direto
+  (não uma abertura automática) por causa do bloqueio de janela do iPhone, e só aparece depois de
+  gravar. Sem WhatsApp: aviso no lugar. Não é envio automático (API paga do WhatsApp fora do escopo).
+- **Horários em botões**: ao escolher a data aparecem os horários da tabela daquele dia; os ocupados
+  ficam apagados com o primeiro nome da cliente; "Outro horário" abre a digitação livre
+  (exceções); folga avisa mas deixa registrar. Lógica pura em `lib/agendaDia.ts` (`horariosDoDia`).
+- **Botão "WhatsApp" da lista de confirmados padronizado**: antes abria só a conversa em branco; agora
+  abre a mesma confirmação pronta do "Confirmar" e do agendamento manual (`linkConfirmacao`), e serve
+  de "reenviar". Igual para agendamentos do site e manuais. A lista saiu do `page.tsx` para
+  `admin/AgendamentosManager.tsx` (testável), sem mudar o comportamento.
+- **Aba em branco no iPhone**: se a gravação falhar depois de a aba do WhatsApp já ter sido aberta no
+  toque, a aba é fechada (antes ficava uma aba em branco) e o WhatsApp não é aberto.
+- **Correções junto**: `zap()` não confunde mais o DDD 55 (RS) com o DDI (só considera DDI se o
+  número passar de 11 dígitos); o campo de data usava UTC (`toISOString`) e, depois das 21h, achava
+  que "hoje" era amanhã; `agenda.dias` ausente (só folgas salvas) não quebra a tela.
+- **Organização**: o formulário saiu do `page.tsx` para `admin/NovoAgendamentoManual.tsx` (assim é
+  testável); `zap` foi para `utils.ts` e `detalheErro` para `admin/detalheErro.ts`.
+- **Testes**: entram jsdom + Testing Library (só desenvolvimento) e o atalho `@/` no Vitest. 78 testes
+  no total (eram 30): confirmação, horários, `zap`, `diaDaSemana` e as telas do formulário e da lista
+  simulando a dona (inclui a abertura da aba no toque, que protege o conserto do iPhone). Os testes
+  foram validados "estragando" o código de propósito (todos os defeitos foram pegos).
+- **Verificação visual** com dados reais de produção (só leitura), nos temas claro e escuro.
+- **A conferir no iPhone da Carin**: o botão "Enviar confirmação" abrindo o WhatsApp com a mensagem.
+
 ## ⏳ Próximos passos (por prioridade)
 
 ### Design
@@ -91,6 +123,7 @@ dia seguinte** (opção B).
 - **Painel de horários** — accordion por dia + botão "usar o mesmo horário em todos os dias".
 
 ### Código / escala
+- **Erro visível nos botões da lista** — se Confirmar/Recusar/Cancelar falhar ao gravar (sem internet, permissão), hoje nada aparece na tela (só no console). Mostrar uma mensagem curta como o formulário manual já faz.
 - **Filtro por data nas consultas** — `slots` e `agendamentos` são lidos por inteiro; ao crescer, filtrar por `data >= hoje` e arquivar/limpar os antigos (os `slots` de confirmados não são removidos hoje).
 - **Serviço por id, não por índice** — no `BookingSheet`, guardar o id do serviço em vez do índice do array (evita agendar o serviço errado caso a lista mude com o sheet aberto).
 - **Rate limiting** — proteger `criarAgendamento` e `/api/notify-owner` contra criação em massa (ex.: limite por IP na API route).
