@@ -6,7 +6,8 @@
  * Estratégia: o servidor manda uma mensagem do tipo "notification" (webpush).
  * Assim o próprio FCM/SO exibe a notificação na tela automaticamente — inclusive
  * no iPhone (iOS 16.4+ com o app instalado na tela inicial), que NÃO exibe de
- * forma confiável as mensagens "só de dados". O clique abre /admin (fcmOptions.link). */
+ * forma confiável as mensagens "só de dados". O clique leva pra aba certa do painel
+ * (deep link, `notificationclick` abaixo) — sem uma aba já aberta, abre uma nova. */
 importScripts("https://www.gstatic.com/firebasejs/12.19.0/firebase-app-compat.js");
 importScripts("https://www.gstatic.com/firebasejs/12.19.0/firebase-messaging-compat.js");
 
@@ -22,3 +23,24 @@ firebase.initializeApp({
 // Inicializar o messaging registra o handler que exibe as mensagens
 // "notification" automaticamente quando o app está em segundo plano.
 firebase.messaging();
+
+// Deep link: se o painel já estiver aberto numa aba, o clique na notificação só FOCA essa
+// aba (o navegador não deixa recarregar a URL de uma janela existente) — por isso avisamos
+// a página por postMessage, que troca de aba sozinha. Sem aba já aberta, abre uma nova com
+// a URL certa direto (o "?aba=" já vem no link).
+self.addEventListener("notificationclick", (event) => {
+  event.notification.close();
+  const aba = event.notification.data && event.notification.data.aba;
+  const url = aba ? `/admin?aba=${aba}` : "/admin";
+  event.waitUntil(
+    clients.matchAll({ type: "window", includeUncontrolled: true }).then((lista) => {
+      for (const cliente of lista) {
+        if (cliente.url.includes("/admin") && "focus" in cliente) {
+          cliente.postMessage({ type: "notification-clicked", aba });
+          return cliente.focus();
+        }
+      }
+      return clients.openWindow(url);
+    }),
+  );
+});

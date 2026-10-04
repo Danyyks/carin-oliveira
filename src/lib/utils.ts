@@ -1,9 +1,20 @@
 // Helpers do "motor" — formatação, WhatsApp e datas.
 
-export const brl = (v: number) => "R$ " + String(v).replace(".", ",");
+// Valor inteiro fica sem centavos ("R$ 85"); com centavos, sempre duas casas ("R$ 65,50").
+export const brl = (v: number) => "R$ " + (Number.isInteger(v) ? String(v) : v.toFixed(2)).replace(".", ",");
 
 export function wppUrl(phone: string, text: string) {
   return `https://wa.me/${phone}?text=${encodeURIComponent(text)}`;
+}
+
+/** Duração em minutos → texto curto ("45min", "1h", "1h30"). Zero ou negativo vira "". */
+export function formatarDuracao(min: number): string {
+  if (!min || min <= 0) return "";
+  const h = Math.floor(min / 60);
+  const m = min % 60;
+  if (h === 0) return `${m}min`;
+  if (m === 0) return `${h}h`;
+  return `${h}h${String(m).padStart(2, "0")}`;
 }
 
 /**
@@ -21,10 +32,11 @@ const MESES = ["jan", "fev", "mar", "abr", "mai", "jun", "jul", "ago", "set", "o
 
 export type Dia = { key: string; dia: string; num: number; mes: string; weekday: number; label: string };
 
-/** Próximos `qtd` dias a partir de amanhã. `key` é a data local (YYYY-MM-DD). */
-export function proximosDias(qtd = 6): Dia[] {
+/** Próximos `qtd` dias a partir de amanhã (ou de hoje, com `desdeHoje`). `key` é a data local (YYYY-MM-DD). */
+export function proximosDias(qtd = 6, desdeHoje = false): Dia[] {
   const out: Dia[] = [];
-  for (let i = 1; i <= qtd; i++) {
+  const inicio = desdeHoje ? 0 : 1;
+  for (let i = inicio; i < inicio + qtd; i++) {
     const d = new Date();
     d.setDate(d.getDate() + i);
     const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
@@ -52,9 +64,9 @@ export function diaDaSemana(dataKey: string): number {
   return new Date(y, m - 1, d).getDay();
 }
 
-/** Rótulo curto de uma data "YYYY-MM-DD" no mesmo formato dos dias (ex.: "sáb, 18/09"). */
+/** Rótulo curto de uma data "YYYY-MM-DD", igual ao de `proximosDias` (ex.: "sáb, 3/10"). */
 export function labelData(dataKey: string): string {
   const [y, m, d] = dataKey.split("-").map(Number);
   const dt = new Date(y, m - 1, d);
-  return `${DIAS[dt.getDay()]}, ${String(d).padStart(2, "0")}/${String(m).padStart(2, "0")}`;
+  return `${DIAS[dt.getDay()]}, ${d}/${String(m).padStart(2, "0")}`;
 }

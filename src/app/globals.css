@@ -4,39 +4,43 @@
    DESIGN SYSTEM — Link na bio (paleta rosa, claro/escuro)
    ============================================================ */
 :root {
-  --bg: linear-gradient(180deg, #fff6fa 0%, #fce7f0 100%);
+  --bg: linear-gradient(180deg, #fff9f6 0%, #fbefea 100%);
   --surface: #ffffff;
-  --surface-2: #fdf1f5;
-  --text: #2a2328;
-  --text-muted: #736069; /* AA sobre branco (~4.9:1) */
-  --accent: #e85d8e;
-  --accent-deep: #c43f72;
-  --accent-cta: #c43f72; /* fundo sólido + texto branco (AA) */
-  --accent-soft: #f7cadb;
+  --surface-2: #f6ebe6;
+  --text: #2b1d22;
+  --text-muted: #7a6169; /* AA sobre branco (~4.9:1) */
+  --accent: #b23a5e;
+  --accent-deep: #8c2c49;
+  --accent-cta: #b23a5e; /* fundo sólido + texto branco (AA) */
+  --accent-soft: #f3d9df;
+  --ink: #2b1d22; /* âncora escura do CTA principal — não muda com o tema */
+  --on-ink: #fff6f2; /* texto/ícone sobre --ink */
   --folga-bg: #fbe4e6; /* dia de folga no calendário */
   --folga-fg: #b02240;
-  --border: rgba(42, 35, 40, 0.07);
-  --shadow: rgba(196, 63, 114, 0.16);
-  --ring: rgba(232, 93, 142, 0.5);
+  --border: rgba(43, 29, 34, 0.08);
+  --shadow: rgba(43, 29, 34, 0.16);
+  --ring: rgba(178, 58, 94, 0.5);
   color-scheme: light;
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --bg: linear-gradient(180deg, #181015 0%, #20141a 100%);
-    --surface: #241620;
-    --surface-2: #2e1b26;
-    --text: #f6edf1;
-    --text-muted: #bba3ad;
-    --accent: #f27ca6;
-    --accent-deep: #f492b6;
-    --accent-cta: #c43f72; /* fundo sólido + texto branco (AA) */
-    --accent-soft: #7a3e54;
+    --bg: linear-gradient(180deg, #1c1216 0%, #241419 100%);
+    --surface: #2a1a20;
+    --surface-2: #34222a;
+    --text: #f7ede9;
+    --text-muted: #c2a8af;
+    --accent: #e88aa8;
+    --accent-deep: #f0a4bc;
+    --accent-cta: #c6537b; /* fundo sólido + texto branco (AA) */
+    --accent-soft: #4a2733;
+    --ink: #f7ede9; /* no escuro o CTA "âncora" inverte: vira claro sobre o fundo escuro */
+    --on-ink: #241419;
     --folga-bg: #4a2028; /* dia de folga no calendário (escuro) */
     --folga-fg: #f2a6b4;
-    --border: rgba(246, 237, 241, 0.1);
+    --border: rgba(247, 237, 233, 0.1);
     --shadow: rgba(0, 0, 0, 0.5);
-    --ring: rgba(242, 124, 166, 0.55);
+    --ring: rgba(232, 138, 168, 0.55);
     color-scheme: dark;
   }
 }
@@ -47,7 +51,7 @@ body {
   background: var(--bg);
   background-attachment: fixed;
   color: var(--text);
-  font-family: var(--font-inter), -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  font-family: var(--font-manrope), -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
   -webkit-font-smoothing: antialiased;
   padding: 26px 16px 36px;
 }
@@ -88,17 +92,33 @@ a {
 /* ---------- PERFIL ---------- */
 .profile {
   text-align: center;
-  margin-bottom: 20px;
+  margin-bottom: 24px;
+  padding-top: 6px;
+}
+.avatar-wrap {
+  position: relative;
+  width: 136px;
+  height: 136px;
+  margin: 0 auto 18px;
+}
+.avatar-glow {
+  position: absolute;
+  inset: -46px;
+  border-radius: 50%;
+  background: radial-gradient(circle, var(--accent-soft) 0%, transparent 70%);
+  filter: blur(2px);
+  opacity: 0.9;
+  z-index: 0;
 }
 .avatar {
-  width: 92px;
-  height: 92px;
-  border-radius: 50%;
-  margin: 0 auto 12px;
   position: relative;
+  z-index: 1;
+  width: 136px;
+  height: 136px;
+  border-radius: 50%;
   background: linear-gradient(150deg, #f6d8c8, #eaa6c1 55%, #ce7ba0);
-  box-shadow: 0 12px 30px -8px var(--shadow);
-  border: 4px solid var(--surface);
+  box-shadow: 0 18px 36px -12px var(--shadow);
+  border: 5px solid var(--surface);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -106,7 +126,7 @@ a {
 .avatar span {
   font-family: var(--font-fraunces), Georgia, serif;
   font-style: italic;
-  font-size: 2.3rem;
+  font-size: 3.1rem;
   color: #fff;
   font-weight: 500;
   text-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
@@ -118,16 +138,30 @@ a {
   background-size: cover;
   background-position: center;
 }
-.name {
-  font-size: 1.45rem;
-  font-weight: 800;
-  letter-spacing: -0.02em;
-  display: inline-flex;
+.avatar-badge {
+  position: absolute;
+  z-index: 2;
+  right: 2px;
+  bottom: 2px;
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  background: var(--surface);
+  box-shadow: 0 4px 12px -4px var(--shadow);
+  display: flex;
   align-items: center;
-  gap: 6px;
+  justify-content: center;
 }
-.name .verified {
+.avatar-badge .verified {
   color: var(--accent);
+}
+.name {
+  font-family: var(--font-fraunces), Georgia, serif;
+  font-style: italic;
+  font-weight: 500;
+  font-size: 2.35rem;
+  line-height: 1.05;
+  letter-spacing: -0.01em;
 }
 .handle {
   color: var(--accent-deep);
@@ -136,18 +170,31 @@ a {
   margin-top: 2px;
 }
 .role {
-  margin-top: 4px;
+  margin-top: 8px;
   color: var(--accent-deep);
   font-weight: 700;
-  font-size: 0.72rem;
-  letter-spacing: 0.14em;
+  font-size: 0.76rem;
+  letter-spacing: 0.16em;
   text-transform: uppercase;
 }
 .bio {
   color: var(--text-muted);
-  font-size: 0.9rem;
-  margin-top: 8px;
-  line-height: 1.5;
+  font-size: 0.92rem;
+  margin: 14px auto 0;
+  max-width: 270px;
+  line-height: 1.55;
+}
+.local-chip {
+  margin-top: 12px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--text-muted);
+  font-weight: 600;
+  font-size: 0.78rem;
+}
+.local-chip svg {
+  color: var(--accent-deep);
 }
 
 /* ---------- BENTO ---------- */
@@ -215,74 +262,64 @@ a {
   opacity: 1;
 }
 
-/* blocos compactos (contato) */
-.tile.compact {
-  flex-direction: row;
-  align-items: center;
-  gap: 12px;
-  padding: 13px 15px;
-}
-.tile.compact .tico {
-  width: 36px;
-  height: 36px;
-  font-size: 1.05rem;
-  border-radius: 11px;
-  flex-shrink: 0;
-}
-.tile.compact .ttitle {
-  font-size: 0.95rem;
-  flex: 1;
-}
-.tile.compact .arrow {
-  font-size: 0.95rem;
-}
-
 /* bloco principal: agendar */
 .t-book {
-  background: linear-gradient(135deg, #f06aa0, #d8477e 55%, #b7376a);
-  color: #fff;
+  background: var(--ink);
+  color: var(--on-ink);
   border: none;
   flex-direction: row;
   align-items: center;
   gap: 15px;
-  padding: 18px 20px;
-  box-shadow: 0 16px 34px -14px var(--shadow);
+  padding: 19px 20px;
+  border-radius: 20px;
+  box-shadow: 0 18px 32px -16px var(--shadow);
 }
 .t-book .tico {
-  background: rgba(255, 255, 255, 0.22);
+  background: var(--accent-cta);
   color: #fff;
 }
 .t-book .ttitle {
-  font-size: 1.15rem;
+  font-size: 1.12rem;
+  font-weight: 700;
+  color: var(--on-ink);
 }
 .t-book .tsub {
-  color: rgba(255, 255, 255, 0.85);
+  color: var(--on-ink);
+  opacity: 0.65;
   margin-top: 3px;
 }
 .t-book .txt {
   flex: 1;
 }
 .t-book .arrow {
-  color: #fff;
+  color: var(--on-ink);
   opacity: 0.9;
 }
 
-/* blocos de marca */
-.t-wpp {
-  background: linear-gradient(150deg, #2bd46e, #1fa855);
-  color: #063d1e;
-  border: none;
+/* blocos de marca (WhatsApp/Instagram): cartões neutros, ícone tonal — nada de tile colorido inteiro */
+.tile.compact {
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 9px;
+  padding: 17px 8px;
+}
+.tile.compact .tico {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+}
+.tile.compact .ttitle {
+  font-size: 0.86rem;
+  font-weight: 700;
 }
 .t-wpp .tico {
-  background: rgba(255, 255, 255, 0.3);
-}
-.t-insta {
-  background: linear-gradient(135deg, #f9ce34, #ee2a7b 45%, #6228d7);
-  color: #fff;
-  border: none;
+  background: #e3f5ea;
+  color: #1f9e53;
 }
 .t-insta .tico {
-  background: rgba(255, 255, 255, 0.22);
+  background: var(--accent-soft);
+  color: var(--accent-deep);
 }
 
 /* bloco da loja (revendedora O Boticário) — banner com imagem de fundo */
@@ -414,32 +451,34 @@ a {
   font-size: 1.15rem;
 }
 .t-serv .head b {
-  font-weight: 700;
-  font-size: 1.02rem;
+  font-family: var(--font-fraunces), Georgia, serif;
+  font-style: italic;
+  font-weight: 500;
+  font-size: 1.2rem;
 }
 .svc-list {
   display: flex;
   flex-direction: column;
+  gap: 10px;
 }
 .svc-row {
   display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-  padding: 10px 2px;
-  border-top: 1px solid var(--border);
-}
-.svc-row:first-child {
-  border-top: none;
+  flex-direction: column;
+  gap: 10px;
+  padding: 14px 16px;
+  border-radius: 16px;
+  background: var(--surface-2);
 }
 .svc-row .info b {
-  font-weight: 600;
-  font-size: 0.94rem;
+  font-weight: 700;
+  font-size: 0.95rem;
   display: block;
 }
-.svc-row .info span {
+.svc-row .info > span {
+  display: block;
   color: var(--text-muted);
-  font-size: 0.76rem;
+  font-size: 0.78rem;
+  margin-top: 2px;
 }
 /* selo "Mais pedido" (site e painel) */
 .svc-selo {
@@ -455,6 +494,23 @@ a {
   border-radius: 999px;
   vertical-align: middle;
 }
+.svc-meta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+.svc-duracao {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  color: var(--text-muted);
+  font-weight: 700;
+  font-size: 0.74rem;
+  background: var(--surface);
+  padding: 5px 10px;
+  border-radius: 999px;
+}
 .svc-row .right {
   display: flex;
   align-items: center;
@@ -462,19 +518,20 @@ a {
   flex-shrink: 0;
 }
 .svc-row .price {
-  font-weight: 700;
+  font-family: var(--font-fraunces), Georgia, serif;
+  font-weight: 600;
   color: var(--accent-deep);
-  font-size: 0.98rem;
+  font-size: 1.05rem;
 }
 .svc-row .mini {
-  background: var(--surface-2);
+  background: transparent;
   color: var(--accent-deep);
-  border: none;
-  font-weight: 600;
+  border: 1.5px solid var(--accent-cta);
+  font-weight: 700;
   font-size: 0.78rem;
-  padding: 8px 14px;
-  min-height: 40px;
-  border-radius: 10px;
+  padding: 7px 14px;
+  min-height: 36px;
+  border-radius: 999px;
   cursor: pointer;
   transition: background 0.15s, color 0.15s;
 }
@@ -521,7 +578,7 @@ a {
   width: 40px;
   height: 4px;
   border-radius: 99px;
-  background: var(--border);
+  background: color-mix(in srgb, var(--text) 28%, transparent); /* visível nos dois temas */
   margin: 6px auto 16px;
 }
 .sheet h2 {
@@ -596,8 +653,10 @@ a {
   font-size: 0.7rem;
   font-weight: 500;
 }
-.chip:hover {
-  border-color: var(--accent-soft);
+@media (hover: hover) {
+  .chip:hover {
+    border-color: var(--accent-soft);
+  }
 }
 .chip.active {
   background: var(--accent-cta);
@@ -618,8 +677,10 @@ a {
   opacity: 0.75;
   cursor: not-allowed;
 }
-.chip.taken:hover {
-  border-color: var(--border);
+@media (hover: hover) {
+  .chip.taken:hover {
+    border-color: var(--border);
+  }
 }
 .chip.taken small {
   max-width: 9ch;
@@ -730,50 +791,48 @@ a {
 /* ============================================================
    PAINEL /admin
    ============================================================ */
-/* O painel usa uma paleta ROXA (pastel, vibe Nubank) para se diferenciar
-   visualmente do site público (rosa) — só cores, escopadas em .admin. */
-.admin {
-  --accent: #8b3dd9;
-  --accent-deep: #6d28b8;
+/* O painel usa um tema ESCURO único (paleta roxa, vibe Nubank), independente do tema
+   do sistema — só cores, escopadas em .admin. O site público segue claro/escuro. */
+.admin,
+.adm-install-wrap {
+  color-scheme: dark;
+  color: var(--text);
+  font-family: var(--font-inter), -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  --accent: #b98cf0;
+  --accent-deep: #cbb0f5;
   --accent-cta: #6d28b8;
-  --accent-soft: #e5d4f7;
-  --surface-2: #f2eafb;
-  --shadow: rgba(109, 40, 184, 0.18);
-  --ring: rgba(139, 61, 217, 0.5);
-  --danger: #c0272c;
-  --danger-bg: rgba(229, 72, 77, 0.14);
-  --success-wpp: #1fa855;
-  --success-wpp-bg: rgba(31, 168, 85, 0.16);
+  --accent-soft: #3f2a5c;
+  --surface: #211a2c;
+  --surface-2: #2a2138;
+  --text: #f2edf8;
+  --text-muted: #b7a6c8;
+  --border: rgba(242, 237, 248, 0.1);
+  --shadow: rgba(0, 0, 0, 0.5);
+  --ring: rgba(185, 140, 240, 0.55);
+  --danger: #ff9095;
+  --danger-bg: rgba(255, 138, 142, 0.14);
+  --success-wpp: #3ddc84;
+  --success-wpp-bg: rgba(61, 220, 132, 0.14);
+  --on-accent: #1f1030; /* texto sobre --accent (lavanda) */
+  --on-danger: #2b0a0c; /* texto sobre --danger */
+  --on-success: #06301a; /* texto sobre --success-wpp */
+  --folga-bg: rgba(255, 144, 149, 0.16);
+  --folga-fg: #ff9095;
 }
-/* fundo roxo pastel cobrindo a tela toda (por cima do rosa do body) */
+/* fundo escuro cobrindo a tela toda (por cima do rosa do body) */
 .admin::before {
   content: "";
   position: fixed;
   inset: 0;
   z-index: -1;
-  background: linear-gradient(180deg, #f7f2fd 0%, #ece0f8 100%);
+  background: linear-gradient(180deg, #14101c 0%, #1d1428 100%);
 }
-@media (prefers-color-scheme: dark) {
-  .admin {
-    --accent: #b98cf0;
-    --accent-deep: #cbb0f5;
-    --accent-cta: #6d28b8;
-    --accent-soft: #3f2a5c;
-    --surface: #201a2b;
-    --surface-2: #2a2138;
-    --text: #f2edf8;
-    --text-muted: #b7a6c8;
-    --border: rgba(242, 237, 248, 0.1);
-    --shadow: rgba(0, 0, 0, 0.5);
-    --ring: rgba(185, 140, 240, 0.55);
-    --danger: #ff9095;
-    --danger-bg: rgba(229, 72, 77, 0.22);
-    --success-wpp: #3ddc84;
-    --success-wpp-bg: rgba(61, 220, 132, 0.2);
-  }
-  .admin::before {
-    background: linear-gradient(180deg, #14101c 0%, #1d1428 100%);
-  }
+/* mesma cor atrás da página: a rolagem elástica do iPhone não mostra o rosa do site */
+html:has(.admin) {
+  background: #14101c;
+}
+body:has(.admin) {
+  background: transparent;
 }
 
 .admin {
@@ -922,7 +981,7 @@ a {
 }
 .adm-input {
   font-family: var(--font-inter), sans-serif;
-  font-size: 0.95rem;
+  font-size: 1.0625rem; /* 17px: abaixo de 16px o iPhone dá zoom ao focar o campo */
   color: var(--text);
   background: var(--surface-2);
   border: 1.5px solid var(--border);
@@ -953,8 +1012,10 @@ a {
   transition: transform 0.15s, opacity 0.2s;
   min-height: 44px;
 }
-.adm-btn:hover {
-  transform: translateY(-1px);
+@media (hover: hover) {
+  .adm-btn:hover {
+    transform: translateY(-1px);
+  }
 }
 .adm-btn:active {
   transform: scale(0.97);
@@ -973,13 +1034,23 @@ a {
   border-radius: 12px;
   cursor: pointer;
 }
+.adm-btn-danger {
+  background: var(--danger-bg);
+  color: var(--danger);
+}
+@media (hover: hover) {
+  .adm-btn-danger:hover {
+    background: var(--danger);
+    color: var(--on-danger);
+  }
+}
 .adm-erro {
-  color: #e5484d;
+  color: var(--danger);
   font-size: 0.86rem;
   font-weight: 600;
 }
 .adm-ok {
-  color: #1fa855;
+  color: var(--success-wpp);
   font-size: 0.88rem;
   font-weight: 700;
 }
@@ -1055,17 +1126,19 @@ a {
   cursor: pointer;
   transition: background 0.15s, color 0.15s;
 }
-.adm-mini:hover {
-  background: var(--accent);
-  color: #fff;
-}
 .adm-mini-danger {
   background: var(--danger-bg);
   color: var(--danger);
 }
-.adm-mini-danger:hover {
-  background: var(--danger);
-  color: #fff;
+@media (hover: hover) {
+  .adm-mini:hover {
+    background: var(--accent);
+    color: var(--on-accent);
+  }
+  .adm-mini-danger:hover {
+    background: var(--danger);
+    color: var(--on-danger);
+  }
 }
 .adm-dias {
   display: flex;
@@ -1126,7 +1199,7 @@ a {
 }
 .sheet-input {
   font-family: inherit;
-  font-size: 0.95rem;
+  font-size: 1rem; /* 16px: abaixo disso o iPhone dá zoom ao focar o campo */
   color: var(--text);
   background: var(--surface-2);
   border: 1.5px solid var(--border);
@@ -1254,17 +1327,19 @@ a {
   background: var(--success-wpp-bg);
   color: var(--success-wpp);
 }
-.ag-whatsapp:hover {
-  background: var(--success-wpp);
-  color: #fff;
+@media (hover: hover) {
+  .ag-whatsapp:hover {
+    background: var(--success-wpp);
+    color: var(--on-success);
+  }
 }
 .ag-tag-ok {
   font-size: 0.62rem;
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.06em;
-  color: #1fa855;
-  background: #e6f6ec;
+  color: var(--success-wpp);
+  background: var(--success-wpp-bg);
   padding: 2px 7px;
   border-radius: 99px;
 }
@@ -1328,8 +1403,10 @@ a {
   cursor: pointer;
   -webkit-tap-highlight-color: transparent;
 }
-.cal-dia:hover:not(:disabled) {
-  background: var(--surface-2);
+@media (hover: hover) {
+  .cal-dia:hover:not(:disabled) {
+    background: var(--surface-2);
+  }
 }
 .cal-dia:active:not(:disabled) {
   transform: scale(0.92);
@@ -1375,4 +1452,733 @@ a {
 .cal-leg-folga {
   background: var(--folga-bg);
   border: 1px solid var(--folga-fg);
+}
+
+/* ============================================================
+   PAINEL: folhas (bottom sheets) e aviso com "Desfazer" — prefixo pn-
+   Vivem dentro de .admin (herdam o tema escuro); position: fixed.
+   ============================================================ */
+/* "+ Adicionar agendamento" e "Bloquear horários": lado a lado quando cabe, empilhados no celular */
+.pn-acoes > * {
+  flex: 1 1 200px;
+}
+.pn-btn-bloquear {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: 44px;
+  font-size: 0.95rem;
+}
+
+.pn-fundo {
+  position: fixed;
+  inset: 0;
+  z-index: 90;
+  background: rgba(8, 5, 14, 0.62);
+  backdrop-filter: blur(3px);
+  touch-action: none;
+  animation: pn-fade 0.2s ease-out both;
+}
+.pn-folha {
+  position: fixed;
+  left: 50%;
+  bottom: var(--kb, 0px); /* sobe junto com o teclado do iPhone */
+  z-index: 91;
+  width: 100%;
+  max-width: 520px;
+  max-height: min(92dvh, 760px);
+  display: flex;
+  flex-direction: column;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-bottom: none;
+  border-radius: 28px 28px 0 0;
+  box-shadow: 0 -20px 50px -20px rgba(0, 0, 0, 0.7);
+  transform: translateX(-50%);
+  animation: pn-sobe 0.32s cubic-bezier(0.2, 0.85, 0.25, 1) both;
+}
+.pn-folha-topo {
+  position: relative;
+  flex: none;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  min-height: 64px;
+  padding: 18px 8px 2px 20px;
+}
+.pn-tracinho {
+  position: absolute;
+  top: 8px;
+  left: 50%;
+  width: 36px;
+  height: 5px;
+  border-radius: 99px;
+  transform: translateX(-50%);
+  background: color-mix(in srgb, var(--text) 28%, transparent);
+}
+.pn-folha-titulo {
+  margin: 0;
+  font-size: 1.25rem;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  outline: none;
+}
+.pn-fechar {
+  width: 44px;
+  height: 44px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  border-radius: 50%;
+  background: var(--surface-2);
+  color: var(--text-muted);
+  cursor: pointer;
+}
+.pn-folha-corpo {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding: 8px 20px 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+.pn-folha-rodape {
+  flex: none;
+  padding: 12px 20px calc(14px + env(safe-area-inset-bottom));
+  border-top: 1px solid var(--border);
+  background: var(--surface);
+}
+.pn-rodape-col {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.pn-btn-largo {
+  width: 100%;
+  min-height: 52px;
+  font-size: 1rem;
+  border-radius: 14px;
+}
+
+/* conteúdo da folha "Bloquear horários" */
+.pn-bloco {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.pn-rotulo {
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+/* dias em fileira que rola de lado, encostando nas bordas da folha */
+.pn-dias {
+  display: flex;
+  gap: 8px;
+  margin: 0 -20px;
+  padding: 2px 20px 6px;
+  overflow-x: auto;
+  scroll-snap-type: x proximity;
+  scroll-padding-inline: 20px; /* o chip que encaixa fica com o respiro, não colado na borda */
+  scrollbar-width: none;
+}
+.pn-dias::-webkit-scrollbar {
+  display: none;
+}
+.pn-dias .chip {
+  flex: 0 0 auto;
+  min-width: 60px;
+  min-height: 76px;
+  scroll-snap-align: start;
+}
+.pn-folha .chip {
+  justify-content: center;
+  min-height: 48px;
+  min-width: 72px;
+}
+.pn-folha .chip-outro {
+  min-width: 0;
+}
+.chip:not(.active) small.pn-folga {
+  color: var(--danger);
+  font-weight: 700;
+}
+.pn-dica {
+  margin: 0;
+}
+.pn-nota {
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+  margin: 0;
+  padding: 12px 14px;
+  border-radius: 14px;
+  background: var(--surface-2);
+  font-size: 0.88rem;
+  line-height: 1.4;
+}
+.pn-nota svg {
+  flex: none;
+  margin-top: 1px;
+  color: var(--accent);
+}
+
+/* aviso curto embaixo da tela, com "Desfazer" (cores invertidas para se destacar do fundo escuro) */
+.pn-avisos {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: calc(16px + env(safe-area-inset-bottom));
+  z-index: 100;
+  display: flex;
+  justify-content: center;
+  padding: 0 16px;
+  pointer-events: none;
+}
+.pn-aviso {
+  pointer-events: auto;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  max-width: 460px;
+  min-height: 52px;
+  padding: 6px 6px 6px 18px;
+  border-radius: 16px;
+  background: #ece6f4;
+  color: #1a1424;
+  font-size: 0.95rem;
+  font-weight: 600;
+  box-shadow: 0 12px 30px -8px rgba(0, 0, 0, 0.6);
+  animation: pn-aviso-entra 0.25s cubic-bezier(0.2, 0.85, 0.25, 1) both;
+}
+.pn-aviso span {
+  flex: 1;
+}
+.pn-aviso-acao {
+  min-height: 44px;
+  padding: 0 16px;
+  border: none;
+  border-radius: 12px;
+  background: transparent;
+  color: #5b1fa0;
+  font-size: 0.95rem;
+  font-weight: 800;
+  cursor: pointer;
+}
+.pn-aviso-acao:disabled {
+  opacity: 0.5;
+}
+
+@keyframes pn-fade {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+@keyframes pn-sobe {
+  from {
+    transform: translate(-50%, 100%);
+  }
+  to {
+    transform: translate(-50%, 0);
+  }
+}
+@keyframes pn-aviso-entra {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+@keyframes pn-dialogo-entra {
+  from {
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(0.94);
+  }
+  to {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .pn-fundo,
+  .pn-folha,
+  .pn-aviso,
+  .pn-dialogo {
+    animation: none;
+  }
+}
+
+/* Diálogo de confirmação próprio (Fase C) — substitui o confirm() nativo. */
+.pn-dialogo {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  z-index: 91;
+  width: min(88vw, 380px);
+  transform: translate(-50%, -50%);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  padding: 22px 20px;
+  box-shadow: 0 24px 60px -20px rgba(0, 0, 0, 0.7);
+  animation: pn-dialogo-entra 0.18s cubic-bezier(0.2, 0.85, 0.25, 1) both;
+}
+.pn-dialogo-titulo {
+  margin: 0 0 8px;
+  font-size: 1.1rem;
+  font-weight: 800;
+  letter-spacing: -0.01em;
+  outline: none;
+}
+.pn-dialogo-texto {
+  margin: 0;
+  color: var(--text-muted);
+  font-size: 0.92rem;
+  line-height: 1.4;
+}
+.pn-dialogo-acoes {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 20px;
+}
+
+/* ============================================================
+   PAINEL NOVO — barra de abas + Agenda por dia (Fase B)
+   ============================================================ */
+.pn-shell {
+  padding-bottom: calc(52px + env(safe-area-inset-bottom, 0px) + 16px);
+}
+.pn-offline {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 14px;
+  margin-bottom: 12px;
+  border-radius: 12px;
+  background: rgba(255, 138, 142, 0.14);
+  color: var(--danger);
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+.pn-tabbar {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 20;
+  display: flex;
+  background: #1a1424;
+  border-top: 1px solid var(--border);
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+}
+.pn-tab {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  height: 52px;
+  background: transparent;
+  border: none;
+  color: var(--text-muted);
+  cursor: pointer;
+  font-family: inherit;
+  -webkit-tap-highlight-color: transparent;
+}
+.pn-tab.active {
+  color: var(--accent);
+}
+.pn-tab-icone {
+  position: relative;
+  display: flex;
+}
+.pn-tab-badge {
+  position: absolute;
+  top: -4px;
+  right: -10px;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 4px;
+  border-radius: 999px;
+  background: #ffc670;
+  color: #1f1030;
+  font-size: 0.62rem;
+  font-weight: 800;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.pn-tab-rotulo {
+  font-size: 0.68rem;
+  font-weight: 600;
+}
+
+/* ---------- Agenda por dia ---------- */
+.pn-agenda {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+.pn-banner-pedidos {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  background: rgba(245, 158, 11, 0.16);
+  color: #ffc670;
+  border: none;
+  border-radius: 14px;
+  padding: 13px 16px;
+  font-weight: 700;
+  font-size: 0.88rem;
+  cursor: pointer;
+  text-align: left;
+}
+.pn-banner-pedidos span {
+  flex: 1;
+}
+.pn-agenda-cabecalho {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+.pn-agenda-mes-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: transparent;
+  border: none;
+  color: var(--text);
+  font-weight: 700;
+  font-size: 1.05rem;
+  padding: 6px 4px;
+  cursor: pointer;
+  text-transform: capitalize;
+}
+.pn-agenda-mes-btn svg {
+  transition: transform 0.2s ease;
+  color: var(--text-muted);
+}
+.pn-agenda-mes-btn svg.pn-rotacionado {
+  transform: rotate(180deg);
+}
+.pn-agenda-setas {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.pn-agenda-hoje {
+  background: var(--surface-2);
+  color: var(--accent-deep);
+  border: none;
+  font-weight: 700;
+  font-size: 0.82rem;
+  padding: 8px 14px;
+  border-radius: 10px;
+  cursor: pointer;
+}
+.pn-mes {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 14px;
+}
+.pn-mes-selecionado {
+  outline: 2px solid var(--accent);
+  font-weight: 700;
+}
+.pn-mes-ponto {
+  position: absolute;
+  bottom: 4px;
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: #ffc670;
+}
+.pn-mes .cal-dia {
+  position: relative;
+}
+
+/* ---------- Faixa da semana ---------- */
+.pn-semana {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 6px;
+}
+.pn-semana-dia {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 3px;
+  height: 60px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  color: var(--text);
+  cursor: pointer;
+  font-family: inherit;
+  -webkit-tap-highlight-color: transparent;
+}
+.pn-semana-dia small {
+  font-size: 0.62rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--text-muted);
+}
+.pn-semana-dia b {
+  font-size: 1.05rem;
+  font-weight: 700;
+}
+.pn-semana-dia.active {
+  background: var(--accent);
+  border-color: var(--accent);
+}
+.pn-semana-dia.active small,
+.pn-semana-dia.active b {
+  color: var(--on-accent);
+}
+.pn-semana-ponto {
+  position: absolute;
+  top: 6px;
+  right: 8px;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #ffc670;
+}
+.pn-semana-dia.active .pn-semana-ponto {
+  background: var(--on-accent);
+}
+.pn-semana-hachura {
+  position: absolute;
+  inset: 0;
+  border-radius: 14px;
+  background: repeating-linear-gradient(
+    135deg,
+    rgba(183, 166, 200, 0.18) 0px,
+    rgba(183, 166, 200, 0.18) 3px,
+    transparent 3px,
+    transparent 8px
+  );
+  pointer-events: none;
+}
+
+/* ---------- Cabeçalho e lista do dia ---------- */
+.pn-dia-cabecalho {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+}
+.pn-dia-titulo {
+  font-family: var(--font-inter), sans-serif;
+  font-size: 1.2rem;
+  font-weight: 800;
+  letter-spacing: -0.01em;
+}
+.pn-dia-resumo {
+  color: var(--text-muted);
+  font-size: 0.85rem;
+  margin-top: 2px;
+}
+.pn-btn-bloquear,
+.pn-btn-topo {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  flex-shrink: 0;
+}
+.pn-linha-chevron {
+  flex-shrink: 0;
+  color: var(--text-muted);
+}
+.pn-lista-periodo {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.pn-periodo-label {
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--accent-deep);
+  margin: 4px 0 -2px;
+}
+.pn-linha {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  min-height: 64px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 10px 14px;
+  font-family: inherit;
+  color: var(--text);
+  text-align: left;
+}
+.pn-linha-clicavel {
+  cursor: pointer;
+  border: 1px solid var(--border);
+}
+.pn-linha.passou {
+  opacity: 0.5;
+}
+.pn-linha-hora {
+  width: 44px;
+  flex-shrink: 0;
+  font-size: 0.92rem;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+.pn-linha-principal {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+.pn-linha-principal b {
+  font-size: 0.94rem;
+  font-weight: 700;
+  overflow-wrap: anywhere;
+}
+.pn-linha-principal small {
+  font-size: 0.78rem;
+  color: var(--text-muted);
+}
+.pn-linha-livre {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--text-muted);
+  font-weight: 600;
+  font-size: 0.9rem;
+}
+.pn-linha-bloqueado {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--text-muted);
+  font-weight: 700;
+  font-size: 0.9rem;
+}
+[data-estado="bloqueado"] {
+  background: repeating-linear-gradient(
+      135deg,
+      rgba(183, 166, 200, 0.1) 0px,
+      rgba(183, 166, 200, 0.1) 3px,
+      transparent 3px,
+      transparent 8px
+    ),
+    var(--surface);
+}
+.pn-pilula-pedido {
+  flex-shrink: 0;
+  font-size: 0.7rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: #ffc670;
+  background: rgba(245, 158, 11, 0.16);
+  padding: 4px 10px;
+  border-radius: 999px;
+}
+.pn-linha-whatsapp {
+  flex-shrink: 0;
+  width: 44px;
+  height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 12px;
+  background: var(--success-wpp-bg);
+  color: var(--success-wpp);
+}
+@media (hover: hover) {
+  .pn-linha-whatsapp:hover {
+    background: var(--success-wpp);
+    color: var(--on-success);
+  }
+}
+
+/* Aviso flutuante de "agendamento criado" (fica acima da TabBar, visível de qualquer
+   ponto da rolagem — a linha tocada pode estar longe do topo da lista). */
+.pn-salvo-flutuante {
+  position: fixed;
+  left: 16px;
+  right: 16px;
+  bottom: calc(52px + env(safe-area-inset-bottom, 0px) + 14px);
+  z-index: 30;
+  max-width: 460px;
+  margin: 0 auto;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 16px;
+  box-shadow: 0 12px 30px -10px rgba(0, 0, 0, 0.5);
+}
+.pn-detalhe-nome {
+  font-size: 1.05rem;
+  font-weight: 700;
+}
+.pn-detalhe-total {
+  font-weight: 700;
+  margin-top: 4px;
+}
+.pn-detalhe-acoes {
+  margin-top: 8px;
+}
+
+/* ---------- Meu link (aba Conta) ---------- */
+.pn-meulink {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 12px;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 6px 6px 6px 16px;
+}
+.pn-meulink-url {
+  flex: 1;
+  min-width: 0;
+  font-size: 0.86rem;
+  color: var(--text);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.pn-meulink-btn {
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 10px 16px;
+  font-size: 0.86rem;
+}
+.pn-meulink-btn.copiado {
+  background: var(--success-wpp);
+  color: var(--on-success);
 }

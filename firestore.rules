@@ -4,6 +4,18 @@ rules_version = '2';
 // Modelo: só a Carin (dona) escreve serviços/horários e gerencia agendamentos;
 // o público lê o que é público e só CRIA pedidos de agendamento (nunca edita),
 // o que garante o anti-agendamento-duplicado (id determinístico "data_hora").
+//
+// Endurecido em 28/09/2026 (Fase R, testado no emulador antes de publicar):
+// formato exato dos campos, id determinístico validado, `criadoEm` sempre do
+// servidor, `slots`/`agendamentos` sempre criados JUNTOS (nunca um sem o outro),
+// e `update` restrito à única transição real que o app faz (confirmar).
+//
+// Pegadinha aprendida testando no emulador: o `id` do `match /slots/{id}` só se
+// resolve direito dentro de funções chamadas NUM SÓ NÍVEL a partir do match — numa
+// cadeia de 2+ funções (ex.: slotDonoOk → slotCamposOk → idBateComDataHora), o
+// motor de regras não captura `id` pelo escopo léxico e a regra quebra com um erro
+// de avaliação (não um simples "nega"). Por isso, abaixo, `id` sempre é passado
+// como PARÂMETRO explícito — nunca capturado de fora da função.
 
 service cloud.firestore {
   match /databases/{database}/documents {
@@ -15,10 +27,26 @@ service cloud.firestore {
       ];
     }
 
-    // Config do estúdio: leitura pública, escrita só da dona.
+    function dataValida(v) {
+      return v is string && v.matches('^[0-9]{4}-[0-9]{2}-[0-9]{2}$');
+    }
+    function horaValida(v) {
+      return v is string && v.matches('^[0-9]{2}:[0-9]{2}$');
+    }
+    // O id do documento TEM que ser "data_hora" — trava a duplicidade mesmo fora do app.
+    function idBateComDataHora(idDoc, data, hora) {
+      return idDoc == data + '_' + hora;
+    }
+    // `criadoEm` só passa quando foi gravado com serverTimestamp() (nunca uma data
+    // arbitrária do cliente): o valor resolvido bate com o horário do próprio request.
+    function criadoAgora() {
+      return request.resource.data.criadoEm == request.time;
+    }
+
+    // Config do estúdio: leitura e escrita só da dona (não usado pelo app hoje;
+    // antes a leitura era pública sem necessidade — sem uso real no código).
     match /config/{doc} {
-      allow read: if true;
-      allow write: if isDono();
+      allow read, write: if isDono();
     }
 
     // Tokens de push (aparelhos da dona): só a dona lê/escreve.
@@ -34,59 +62,143 @@ service cloud.firestore {
     }
 
     // Disponibilidade (dias/horários abertos, bloqueios): leitura pública, escrita só da dona.
-    match /disponibilidade/{doc=**} {
+    match /disponibilidade/{doc} {
       allow read: if true;
       allow write: if isDono();
     }
 
-    // Agendamentos:
-    // - qualquer um pode CRIAR um pedido (com validação e status "pendente");
-    // - NINGUÉM (além da dona) pode editar/apagar -> um 2º create no mesmo id falha,
-    //   impedindo dois clientes pegarem o mesmo horário;
-    // - só a dona lê a lista e confirma/recusa (update/delete).
-    // Horários ocupados (público): só data/hora/status — sem dados do cliente.
-    // O público só CRIA (create-only); o id determinístico "data_hora" impede
-    // dois pedidos no mesmo horário. Só a dona altera/apaga (confirmar/liberar).
-    match /slots/{id} {
-      allow read: if true;
-      // A dona (isDono) pode criar direto (agendamento manual); o público só cria
-      // pedido "pendente" com id determinístico "data_hora".
-      allow create: if isDono() || (
-        request.resource.data.status == 'pendente'
-        && request.resource.data.data is string
-        && request.resource.data.hora is string
-        && id == request.resource.data.data + '_' + request.resource.data.hora
-      );
-      allow update, delete: if isDono();
+    // ---------- Horários ocupados (público: só data/hora/status, sem dados do cliente) ----------
+    // status: pendente/confirmado (tem cliente) ou bloqueado (a dona fechou, sem cliente).
+    // `origemAgendamento` (opcional, só quem cria é a dona): id do agendamento que causou um
+    // bloqueio AUTOMÁTICO (duração de serviço comendo o horário seguinte) — pra liberar sozinho
+    // se aquele agendamento for cancelado. Nunca existe num bloqueio manual da folha "Bloquear
+    // horários".
+    function slotCamposOk(idDoc) {
+      let d = request.resource.data;
+      return dataValida(d.data) && horaValida(d.hora)
+        && idBateComDataHora(idDoc, d.data, d.hora)
+        && criadoAgora();
+    }
+    // Público: só cria pedido "pendente", e só junto com o agendamento correspondente (o
+    // mesmo id) — um slot nunca fica "solto" sem o registro do pedido.
+    function slotPublicoOk(idDoc) {
+      let d = request.resource.data;
+      return slotCamposOk(idDoc)
+        && d.status == 'pendente'
+        && d.keys().hasOnly(['data', 'hora', 'status', 'criadoEm'])
+        && existsAfter(/databases/$(database)/documents/agendamentos/$(idDoc));
+    }
+    // Público, bloqueio AUTOMÁTICO da duração: um serviço mais longo que o intervalo até o(s)
+    // próximo(s) horário(s) da tabela fecha esses horários junto com o pedido. Só no MESMO
+    // dia, DEPOIS do horário do pedido, e apontando para um pedido que nasce nesta mesma
+    // escrita (não existia antes, existe depois) — não dá pra pendurar bloqueio num pedido
+    // antigo ou de outra pessoa. Recusar/cancelar o pedido apaga esses bloqueios junto.
+    function slotPublicoBloqueioOk(idDoc) {
+      let d = request.resource.data;
+      let origem = d.get('origemAgendamento', null);
+      return slotCamposOk(idDoc)
+        && d.status == 'bloqueado'
+        && d.keys().hasOnly(['data', 'hora', 'status', 'criadoEm', 'origemAgendamento'])
+        && origem is string
+        && origem.size() == 16
+        && origem.split('_')[0] == d.data
+        && origem.split('_')[1] < d.hora
+        && !exists(/databases/$(database)/documents/agendamentos/$(origem))
+        && existsAfter(/databases/$(database)/documents/agendamentos/$(origem));
+    }
+    // Dona: cria direto em qualquer status (agendamento manual e bloqueio, automático ou
+    // manual). Se vier com `origemAgendamento`, esse agendamento precisa existir ao final
+    // da mesma escrita (bloqueio automático sempre é criado junto do agendamento).
+    function slotDonoOk(idDoc) {
+      let d = request.resource.data;
+      // .get(chave, padrão) é o jeito seguro de ler um campo opcional: acessar
+      // "d.origemAgendamento" direto dá erro de avaliação quando o campo não existe.
+      let origem = d.get('origemAgendamento', null);
+      return slotCamposOk(idDoc)
+        && d.status in ['pendente', 'confirmado', 'bloqueado']
+        && d.keys().hasOnly(['data', 'hora', 'status', 'criadoEm', 'origemAgendamento'])
+        && (d.status == 'bloqueado'
+            // Bloqueio: sem origem (folha "Bloquear horários") ou com origem, desde que o
+            // agendamento apontado exista ao final da mesma escrita (bloqueio automático).
+            ? (origem == null
+               || (origem is string
+                   && existsAfter(/databases/$(database)/documents/agendamentos/$(origem))))
+            // Agendamento de verdade (pendente/confirmado): sempre junto do registro com
+            // o MESMO id — nunca um slot de cliente "solto" (mesma trava do público).
+            : (origem == null && existsAfter(/databases/$(database)/documents/agendamentos/$(idDoc))));
+    }
+    // Só a transição real que o app faz: pendente → confirmado (confirmarAgendamento),
+    // mudando só o `status`. `exists()` nunca lança erro (ao contrário de acessar
+    // `resource` direto quando o documento ainda não existe).
+    function slotUpdateOk(idDoc) {
+      return exists(/databases/$(database)/documents/slots/$(idDoc))
+        && resource.data.status == 'pendente'
+        && request.resource.data.status == 'confirmado'
+        && request.resource.data.keys().hasOnly(resource.data.keys())
+        && request.resource.data.data == resource.data.data
+        && request.resource.data.hora == resource.data.hora
+        && request.resource.data.criadoEm == resource.data.criadoEm;
     }
 
-    // Agendamentos (com dados do cliente): só a dona lê e gerencia;
-    // o público só CRIA o pedido (nunca edita/apaga).
+    match /slots/{id} {
+      allow read: if true;
+      allow create: if isDono() ? slotDonoOk(id) : (slotPublicoOk(id) || slotPublicoBloqueioOk(id));
+      allow update: if isDono() && slotUpdateOk(id);
+      allow delete: if isDono();
+    }
+
+    // ---------- Agendamentos (com dados do cliente): só a dona lê e gerencia ----------
+    function agendamentoCamposOk(idDoc) {
+      let d = request.resource.data;
+      return dataValida(d.data) && horaValida(d.hora)
+        && idBateComDataHora(idDoc, d.data, d.hora)
+        && criadoAgora();
+    }
+    // Público: só cria pedido "pendente", com todos os campos do formulário validados, e só
+    // junto com o slot correspondente (nunca um agendamento sem o horário reservado).
+    function agendamentoPublicoOk(idDoc) {
+      let d = request.resource.data;
+      return agendamentoCamposOk(idDoc)
+        && d.keys().hasOnly([
+          'servicos', 'total', 'clienteNome', 'clienteWhatsapp',
+          'data', 'hora', 'diaLabel', 'status', 'criadoEm'
+        ])
+        && d.status == 'pendente'
+        && d.servicos is list && d.servicos.size() >= 1 && d.servicos.size() <= 15
+        && d.total is number && d.total >= 0 && d.total <= 100000
+        && d.clienteNome is string && d.clienteNome.size() > 1 && d.clienteNome.size() <= 80
+        && d.clienteWhatsapp is string && d.clienteWhatsapp.size() >= 8 && d.clienteWhatsapp.size() <= 25
+        && d.diaLabel is string && d.diaLabel.size() <= 40
+        && !exists(/databases/$(database)/documents/slots/$(idDoc))
+        && existsAfter(/databases/$(database)/documents/slots/$(idDoc));
+    }
+    // Dona: cria direto (agendamento manual), sempre junto com o slot correspondente.
+    function agendamentoDonoOk(idDoc) {
+      return agendamentoCamposOk(idDoc)
+        && existsAfter(/databases/$(database)/documents/slots/$(idDoc));
+    }
+    // Só a transição real que o app faz: pendente → confirmado (confirmarAgendamento),
+    // mudando só o `status`.
+    function agendamentoUpdateOk(idDoc) {
+      return exists(/databases/$(database)/documents/agendamentos/$(idDoc))
+        && resource.data.status == 'pendente'
+        && request.resource.data.status == 'confirmado'
+        && request.resource.data.keys().hasOnly(resource.data.keys())
+        && request.resource.data.servicos == resource.data.servicos
+        && request.resource.data.total == resource.data.total
+        && request.resource.data.clienteNome == resource.data.clienteNome
+        && request.resource.data.clienteWhatsapp == resource.data.clienteWhatsapp
+        && request.resource.data.data == resource.data.data
+        && request.resource.data.hora == resource.data.hora
+        && request.resource.data.diaLabel == resource.data.diaLabel
+        && request.resource.data.criadoEm == resource.data.criadoEm;
+    }
+
     match /agendamentos/{id} {
-      allow read, update, delete: if isDono();
-      // A dona (isDono) cria direto (agendamento manual). O público só cria
-      // pedido "pendente" com id determinístico e campos validados.
-      allow create: if isDono() || (
-        request.resource.data.status == 'pendente'
-        // o id TEM que ser "data_hora" (trava a duplicidade mesmo fora do app)
-        && id == request.resource.data.data + '_' + request.resource.data.hora
-        && request.resource.data.servicos is list
-        && request.resource.data.servicos.size() >= 1
-        && request.resource.data.servicos.size() <= 15
-        && request.resource.data.total is number
-        && request.resource.data.clienteNome is string
-        && request.resource.data.clienteNome.size() > 1
-        && request.resource.data.clienteNome.size() <= 80
-        && request.resource.data.clienteWhatsapp is string
-        && request.resource.data.clienteWhatsapp.size() >= 8
-        && request.resource.data.clienteWhatsapp.size() <= 25
-        && request.resource.data.data is string
-        && request.resource.data.data.size() == 10
-        && request.resource.data.hora is string
-        && request.resource.data.hora.size() <= 5
-        && request.resource.data.diaLabel is string
-        && request.resource.data.diaLabel.size() <= 40
-      );
+      allow read: if isDono();
+      allow create: if isDono() ? agendamentoDonoOk(id) : agendamentoPublicoOk(id);
+      allow update: if isDono() && agendamentoUpdateOk(id);
+      allow delete: if isDono();
     }
   }
 }

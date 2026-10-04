@@ -1,6 +1,6 @@
-import { CalendarDays, Sparkles, MapPin } from "lucide-react";
+import { CalendarDays, Sparkles, MapPin, Clock } from "lucide-react";
 import type { StudioConfig, Servico } from "@/config/studio";
-import { brl, wppUrl } from "@/lib/utils";
+import { brl, wppUrl, formatarDuracao } from "@/lib/utils";
 import { WhatsappIcon, InstagramIcon } from "./icons";
 
 export default function BentoGrid({
@@ -74,13 +74,23 @@ export default function BentoGrid({
                     {s.nome}
                     {s.destaque && <span className="svc-selo">Mais pedido</span>}
                   </b>
-                  <span>{s.desc}</span>
+                  {s.desc && <span>{s.desc}</span>}
                 </div>
-                <div className="right">
-                  <span className="price">{brl(s.preco)}</span>
-                  <button className="mini" onClick={() => onBook(i)}>
-                    Agendar
-                  </button>
+                <div className="svc-meta">
+                  {s.duracaoMin ? (
+                    <span className="svc-duracao">
+                      <Clock size={13} strokeWidth={2.2} aria-hidden="true" />
+                      {formatarDuracao(s.duracaoMin)}
+                    </span>
+                  ) : (
+                    <span />
+                  )}
+                  <div className="right">
+                    <span className="price">{brl(s.preco)}</span>
+                    <button className="mini" onClick={() => onBook(i)}>
+                      Agendar
+                    </button>
+                  </div>
                 </div>
               </div>
             ))}

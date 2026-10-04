@@ -24,6 +24,7 @@ Modelo **pedido → confirmação**. O cliente pede, o horário fica reservado, 
 - `pendente` — alguém pediu; sai da tabela; aguarda a Carin
 - `confirmado` — Carin aceitou; ocupado de vez
 - `recusado` / `cancelado` — libera o horário de volta (o registro é removido)
+- `bloqueado` — a Carin fechou o horário (sem cliente); some do site como se estivesse ocupado, até ela liberar
 
 ## Depois do atendimento
 O agendamento `confirmado` fica na lista do painel **o dia inteiro do atendimento** e **some na virada do dia seguinte**. É só um filtro de tela: o registro **continua no banco** (histórico) e nada é apagado. O painel recalcula o "hoje" sozinho (ao reabrir o app e a cada minuto), então funciona mesmo com o app aberto de um dia pro outro. Os pedidos `pendente` **não** somem — um pedido antigo sem resposta continua aparecendo para a Carin resolver.
@@ -36,8 +37,24 @@ O agendamento `confirmado` fica na lista do painel **o dia inteiro do atendiment
 ## Detalhe anti-"reserva fantasma"
 Se o cliente pede e some sem concluir, o horário fica `pendente`. Como não usamos função agendada (paga) para expirar sozinho, a **Carin libera no painel** num toque. Simples e suficiente para o MVP.
 
-## Folgas (bloqueio de datas específicas)
-A agenda base é por **dia da semana**. Para folgar numa **data pontual** (viagem, imprevisto), a Carin usa o card **"Folgas"** no painel: um mini-calendário onde ela toca no dia para bloquear/liberar. Um dia bloqueado (`disponibilidade/regras.bloqueios`) **some do agendamento** no site, sem afetar os outros dias da mesma semana. É dia inteiro e reversível.
+## Folgas e bloqueio de horários
+A agenda base é por **dia da semana**. Para fechar algo numa **data pontual** (viagem, consulta, imprevisto), sem mexer nas outras semanas, a Carin usa o botão **"Bloquear horários"** (ao lado de "+ Adicionar agendamento"). Abre uma folha por cima do painel:
+
+1. **Escolhe o dia**: fileira com hoje e os próximos 13 dias (folgas marcadas com a palavra "folga") ou o campo "Outra data".
+2. **Toca nos horários** que quer fechar, ou nos atalhos **Manhã / Tarde / Noite / Dia todo**. Os atalhos só *marcam*; nada é gravado até ela tocar no botão do rodapé. Manhã é antes das 12:00, tarde vai até 17:59 e noite começa às 18:00. Horários que já têm cliente ficam apagados, com o primeiro nome, e nunca são marcados.
+3. **Toca no botão**, que diz o que vai acontecer: "Bloquear 3 horários", "Liberar 1 horário", "Salvar alterações" ou "Marcar folga". Aparece o aviso **"3 horários bloqueados."** com **Desfazer** por 6 segundos.
+
+- **Horário bloqueado** é um documento em `slots/{data_hora}` com `status: "bloqueado"` (sem motivo, porque `slots` é pública). Como o site já esconde qualquer horário que exista em `slots` e o id é único, a cliente não consegue pedir esse horário. Aparece como **"Bloqueado"** (cadeado) na folha e no formulário do agendamento manual, sem confundir com nome de cliente.
+- **Liberar** apaga só documentos com `status` bloqueado. **Nunca** apaga o horário de uma cliente.
+- **Dia todo** (todos os horários livres marcados) vira **folga do dia inteiro**: a data entra em `disponibilidade/regras.bloqueios` (`arrayUnion`, então dois aparelhos não se atropelam) e o dia some do site. Se o dia já tem cliente, a folha avisa que **a folga fecha só os horários livres** e as clientes continuam agendadas. Um dia que já é folga mostra o botão **"Liberar o dia"**.
+- Tudo é gravado em **transação** (lê antes de escrever): se uma cliente pegou o horário no meio do caminho, ele não é bloqueado e o aviso diz quantos ficaram de fora.
+
+## Duração do serviço (bloqueia sozinho o horário seguinte)
+Na Tabela de preços, cada serviço tem um campo **Duração (minutos, opcional)**. Quando o serviço marcado é mais longo que o intervalo até o próximo horário da tabela, esse horário seguinte fica indisponível **sozinho**, sem a Carin precisar bloquear na mão. Sem duração cadastrada, nada muda — funciona como sempre funcionou.
+
+- **Agendamento manual**: ao escolher o(s) serviço(s) e a data, os horários que a duração "comeria" aparecem como **"sem espaço"** (apagados, junto dos ocupados) mesmo que ninguém esteja marcado neles. Salvar bloqueia esse(s) horário(s) automaticamente — igual ao bloqueio manual, mas marcado por dentro como vindo desse agendamento. **Cancelar ou recusar esse agendamento libera esse bloqueio junto**, sozinho.
+- **Pedido do site**: a cliente só vê os horários em que o serviço escolhido realmente cabe (some da lista o horário cujo intervalo seria "comido" por um serviço já ocupado logo depois). E, desde 02/10/2026, o pedido de um serviço longo **já fecha junto** o(s) horário(s) seguinte(s) que ele come (slot "bloqueado" com `origemAgendamento`) — antes o site só filtrava, e outra cliente conseguia marcar no meio do serviço. Se a Carin recusar ou cancelar o pedido, esses horários voltam a ficar livres.
+- "Próximo horário" é sempre um horário que já está na **tabela** daquele dia — a duração nunca inventa um horário novo para bloquear.
 
 ## Agendamento manual (a dona registra)
 Para clientes que marcaram **por fora** (WhatsApp, agenda de papel), a Carin usa o botão **"+ Adicionar agendamento"** no painel: preenche nome, serviço(s), data e horário (WhatsApp opcional). O agendamento entra **já como `confirmado`** (`criarAgendamentoManual`), aparece na lista dela e **trava o horário** no site. Só a dona faz isso — as regras liberam `create` para `isDono()`; o público continua só podendo criar pedido `pendente`.

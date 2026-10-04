@@ -43,9 +43,14 @@ export async function POST(req: Request) {
     const tokens = snap.docs.map((d) => d.id).filter(Boolean);
     if (tokens.length === 0) return NextResponse.json({ ok: true, enviados: 0 });
 
+    const servicos = Array.isArray(dados.servicos) ? dados.servicos : [];
+    const nomeServicos =
+      servicos.length > 1
+        ? `${servicos[0]?.nome} +${servicos.length - 1}`
+        : servicos[0]?.nome;
     const quando = [dados.diaLabel, dados.hora].filter(Boolean).join(" às ");
     const corpo =
-      [dados.clienteNome, dados.servicoNome].filter(Boolean).join(" · ") +
+      [dados.clienteNome, nomeServicos].filter(Boolean).join(" · ") +
       (quando ? ` — ${quando}` : "");
 
     const res = await getMessaging(app).sendEachForMulticast({
@@ -58,7 +63,11 @@ export async function POST(req: Request) {
           body: corpo || "Você tem um pedido pendente.",
           icon: "/icon-192.png",
         },
-        fcmOptions: { link: "/admin" },
+        // "aba" também vai em `data` (não só na URL): é o que o notificationclick do service
+        // worker usa pra levar direto pra Pedidos, seja abrindo o painel ou só focando uma
+        // aba já aberta (nesse caso a URL do link abaixo nem é lida — ver firebase-messaging-sw.js).
+        data: { aba: "pedidos" },
+        fcmOptions: { link: "/admin?aba=pedidos" },
         headers: { Urgency: "high" },
       },
     });

@@ -11,7 +11,8 @@ export const metadata: Metadata = {
   icons: { apple: "/apple-touch-icon.png" },
 };
 
-export const viewport: Viewport = { themeColor: "#6d28b8" };
+// Painel em tema escuro único: a barra do navegador e o fundo do app instalado combinam com ele.
+export const viewport: Viewport = { themeColor: "#14101c", colorScheme: "dark" };
 
 export default function AdminLayout({ children }: LayoutProps<"/admin">) {
   return (

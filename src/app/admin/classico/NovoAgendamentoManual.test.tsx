@@ -2,7 +2,7 @@
 // Testes da tela "+ Adicionar agendamento" (agendamento manual da Carin).
 // Simulam a dona usando o formulário; o banco (Firestore) é trocado por um falso.
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { cleanup, fireEvent, render, screen } from "@testing-library/react";
+import { cleanup, fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { studio } from "@/config/studio";
 import { labelData, proximosDias } from "@/lib/utils";
 import NovoAgendamentoManual from "./NovoAgendamentoManual";
@@ -13,8 +13,9 @@ const banco = vi.hoisted(() => ({
   servicos: [
     { id: "s1", nome: "Alongamento", desc: "", preco: 120, destaque: false },
     { id: "s2", nome: "Nail art", desc: "", preco: 45, destaque: false },
-  ],
+  ] as { id: string; nome: string; desc: string; preco: number; destaque: boolean; duracaoMin?: number }[],
   ocupados: new Set<string>(),
+  bloqueados: new Set<string>(), // subconjunto de `ocupados` que a Carin fechou (sem cliente)
   agenda: { dias: {} } as { dias?: Record<string, string[]>; bloqueios?: string[] },
   agendamentos: [] as { data: string; hora: string; clienteNome: string }[],
 }));
@@ -24,8 +25,8 @@ vi.mock("@/lib/db", () => ({
     cb(banco.servicos);
     return () => {};
   },
-  ouvirSlotsOcupados: (cb: (ocupados: Set<string>) => void) => {
-    cb(banco.ocupados);
+  ouvirSlotsOcupados: (cb: (ocupados: Set<string>, bloqueados: Set<string>) => void) => {
+    cb(banco.ocupados, banco.bloqueados);
     return () => {};
   },
   ouvirAgenda: (cb: (agenda: unknown) => void) => {
@@ -48,6 +49,7 @@ beforeEach(() => {
   banco.criar.mockReset();
   banco.criar.mockImplementation(async (a: { data: string; hora: string }) => `${a.data}_${a.hora}`);
   banco.ocupados.clear();
+  banco.bloqueados.clear();
   banco.agendamentos = [];
   // a tabela da Carin: nesse dia da semana ela atende nesses horários
   banco.agenda = { dias: { [String(DIA.weekday)]: GRADE }, bloqueios: [] };
@@ -84,15 +86,18 @@ describe("Agendamento manual: confirmação para a cliente", () => {
 
     // gravou o agendamento certo
     expect(banco.criar).toHaveBeenCalledTimes(1);
-    expect(banco.criar).toHaveBeenCalledWith({
-      servicos: [{ nome: "Alongamento", preco: 120 }],
-      total: 120,
-      clienteNome: "Ana Souza",
-      clienteWhatsapp: "(15) 99999-8888",
-      data: DIA.key,
-      hora: "14:00",
-      diaLabel: labelData(DIA.key),
-    });
+    expect(banco.criar).toHaveBeenCalledWith(
+      {
+        servicos: [{ nome: "Alongamento", preco: 120 }],
+        total: 120,
+        clienteNome: "Ana Souza",
+        clienteWhatsapp: "(15) 99999-8888",
+        data: DIA.key,
+        hora: "14:00",
+        diaLabel: labelData(DIA.key),
+      },
+      [], // sem duração cadastrada no serviço: nada pra bloquear em seguida
+    );
 
     // o botão leva ao WhatsApp DA CLIENTE com a mensagem de confirmação pronta
     const href = link.getAttribute("href")!;
@@ -113,7 +118,7 @@ describe("Agendamento manual: confirmação para a cliente", () => {
     salvar();
 
     const link = await screen.findByRole("link", { name: "Enviar confirmação no WhatsApp" });
-    expect(banco.criar).toHaveBeenCalledWith(expect.objectContaining({ hora: "19:30", data: DIA.key }));
+    expect(banco.criar).toHaveBeenCalledWith(expect.objectContaining({ hora: "19:30", data: DIA.key }), []);
     expect(decodeURIComponent(link.getAttribute("href")!)).toContain("às 19:30");
   });
 
@@ -282,5 +287,140 @@ describe("Agendamento manual: horários do dia", () => {
     escolherData();
 
     expect(chip("Outro horário")).toBeTruthy();
+  });
+});
+
+describe("Agendamento manual: horários bloqueados", () => {
+  beforeEach(() => {
+    // A Carin bloqueou a manhã desse dia (sem cliente nenhuma)
+    for (const h of ["09:00", "10:00"]) {
+      banco.ocupados.add(`${DIA.key}_${h}`);
+      banco.bloqueados.add(`${DIA.key}_${h}`);
+    }
+  });
+
+  it("horário bloqueado fica apagado, sem clique, e diz 'Bloqueado' (não inventa nome de cliente)", () => {
+    render(<NovoAgendamentoManual />);
+    abrir();
+    escolherData();
+
+    const bloqueado = chip("09:00, bloqueado");
+    expect(bloqueado.disabled).toBe(true);
+    expect(bloqueado.className).toContain("taken");
+    expect(bloqueado.textContent).toContain("Bloqueado");
+    expect(chip("14:00").disabled).toBe(false); // a tarde segue livre
+  });
+
+  it("bloqueado e cliente aparecem juntos, cada um do seu jeito", () => {
+    banco.ocupados.add(`${DIA.key}_14:00`);
+    banco.agendamentos = [{ data: DIA.key, hora: "14:00", clienteNome: "Bruna Lima" }];
+    render(<NovoAgendamentoManual />);
+    abrir();
+    escolherData();
+
+    expect(chip("10:00, bloqueado").textContent).toContain("Bloqueado");
+    expect(chip("14:00, ocupado por Bruna").textContent).toContain("Bruna");
+  });
+
+  it("digitando um horário bloqueado em 'Outro horário', avisa que está bloqueado e não salva", async () => {
+    render(<NovoAgendamentoManual />);
+    preencher({ outro: true, hora: "10:00" });
+
+    expect(screen.getByText("Esse horário está bloqueado.")).toBeTruthy();
+    salvar();
+    expect((await screen.findAllByText("Esse horário está bloqueado.")).length).toBeGreaterThan(0);
+    expect(banco.criar).not.toHaveBeenCalled();
+  });
+
+  it("se o horário for tomado entre o toque e o salvar, a mensagem pede para escolher outro", async () => {
+    banco.criar.mockRejectedValueOnce({ code: "horario-ocupado" });
+    render(<NovoAgendamentoManual />);
+    preencher(); // 14:00, livre na tela
+    salvar();
+
+    expect(await screen.findByText("Esse horário acabou de ser ocupado. Escolha outro.")).toBeTruthy();
+    expect(screen.queryByText(/Não consegui salvar/)).toBeNull();
+    expect(screen.queryByRole("link", { name: /Enviar confirmação/ })).toBeNull();
+  });
+
+  it("bloqueio de outro dia não apaga os horários deste", () => {
+    banco.ocupados.clear();
+    banco.bloqueados.clear();
+    banco.ocupados.add(`${DIA_OUTRO.key}_09:00`);
+    banco.bloqueados.add(`${DIA_OUTRO.key}_09:00`);
+    render(<NovoAgendamentoManual />);
+    abrir();
+    escolherData();
+
+    expect(chip("09:00").disabled).toBe(false);
+  });
+});
+
+describe("Agendamento manual: duração do serviço bloqueia o horário seguinte", () => {
+  beforeEach(() => {
+    // Alongamento passa a ter duração (1h30); Nail art continua sem.
+    banco.servicos = [
+      { id: "s1", nome: "Alongamento", desc: "", preco: 120, destaque: false, duracaoMin: 90 },
+      { id: "s2", nome: "Nail art", desc: "", preco: 45, destaque: false },
+    ];
+  });
+
+  it("mostra a duração somada junto do total", () => {
+    render(<NovoAgendamentoManual />);
+    abrir();
+    fireEvent.click(screen.getByRole("button", { name: /Alongamento/ }));
+    expect(document.querySelector("form")?.textContent).toContain("1h30");
+  });
+
+  it("horário cujo seguinte já está ocupado fica marcado 'sem espaço' e não dá pra escolher", () => {
+    // 15:00 já tem a Bruna. Um Alongamento (90min) às 14:00 invadiria as 15:00 — 14:00 some
+    // como opção normal e vira "sem espaço" (15:00 continua mostrando a Bruna, sem mudar).
+    banco.ocupados.add(`${DIA.key}_15:00`);
+    banco.agendamentos = [{ data: DIA.key, hora: "15:00", clienteNome: "Bruna" }];
+    render(<NovoAgendamentoManual />);
+    abrir();
+    fireEvent.click(screen.getByRole("button", { name: /Alongamento/ }));
+    escolherData();
+
+    const semEspaco = chip("14:00, sem espaço para esse serviço");
+    expect(semEspaco.disabled).toBe(true);
+    expect(semEspaco.textContent).toContain("sem espaço");
+    expect(chip("15:00, ocupado por Bruna")).toBeTruthy();
+    // horários mais cedo, que não esbarram em nada, continuam livres
+    expect(chip("09:00").disabled).toBe(false);
+    expect(chip("10:00").disabled).toBe(false);
+  });
+
+  it("salvar às 14:00 (com a agenda livre depois) bloqueia sozinho o horário das 15:00", async () => {
+    render(<NovoAgendamentoManual />);
+    preencher({ hora: "14:00" });
+    salvar();
+    await screen.findByRole("link", { name: "Enviar confirmação no WhatsApp" });
+    expect(banco.criar).toHaveBeenCalledWith(expect.objectContaining({ hora: "14:00" }), ["15:00"]);
+  });
+
+  it("'Outro horário' também avisa quando o serviço não cabe, e não deixa salvar", async () => {
+    // Só pelo campo de texto livre dá pra tentar um horário que a UI já não oferece como chip.
+    banco.ocupados.add(`${DIA.key}_15:00`);
+    render(<NovoAgendamentoManual />);
+    preencher({ outro: true, hora: "14:00" });
+
+    expect(screen.getByText("Esse serviço não cabe: o horário seguinte já está ocupado.")).toBeTruthy();
+    salvar();
+    await waitFor(() => expect(banco.criar).not.toHaveBeenCalled());
+    expect(screen.getAllByText("Esse serviço não cabe: o horário seguinte já está ocupado.").length).toBeGreaterThan(0);
+  });
+
+  it("serviço sem duração cadastrada não bloqueia nada extra (comportamento de antes)", async () => {
+    render(<NovoAgendamentoManual />);
+    abrir();
+    fireEvent.change(screen.getByLabelText("Nome da cliente"), { target: { value: "Ana Souza" } });
+    fireEvent.click(screen.getByRole("button", { name: /Nail art/ }));
+    escolherData();
+    fireEvent.click(chip("14:00"));
+    fireEvent.click(screen.getByRole("button", { name: "Salvar agendamento" }));
+
+    await screen.findByText("Sem WhatsApp cadastrado, a cliente não recebe a confirmação.");
+    expect(banco.criar).toHaveBeenCalledWith(expect.anything(), []);
   });
 });

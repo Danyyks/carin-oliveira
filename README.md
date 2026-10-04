@@ -45,14 +45,16 @@ O diferencial está no cuidado com o dia a dia e com o custo. A trava de horári
 
 <table>
   <tr>
-    <td align="center"><img src="docs/imagens/agendamento.png" width="620" /><br /><sub><b>Site de agendamento</b> · a cliente escolhe serviço, dia e horário pelo link da bio</sub></td>
+    <td align="center"><img src="docs/imagens/site-perfil.jpg" width="320" /><br /><sub><b>Link na bio</b> · foto, nome e botão de agendar em destaque</sub></td>
+    <td align="center"><img src="docs/imagens/site-servicos.jpg" width="320" /><br /><sub><b>Serviços & valores</b> · tabela de preços com o serviço mais pedido em destaque</sub></td>
   </tr>
   <tr>
-    <td align="center"><img src="docs/imagens/painel.png" width="620" /><br /><sub><b>Painel da profissional</b> · confirma pedidos, define horários e registra clientes que marcaram por fora</sub></td>
+    <td align="center"><img src="docs/imagens/painel-agenda.jpg" width="320" /><br /><sub><b>Agenda por dia</b> · confirmado, pedido, livre e bloqueado, tudo numa linha só</sub></td>
+    <td align="center"><img src="docs/imagens/painel-pedidos.jpg" width="320" /><br /><sub><b>Pedidos</b> · confirma ou recusa com um toque, WhatsApp pronto pra enviar</sub></td>
   </tr>
 </table>
 
-<sub>Imagens de demonstração com dados fictícios (estúdio "Studio Bella").</sub>
+<sub>Prints reais do app em produção. Na Agenda e nos Pedidos, os nomes das clientes são fictícios (tela de prévia interna) — só a dona vê os dados reais, atrás do login.</sub>
 
 </div>
 
@@ -60,16 +62,24 @@ O diferencial está no cuidado com o dia a dia e com o custo. A trava de horári
 
 ## Funcionalidades
 
+**Site (link na bio)**
 - **Agendamento online com trava de horário** — a cliente escolhe um ou mais serviços, o dia e o horário. O horário sai da agenda pública na hora, então duas clientes nunca pegam o mesmo.
-- **Painel da profissional** — instalável como aplicativo (PWA), com acesso protegido por login, seções recolhíveis e os agendamentos sempre à vista.
-- **Notificação quando chega um pedido** — aparece na tela mesmo com o app fechado, inclusive no iPhone com o aplicativo instalado.
+- **Foto, nome e estúdio em destaque**, com fontes autorais (serifada nos títulos, moderna no texto) e paleta própria — claro e escuro conforme o aparelho da cliente.
+- **Duração de cada serviço à vista**, quando a profissional cadastra, junto do preço.
+- **Espaço da lojinha e mapa real do estúdio**, além dos atalhos de WhatsApp e Instagram.
+
+**Painel da profissional** (PWA, instalável no iPhone, login protegido, tema escuro único)
+- **Agenda por dia com barra de abas** (Agenda, Pedidos, Horários, Serviços, Conta) — o dia inteiro numa lista só, com 5 estados por horário: confirmado, pedido, livre, bloqueado e passado.
+- **Bloqueio de horários** — fecha só a manhã, a tarde, a noite ou horários soltos de uma data (sem mexer nas outras semanas), com opção de repetir no mesmo dia da semana por até 12 semanas, e aviso de desfazer. Horário com cliente nunca é bloqueado por engano.
+- **Mudar horário** de um pedido ou confirmado, quando combina outro horário com a cliente pelo WhatsApp.
+- **Notificação quando chega um pedido** — aparece na tela mesmo com o app fechado, inclusive no iPhone, e o toque na notificação já abre direto na aba Pedidos.
 - **Confirmar, recusar e cancelar com WhatsApp pronto** — a mensagem para a cliente abre escrita e a profissional só toca em enviar.
-- **Agendamento manual** — para clientes que marcaram por fora. Os horários do dia aparecem em botões, os ocupados ficam apagados com o nome da cliente, e "Outro horário" abre uma exceção fora da tabela.
-- **Confirmação também no manual** — depois de salvar, um botão envia a mesma mensagem de confirmação. O botão WhatsApp da lista serve de reenviar, para agendamentos do site e manuais.
-- **Lista que se limpa sozinha** — o agendamento confirmado sai da tela no dia seguinte ao atendimento, e o histórico continua guardado.
-- **Tabela de preços editável**, com serviços em destaque.
-- **Dias e horários de atendimento** e **folgas por calendário**, que tiram uma data do site sem afetar os outros dias da semana.
-- **Site público responsivo**, com tema claro e escuro.
+- **Agendamento manual**, para clientes que marcaram por fora: os horários do dia aparecem em botões, os ocupados ficam apagados com o nome da cliente, e "Outro horário" abre uma exceção fora da tabela.
+- **Tabela de preços editável**, com serviços em destaque, duração opcional e a duração bloqueando sozinha o horário seguinte quando o serviço não cabe no intervalo.
+- **Dias e horários de atendimento por semana**, com "copiar de segunda a sexta", e **folgas por calendário**.
+- **Indicador de sem conexão** e mensagens de erro em português, sem código técnico.
+- **Link do site pronto pra copiar**, para colar na bio do Instagram ou de outras redes sociais.
+- **Painel clássico preservado** como plano B por aparelho, se algum dia precisar.
 
 <br />
 
@@ -96,18 +106,28 @@ O site e o painel falam direto com o Firestore. O "motor" (lógica e telas) fica
 src/
 ├── app/
 │   ├── page.tsx                      # site público (link na bio)
-│   ├── globals.css                   # design system, temas claro e escuro
+│   ├── globals.css                   # design system: tokens, temas e telas
 │   ├── admin/                        # painel da profissional (PWA)
-│   │   ├── page.tsx                  # login e painel
-│   │   ├── AgendamentosManager.tsx   # pendentes, confirmados e botões de WhatsApp
-│   │   └── NovoAgendamentoManual.tsx # agendamento manual, horários em botões
+│   │   ├── AdminGate.tsx             # login e troca painel novo / clássico
+│   │   ├── FolhaBloquear.tsx         # bloqueio de horários de uma data
+│   │   ├── painel/                   # painel novo: barra de abas + Agenda por dia
+│   │   │   ├── PainelNovo.tsx        # shell: abas, deep link, indicador offline
+│   │   │   ├── AgendaDia.tsx         # agenda do dia, 5 estados por horário
+│   │   │   ├── PedidosTab.tsx        # confirmar/recusar com WhatsApp pronto
+│   │   │   ├── HorariosTab.tsx       # tabela da semana
+│   │   │   ├── ServicosTab.tsx       # preços e duração
+│   │   │   └── FolhaDetalhe.tsx      # detalhe, mudar horário, cancelar
+│   │   ├── classico/                 # painel clássico (rolagem única), mantido como opção
+│   │   └── compartilhado/            # folha (bottom sheet), desfazer, WhatsApp no toque
 │   └── api/notify-owner/route.ts     # envia o push (Firebase Admin)
-├── components/                       # Profile, BentoGrid, BookingSheet...
+├── components/                       # Profile, Avatar, BentoGrid, BookingSheet...
 ├── hooks/useAuth.ts                  # estado de login
 ├── lib/
 │   ├── db.ts                         # camada de dados (Firestore)
 │   ├── mensagens.ts                  # textos e links de WhatsApp
-│   ├── agendaDia.ts                  # horários do dia: livres, ocupados, exceções
+│   ├── agendaDia.ts                  # horários do dia: livres, ocupados, bloqueados, exceções
+│   ├── datas.ts                      # fuso America/Sao_Paulo, hoje, somar dias
+│   ├── erroHumano.ts                 # mensagens de erro em português
 │   ├── push.ts                       # ativação das notificações
 │   └── utils.ts                      # helpers de moeda, datas e telefone
 └── config/studio.ts                  # dados do estúdio, separados do motor
@@ -185,11 +205,10 @@ npm run build   # build de produção
 ## Roadmap
 
 - [ ] **Mensagem automática no WhatsApp** — envio sem o toque da profissional, pela API oficial. Foi avaliada e deixada para depois, porque tem custo por mensagem.
-- [ ] **Aviso de erro na tela** quando confirmar, recusar ou cancelar falhar por falta de conexão.
-- [ ] **Painel de horários** com um botão para usar o mesmo horário em todos os dias.
-- [ ] **Arrastar para fechar** a tela de agendamento no celular.
-- [ ] **Diálogo próprio de confirmação**, no lugar do aviso padrão do navegador.
+- [ ] **App Check**, para reforçar que só o próprio app grava no Firestore.
 - [ ] **Limite de pedidos por origem** na rota de notificação, contra uso abusivo.
+- [ ] **Busca por nome** entre os agendamentos, para quando o histórico crescer.
+- [ ] **Limpeza de dados antigos** (LGPD), com uma rotina de anonimização.
 - [ ] **Vários estúdios no mesmo sistema**, transformando o projeto num produto para outros profissionais.
 
 <br />

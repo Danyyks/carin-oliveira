@@ -10,19 +10,19 @@ describe("brl - casos adicionais", () => {
   });
 
   it("formata valor negativo mantendo o sinal", () => {
-    expect(brl(-10.5)).toBe("R$ -10,5");
+    expect(brl(-10.5)).toBe("R$ -10,50");
   });
 
   it("formata valor negativo inteiro", () => {
     expect(brl(-1)).toBe("R$ -1");
   });
 
-  it("formata valor com várias casas decimais sem arredondar", () => {
-    expect(brl(3.14159)).toBe("R$ 3,14159");
+  it("arredonda para duas casas decimais", () => {
+    expect(brl(3.14159)).toBe("R$ 3,14");
   });
 
   it("formata valor muito pequeno (menor que 1)", () => {
-    expect(brl(0.5)).toBe("R$ 0,5");
+    expect(brl(0.5)).toBe("R$ 0,50");
   });
 
   it("formata valor grande sem separador de milhar", () => {
@@ -199,5 +199,18 @@ describe("diaDaSemana - dia da semana de uma data YYYY-MM-DD", () => {
   it("concorda com o rótulo mostrado no painel (labelData)", () => {
     expect(labelData("2026-09-24").startsWith("qui")).toBe(true);
     expect(labelData("2026-09-27").startsWith("dom")).toBe(true);
+  });
+});
+
+describe("proximosDias - a partir de hoje", () => {
+  it("com desdeHoje, o primeiro dia é hoje e mantém a quantidade pedida", () => {
+    const dias = proximosDias(14, true);
+    expect(dias).toHaveLength(14);
+    expect(dias[0].key).toBe(hojeKey());
+    expect(dias[1].key).toBe(proximosDias(1)[0].key); // o segundo é amanhã
+  });
+
+  it("sem o segundo argumento, continua começando em amanhã", () => {
+    expect(proximosDias(3)[0].key).not.toBe(hojeKey());
   });
 });

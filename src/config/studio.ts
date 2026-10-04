@@ -8,6 +8,7 @@ export type Servico = {
   desc: string;
   preco: number;
   destaque?: boolean; // "Mais pedido": ganha selo e aparece no topo
+  duracaoMin?: number; // duração em minutos (opcional); usada pra bloquear o horário seguinte sozinho
 };
 
 export type Loja = {
@@ -21,6 +22,7 @@ export type StudioConfig = {
   nome: string;
   titulo: string; // ex.: "Nail Designer"
   foto?: string; // caminho da foto de perfil em /public (ex.: "/carin.jpg")
+  siteUrl: string; // link público (o "link na bio") — mostrado no painel com botão de copiar
   whatsapp: string; // DDI+DDD+número, só dígitos
   instagram: string; // sem @
   enderecoTexto: string;
@@ -36,6 +38,9 @@ export const studio: StudioConfig = {
   nome: "Carin",
   titulo: "Nail Designer",
   foto: "/carin.jpg",
+  // Sem domínio próprio ainda: usa o link do Vercel. Quando tiver domínio, troque aqui (ou
+  // defina NEXT_PUBLIC_SITE_URL na Vercel) — não precisa mexer em mais nada.
+  siteUrl: process.env.NEXT_PUBLIC_SITE_URL || "https://carin-oliveira-z7ov.vercel.app",
   whatsapp: "5515991552752", // WhatsApp da Carin (dona)
   instagram: "carinoliveira9",
   enderecoTexto: "Rua Diniz Goes da Silva, 260 - casa 10, Sorocaba - SP",

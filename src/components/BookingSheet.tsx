@@ -4,7 +4,8 @@ import { useEffect, useMemo, useState } from "react";
 import { Check } from "lucide-react";
 import type { StudioConfig, Servico } from "@/config/studio";
 import { brl, proximosDias, type Dia } from "@/lib/utils";
-import { ouvirAgenda, ouvirSlotsOcupados, criarAgendamento } from "@/lib/db";
+import { ouvirAgenda, ouvirSlotsOcupados, criarAgendamento, type Agenda } from "@/lib/db";
+import { duracaoTotal, duracaoCabe, horariosAfetados } from "@/lib/agendaDia";
 
 export default function BookingSheet({
   studio,
@@ -26,17 +27,53 @@ export default function BookingSheet({
   const [whatsapp, setWhatsapp] = useState("");
 
   const [baseDias, setBaseDias] = useState<Dia[]>([]);
-  const [agenda, setAgenda] = useState<{ dias: Record<string, string[]>; bloqueios?: string[] }>({ dias: {} });
+  const [agenda, setAgenda] = useState<Agenda>({ dias: {} });
   const [ocupados, setOcupados] = useState<Set<string>>(new Set());
 
   const [enviando, setEnviando] = useState(false);
   const [sucesso, setSucesso] = useState(false);
   const [erro, setErro] = useState("");
 
+  // Só começa a ler a agenda e os horários quando a cliente ABRE o sheet: quem apenas olha
+  // a página não gasta leituras do Firestore (a cota grátis é por dia). Depois da primeira
+  // abertura, segue em tempo real.
+  const [carregar, setCarregar] = useState(false);
+  const [agendaOk, setAgendaOk] = useState(false);
+  const [slotsOk, setSlotsOk] = useState(false);
+  const [demorou, setDemorou] = useState(false);
+  if (open && !carregar) setCarregar(true);
+
   // Datas e disponibilidade (client-side, evita divergência de hidratação).
   useEffect(() => setBaseDias(proximosDias(14)), []);
-  useEffect(() => ouvirAgenda((a) => setAgenda(a)), []);
-  useEffect(() => ouvirSlotsOcupados((o) => setOcupados(o)), []);
+  useEffect(() => {
+    if (!carregar) return;
+    return ouvirAgenda((a) => {
+      setAgenda(a);
+      setAgendaOk(true);
+    });
+  }, [carregar]);
+  // Lê só a janela que o site oferece (de amanhã a +14 dias), não o histórico inteiro.
+  const desde = baseDias[0]?.key;
+  const ate = baseDias[baseDias.length - 1]?.key;
+  useEffect(() => {
+    if (!carregar || !desde || !ate) return;
+    return ouvirSlotsOcupados(
+      (o) => {
+        setOcupados(o);
+        setSlotsOk(true);
+      },
+      { desde, ate },
+    );
+  }, [carregar, desde, ate]);
+  // Se a leitura falhar, não deixa "Carregando…" para sempre. Sem os dados de verdade nenhum
+  // horário é oferecido (o padrão do config só vale quando a agenda chegou e está vazia).
+  useEffect(() => {
+    if (!carregar) return;
+    const t = setTimeout(() => setDemorou(true), 8000);
+    return () => clearTimeout(t);
+  }, [carregar]);
+  const dadosOk = agendaOk && slotsOk;
+  const carregando = carregar && !dadosOk && !demorou;
 
   useEffect(() => {
     if (open && preset != null) setSvcs([preset]);
@@ -79,20 +116,30 @@ export default function BookingSheet({
   // Dias com pelo menos um horário livre (respeita a agenda da dona; se ela ainda
   // não configurou nada, usa os horários padrão do config como reserva).
   const diasDisponiveis = useMemo(() => {
-    const configurada = Object.values(agenda.dias).some((hs) => hs && hs.length > 0);
+    if (!dadosOk) return [];
+    const configurada = Object.values(agenda.dias ?? {}).some((hs) => hs && hs.length > 0);
     const bloqueadas = new Set(agenda.bloqueios ?? []); // folgas (datas)
     return baseDias
       .filter((d) => !bloqueadas.has(d.key)) // pula os dias de folga
       .map((d) => {
-        const hors = configurada ? agenda.dias[String(d.weekday)] || [] : studio.horarios;
+        const hors = configurada ? (agenda.dias ?? {})[String(d.weekday)] || [] : studio.horarios;
         const livres = hors.filter((h) => !ocupados.has(`${d.key}_${h}`));
-        return { ...d, livres };
+        return { ...d, livres, grade: hors };
       })
       .filter((d) => d.livres.length > 0);
-  }, [baseDias, agenda, ocupados, studio.horarios]);
+  }, [dadosOk, baseDias, agenda, ocupados, studio.horarios]);
+
+  // Serviços escolhidos + total (na ordem em que aparecem na lista) e a duração somada,
+  // usada pra não oferecer um horário que o serviço não cabe até o próximo da tabela.
+  const escolhidos = servicos.filter((_, i) => svcs.includes(i));
+  const total = escolhidos.reduce((soma, s) => soma + s.preco, 0);
+  const duracaoMin = duracaoTotal(escolhidos);
 
   const diaAtual = diaSel ? diasDisponiveis.find((d) => d.key === diaSel.key) : undefined;
-  const horariosLivres = diaAtual?.livres ?? [];
+  const horariosLivres =
+    !diaAtual || duracaoMin <= 0
+      ? (diaAtual?.livres ?? [])
+      : diaAtual.livres.filter((h) => duracaoCabe(diaAtual.key, h, duracaoMin, diaAtual.grade, ocupados));
 
   // Se o horário escolhido foi ocupado por outra pessoa, limpa a seleção.
   useEffect(() => {
@@ -103,24 +150,26 @@ export default function BookingSheet({
   const whatsappOk = whatsapp.replace(/\D/g, "").length >= 10;
   const pronto = svcs.length > 0 && !!diaSel && !!hora && nomeOk && whatsappOk;
 
-  // Serviços escolhidos + total (na ordem em que aparecem na lista).
-  const escolhidos = servicos.filter((_, i) => svcs.includes(i));
-  const total = escolhidos.reduce((soma, s) => soma + s.preco, 0);
-
   async function finalizar() {
     if (!pronto) return;
     setEnviando(true);
     setErro("");
     try {
-      const agendamentoId = await criarAgendamento({
-        servicos: escolhidos.map((s) => ({ nome: s.nome, preco: s.preco })),
-        total,
-        clienteNome: nome.trim(),
-        clienteWhatsapp: whatsapp.trim(),
-        data: diaSel!.key,
-        hora: hora!,
-        diaLabel: diaSel!.label,
-      });
+      // Serviço mais longo que o intervalo até o próximo horário: fecha esse(s) horário(s)
+      // junto com o pedido, pra outra cliente não marcar em cima.
+      const bloquearApos = diaAtual ? horariosAfetados(hora!, duracaoMin, diaAtual.grade) : [];
+      const agendamentoId = await criarAgendamento(
+        {
+          servicos: escolhidos.map((s) => ({ nome: s.nome, preco: s.preco })),
+          total,
+          clienteNome: nome.trim(),
+          clienteWhatsapp: whatsapp.trim(),
+          data: diaSel!.key,
+          hora: hora!,
+          diaLabel: diaSel!.label,
+        },
+        bloquearApos,
+      );
       // Avisa a dona por push (não bloqueia o sucesso se o aviso falhar).
       // Manda só o id; o servidor lê os dados reais no Firestore.
       try {
@@ -133,9 +182,19 @@ export default function BookingSheet({
         // pedido já foi criado; ignora falha do aviso
       }
       setSucesso(true);
-    } catch {
-      setErro("Esse horário acabou de ser reservado. Escolha outro, por favor.");
-      setHora(null);
+    } catch (e) {
+      // "permission-denied" é a colisão do id do horário (alguém pegou primeiro, ou a dona
+      // bloqueou) detectada pelas regras; "horario-ocupado" é a mesma colisão detectada por
+      // nós antes de escrever. Os outros casos são cota estourada ou falta de conexão.
+      const code = (e as { code?: string })?.code;
+      if (code === "permission-denied" || code === "horario-ocupado") {
+        setErro("Esse horário acabou de ser reservado. Escolha outro, por favor.");
+        setHora(null);
+      } else if (code === "resource-exhausted") {
+        setErro("Muitas pessoas agendando agora. Tente de novo em alguns minutos.");
+      } else {
+        setErro("Não consegui enviar o pedido. Confira sua conexão e tente de novo.");
+      }
     } finally {
       setEnviando(false);
     }
@@ -185,7 +244,7 @@ export default function BookingSheet({
                 <span className="n">2</span>Dia
               </div>
               {diasDisponiveis.length === 0 ? (
-                <p className="sheet-vazio">Sem horários disponíveis no momento.</p>
+                <p className="sheet-vazio">{carregando ? "Carregando horários…" : "Sem horários disponíveis no momento."}</p>
               ) : (
                 <div className="chips">
                   {diasDisponiveis.map((d) => (
@@ -211,7 +270,9 @@ export default function BookingSheet({
               <div className="step-label">
                 <span className="n">3</span>Horário
               </div>
-              {diaSel ? (
+              {!diaSel ? (
+                <p className="sheet-vazio">Escolha um dia primeiro.</p>
+              ) : horariosLivres.length > 0 ? (
                 <div className="chips">
                   {horariosLivres.map((h) => (
                     <button key={h} type="button" className={`chip${hora === h ? " active" : ""}`} onClick={() => setHora(h)}>
@@ -220,7 +281,7 @@ export default function BookingSheet({
                   ))}
                 </div>
               ) : (
-                <p className="sheet-vazio">Escolha um dia primeiro.</p>
+                <p className="sheet-vazio">Esse serviço não cabe em nenhum horário livre neste dia. Escolha outro dia.</p>
               )}
             </div>
 

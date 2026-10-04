@@ -2,13 +2,13 @@ import { describe, it, expect } from "vitest";
 import { brl, wppUrl, proximosDias, labelData } from "./utils";
 
 describe("labelData", () => {
-  it("formata a data no padrão 'dia, DD/MM'", () => {
+  it("formata a data no padrão 'dia, D/MM'", () => {
     // 2026-09-19 é um sábado
     expect(labelData("2026-09-19")).toBe("sáb, 19/09");
   });
-  it("mantém zero à esquerda no dia e no mês", () => {
+  it("dia sem zero à esquerda e mês com, igual ao rótulo do site (proximosDias)", () => {
     // 2026-01-05 é uma segunda
-    expect(labelData("2026-01-05")).toBe("seg, 05/01");
+    expect(labelData("2026-01-05")).toBe("seg, 5/01");
   });
 });
 
@@ -16,8 +16,8 @@ describe("brl", () => {
   it("formata inteiro com prefixo R$", () => {
     expect(brl(85)).toBe("R$ 85");
   });
-  it("usa vírgula como separador decimal", () => {
-    expect(brl(34.5)).toBe("R$ 34,5");
+  it("usa vírgula e sempre duas casas quando há centavos", () => {
+    expect(brl(34.5)).toBe("R$ 34,50");
   });
   it("lida com zero", () => {
     expect(brl(0)).toBe("R$ 0");
