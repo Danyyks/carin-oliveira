@@ -1,5 +1,13 @@
 import { describe, it, expect } from "vitest";
-import { brl, wppUrl, proximosDias, labelData } from "./utils";
+import { brl, wppUrl, proximosDias, labelData, dataPorExtenso } from "./utils";
+
+describe("dataPorExtenso", () => {
+  it("dia sem zero e mês por extenso, minúsculo", () => {
+    expect(dataPorExtenso("2027-01-05")).toBe("5 de janeiro");
+    expect(dataPorExtenso("2026-12-25")).toBe("25 de dezembro");
+    expect(dataPorExtenso("2026-03-01")).toBe("1 de março");
+  });
+});
 
 describe("labelData", () => {
   it("formata a data no padrão 'dia, D/MM'", () => {

@@ -54,7 +54,7 @@ agendamentos/{data_hora}     # id determinístico = `${data}_${hora}` (ex: 2026-
 O id do agendamento é **determinístico**: `${data}_${hora}`. As regras de segurança permitem **apenas `create`** (nunca `update`) para o público. Se duas pessoas tentam o mesmo horário, o **segundo `create` falha** porque o documento já existe → **impossível marcar em dobro**. Recusar/cancelar = **apagar** o documento (só a Carin pode), liberando o id.
 
 ### Leitura de `slots` e cota gratuita
-O Firestore grátis (Spark) tem cota de **leituras por dia**. O site lê `slots` **só quando a cliente abre o sheet de agendamento** e **só a janela que ele oferece** (de amanhã a +14 dias, `where("data", ">=", …)`); o painel lê de hoje em diante. Antes, cada visita lia a coleção inteira. Enquanto a agenda e os horários não chegam, o site mostra "Carregando horários…" e **não oferece horário nenhum** (o horário padrão do config só vale quando a agenda chegou e está vazia).
+O Firestore grátis (Spark) tem cota de **leituras por dia**. O site lê `slots` **só quando a cliente abre o sheet de agendamento** e **só o mês que a cliente está vendo no calendário** (de amanhã, ou do dia 1, até o fim daquele mês; `where("data", ">=", …)` + `<=`). Até onde dá pra navegar é escolha da Carin: `disponibilidade/regras.antecedenciaDias` (14, 30, 60 ou 90; sem o campo, 14); o painel lê de hoje em diante. Antes, cada visita lia a coleção inteira. Enquanto a agenda e os horários não chegam, o site mostra "Carregando horários…" e **não oferece horário nenhum** (o horário padrão do config só vale quando a agenda chegou e está vazia).
 
 ### Escritas em transação
 Bloquear, liberar e o agendamento manual usam `runTransaction` (todas as leituras antes das escritas): a dona nunca sobrescreve, sem querer, o horário que uma cliente acabou de pegar. Liberar só apaga `slots` com `status` bloqueado.
@@ -94,7 +94,7 @@ Tema **escuro único** (o site público continua rosa, claro/escuro pelo sistema
   "plano B" garantido pela Fase B4).
 - **Novo** (`src/app/admin/painel/`): barra de abas + Agenda por dia, servido só em `/admin/nova`
   por enquanto (login real, ainda não é produção). `DadosProvider` centraliza uma assinatura por
-  fonte (serviços, agenda, slots numa janela de -7 a +60 dias, agendamentos) para todo o painel
+  fonte (serviços, agenda, slots numa janela de -7 a +120 dias, agendamentos) para todo o painel
   novo — `useDados()` lê esse contexto; `carregando` só vira `true` depois de 250 ms sem os dados
   terem chegado, e um erro numa fonte (`erros.slots`, etc.) não derruba as outras. `AgendaDia`
   mostra o dia com 5 estados por horário (livre, confirmado, pedido, bloqueado, passado — via

@@ -19,6 +19,7 @@ import {
 } from "firebase/firestore";
 import { db } from "./firebase";
 import { hojeKey } from "./utils";
+import { ANTECEDENCIAS } from "./agendaDia";
 
 // ---------- Serviços ----------
 export type ServicoDoc = {
@@ -74,7 +75,9 @@ export const removeServico = (id: string) => deleteDoc(doc(db, "servicos", id));
 // ---------- Disponibilidade (dias/horários + folgas) ----------
 // dias: chave = dia da semana ("0"=domingo ... "6"=sábado), valor = horários "HH:MM".
 // bloqueios: datas específicas de folga ("YYYY-MM-DD") em que a dona não atende.
-export type Agenda = { dias: Record<string, string[]>; bloqueios?: string[] };
+// antecedenciaDias: até quantos dias à frente o site deixa a cliente marcar (escolha da dona;
+// opções e padrão em `ANTECEDENCIAS`/`antecedenciaDe`, agendaDia.ts).
+export type Agenda = { dias: Record<string, string[]>; bloqueios?: string[]; antecedenciaDias?: number };
 
 const regrasRef = () => doc(db, "disponibilidade", "regras");
 
@@ -84,7 +87,7 @@ const regrasRef = () => doc(db, "disponibilidade", "regras");
  * quem lê. Aqui `dias` e `bloqueios` saem sempre preenchidos.
  */
 export function normalizarAgenda(raw: unknown): Agenda {
-  const r = (raw && typeof raw === "object" ? raw : {}) as { dias?: unknown; bloqueios?: unknown };
+  const r = (raw && typeof raw === "object" ? raw : {}) as { dias?: unknown; bloqueios?: unknown; antecedenciaDias?: unknown };
   const dias: Record<string, string[]> = {};
   if (r.dias && typeof r.dias === "object") {
     for (const [k, v] of Object.entries(r.dias as Record<string, unknown>)) {
@@ -92,6 +95,11 @@ export function normalizarAgenda(raw: unknown): Agenda {
     }
   }
   const bloqueios = Array.isArray(r.bloqueios) ? r.bloqueios.filter((d): d is string => typeof d === "string") : [];
+  // Só um valor que o painel oferece é aceito; qualquer outra coisa cai no padrão (campo ausente).
+  const ant = r.antecedenciaDias;
+  if (typeof ant === "number" && (ANTECEDENCIAS as readonly number[]).includes(ant)) {
+    return { dias, bloqueios, antecedenciaDias: ant };
+  }
   return { dias, bloqueios };
 }
 
@@ -112,6 +120,10 @@ export const salvarAgenda = (agenda: Agenda) =>
 // Salva só as folgas (datas), preservando os dias/horários.
 export const salvarBloqueios = (datas: string[]) =>
   setDoc(regrasRef(), { bloqueios: datas }, { merge: true });
+
+// Salva só até quando a agenda fica aberta pras clientes, preservando o resto.
+export const salvarAntecedencia = (dias: number) =>
+  setDoc(regrasRef(), { antecedenciaDias: dias }, { merge: true });
 
 const RE_DATA = /^\d{4}-\d{2}-\d{2}$/;
 const RE_HORA = /^\d{2}:\d{2}$/;

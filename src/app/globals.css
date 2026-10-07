@@ -698,6 +698,80 @@ a {
 .day-chip b {
   font-size: 1.02rem;
 }
+/* Calendário do mês no agendamento do site (a Carin escolhe até quando a agenda fica aberta) */
+.cal-site-topo {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 10px;
+}
+.cal-site-mes {
+  font-weight: 700;
+  font-size: 1rem;
+}
+.cal-site-nav {
+  width: 40px;
+  height: 40px;
+  border-radius: 12px;
+  border: 1.5px solid var(--border);
+  background: var(--surface);
+  color: var(--text);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+.cal-site-nav:disabled {
+  opacity: 0.3;
+  cursor: default;
+}
+.cal-site-grade {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 5px;
+  text-align: center;
+}
+.cal-site-sem {
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: var(--text-muted);
+  padding: 2px 0 4px;
+}
+.cal-site-dia {
+  height: 42px;
+  border-radius: 12px;
+  border: 1.5px solid transparent;
+  background: none;
+  color: color-mix(in srgb, var(--text) 32%, transparent);
+  font: inherit;
+  font-size: 0.92rem;
+  padding: 0;
+}
+.cal-site-dia.livre {
+  color: var(--text);
+  font-weight: 600;
+  border-color: var(--accent-soft);
+  cursor: pointer;
+}
+.cal-site-dia.folga {
+  text-decoration: line-through;
+}
+.cal-site-dia.active {
+  background: var(--accent-cta);
+  border-color: var(--accent-cta);
+  color: #fff;
+}
+@media (hover: hover) {
+  .cal-site-dia.livre:hover {
+    border-color: var(--accent);
+  }
+}
+.cal-site-limite {
+  font-size: 0.78rem;
+  color: var(--text-muted);
+  text-align: center;
+  margin: 10px 0 0;
+}
 .summary {
   background: var(--surface-2);
   border-radius: 15px;
@@ -1998,6 +2072,43 @@ body:has(.admin) {
   color: var(--text-muted);
   font-size: 0.85rem;
   margin-top: 2px;
+}
+/* Aba Horários: até quando as clientes podem marcar no site */
+.pn-antecedencia {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.pn-antecedencia p {
+  margin: 0;
+}
+.pn-antecedencia-titulo {
+  font-size: 1rem;
+  font-weight: 700;
+  margin: 0;
+}
+.pn-opcoes {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 6px;
+}
+.pn-opcao {
+  min-height: 44px;
+  border-radius: 12px;
+  border: 1px solid var(--border);
+  background: var(--surface-2);
+  color: var(--text);
+  font: inherit;
+  font-size: 0.78rem;
+  font-weight: 600;
+  padding: 0 2px;
+  white-space: nowrap;
+  cursor: pointer;
+}
+.pn-opcao.active {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: var(--on-accent);
 }
 .pn-btn-bloquear,
 .pn-btn-topo {

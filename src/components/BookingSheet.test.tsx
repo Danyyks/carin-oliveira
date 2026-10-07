@@ -1,18 +1,19 @@
 // @vitest-environment jsdom
 // Testes do sheet de agendamento do SITE (a cliente escolhe serviço, dia e horário).
 // O banco (Firestore) é trocado por um falso; o foco é o que a cliente vê e o que o
-// componente lê do banco (só quando abre, só a janela de datas que o site oferece).
+// componente lê do banco (só quando abre, só o mês que está na tela).
 import { act, cleanup, fireEvent, render, screen } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { studio } from "@/config/studio";
-import { proximosDias, type Dia } from "@/lib/utils";
+import { dataPorExtenso, hojeKey, proximosDias, type Dia } from "@/lib/utils";
+import { somarDias } from "@/lib/datas";
 import BookingSheet from "./BookingSheet";
 
-type AgendaFalsa = { dias?: Record<string, string[]>; bloqueios?: string[] };
+type AgendaFalsa = { dias?: Record<string, string[]>; bloqueios?: string[]; antecedenciaDias?: number };
 
 const banco = vi.hoisted(() => ({
   ocupados: new Set<string>(),
-  agenda: { dias: {} } as { dias?: Record<string, string[]>; bloqueios?: string[] },
+  agenda: { dias: {} } as { dias?: Record<string, string[]>; bloqueios?: string[]; antecedenciaDias?: number },
   entregar: true, // false = o banco "demora": nada chega
   ouvirAgenda: vi.fn(),
   ouvirSlotsOcupados: vi.fn(),
@@ -37,11 +38,23 @@ const montar = (open = true, onClose = vi.fn()) => (
   <BookingSheet studio={studio} servicos={SERVICOS} open={open} preset={null} onClose={onClose} />
 );
 
-/** Botão do dia (o texto do chip junta dia da semana, número e mês). */
-const chipDia = (d: Dia) =>
-  Array.from(document.querySelectorAll<HTMLButtonElement>(".day-chip")).find(
-    (b) => b.textContent === `${d.dia}${d.num}${d.mes}`,
-  );
+/**
+ * Botão do dia no calendário. Avança os meses (seta ›) até a data aparecer; um dia que está
+ * na tela mas desativado (sem horário, folga, fora do limite) conta como "não oferecido".
+ */
+function chipDia(d: Dia | string): HTMLButtonElement | undefined {
+  const key = typeof d === "string" ? d : d.key;
+  for (let i = 0; i < 5; i++) {
+    const b = document.querySelector<HTMLButtonElement>(`.cal-site-dia[data-dia="${key}"]`);
+    if (b) return b.disabled ? undefined : b;
+    const prox = screen.queryByRole("button", { name: "Próximo mês" }) as HTMLButtonElement | null;
+    if (!prox || prox.disabled) return undefined;
+    fireEvent.click(prox);
+  }
+  return undefined;
+}
+const diasOferecidos = () => document.querySelectorAll(".cal-site-dia.livre").length;
+const TODOS_OS_DIAS = (grade: string[]) => Object.fromEntries(["0", "1", "2", "3", "4", "5", "6"].map((k) => [k, grade]));
 const horaBtn = (h: string) => screen.queryByRole("button", { name: h }) as HTMLButtonElement | null;
 
 beforeEach(() => {
@@ -81,11 +94,27 @@ describe("Sheet do site: o que lê do banco", () => {
     expect(banco.ouvirSlotsOcupados).toHaveBeenCalledTimes(1);
   });
 
-  it("lê só a janela que o site oferece: de amanhã até daqui a 14 dias", () => {
+  it("lê só o mês que está na tela, de amanhã até o fim do mês", () => {
     render(montar(true));
+    const [y, m] = DIAS[0].key.split("-").map(Number);
+    const fimDoMes = `${y}-${String(m).padStart(2, "0")}-${String(new Date(y, m, 0).getDate()).padStart(2, "0")}`;
     expect(banco.ouvirSlotsOcupados).toHaveBeenCalledWith(expect.any(Function), {
       desde: DIAS[0].key,
-      ate: DIAS[13].key,
+      ate: fimDoMes,
+    });
+  });
+
+  it("ir para o mês seguinte lê só aquele mês (do dia 1 ao último)", () => {
+    banco.agenda = { dias: TODOS_OS_DIAS(GRADE), bloqueios: [], antecedenciaDias: 90 };
+    render(montar(true));
+    fireEvent.click(screen.getByRole("button", { name: "Próximo mês" }));
+    const [y, m] = DIAS[0].key.split("-").map(Number);
+    const prox = new Date(y, m, 1); // m já é o mês seguinte em base 0
+    const mm = String(prox.getMonth() + 1).padStart(2, "0");
+    const ultimo = new Date(prox.getFullYear(), prox.getMonth() + 1, 0).getDate();
+    expect(banco.ouvirSlotsOcupados).toHaveBeenLastCalledWith(expect.any(Function), {
+      desde: `${prox.getFullYear()}-${mm}-01`,
+      ate: `${prox.getFullYear()}-${mm}-${ultimo}`,
     });
   });
 
@@ -137,7 +166,7 @@ describe("Sheet do site: dias e horários oferecidos", () => {
     banco.agenda = { bloqueios: [DIAS[0].key] } as AgendaFalsa;
     expect(() => render(montar())).not.toThrow();
     // sem tabela configurada, vale o horário padrão do config
-    expect(document.querySelectorAll(".day-chip").length).toBeGreaterThan(0);
+    expect(chipDia(DIAS[1])).toBeTruthy();
     expect(chipDia(DIAS[0])).toBeUndefined();
   });
 
@@ -146,7 +175,7 @@ describe("Sheet do site: dias e horários oferecidos", () => {
     banco.entregar = false;
     render(montar());
     expect(screen.getByText("Carregando horários…")).toBeTruthy();
-    expect(document.querySelectorAll(".day-chip")).toHaveLength(0); // nada de horário padrão inventado
+    expect(diasOferecidos()).toBe(0); // nada de horário padrão inventado
   });
 
   it("se o banco não responde em 8 segundos, avisa que não há horários (e continua sem oferecer nenhum)", () => {
@@ -158,15 +187,61 @@ describe("Sheet do site: dias e horários oferecidos", () => {
     });
     expect(screen.queryByText("Carregando horários…")).toBeNull();
     expect(screen.getByText("Sem horários disponíveis no momento.")).toBeTruthy();
-    expect(document.querySelectorAll(".day-chip")).toHaveLength(0);
+    expect(diasOferecidos()).toBe(0);
   });
 
   it("só oferece dias quando a agenda E os horários ocupados chegaram", () => {
     // A agenda chega, mas os horários ocupados não: ainda não dá para saber o que está livre.
     banco.ouvirSlotsOcupados.mockImplementation(() => () => {});
     render(montar());
-    expect(document.querySelectorAll(".day-chip")).toHaveLength(0);
+    expect(diasOferecidos()).toBe(0);
     expect(screen.getByText("Carregando horários…")).toBeTruthy();
+  });
+});
+
+describe("Sheet do site: até quando a agenda está aberta (escolha da Carin)", () => {
+  it("sem escolha salva, vale o de sempre: 2 semanas (um dia além disso não é oferecido)", () => {
+    banco.agenda = { dias: TODOS_OS_DIAS(GRADE), bloqueios: [] };
+    render(montar());
+    expect(chipDia(somarDias(hojeKey(), 14))).toBeTruthy();
+    expect(chipDia(somarDias(hojeKey(), 15))).toBeUndefined();
+    expect(screen.getByText(`Agenda aberta até ${dataPorExtenso(somarDias(hojeKey(), 14))}`)).toBeTruthy();
+  });
+
+  it("com 3 meses abertos, a cliente chega a um dia de daqui a 80 dias e escolhe o horário", () => {
+    banco.agenda = { dias: TODOS_OS_DIAS(GRADE), bloqueios: [], antecedenciaDias: 90 };
+    render(montar());
+    const longe = somarDias(hojeKey(), 80);
+    fireEvent.click(chipDia(longe)!);
+    expect(horaBtn("09:00")).toBeTruthy();
+    expect(screen.getByText(`Agenda aberta até ${dataPorExtenso(somarDias(hojeKey(), 90))}`)).toBeTruthy();
+  });
+
+  it("a seta › para no mês do limite (não deixa ir além do que a Carin abriu)", () => {
+    banco.agenda = { dias: TODOS_OS_DIAS(GRADE), bloqueios: [], antecedenciaDias: 30 };
+    render(montar());
+    const proximo = () => screen.getByRole("button", { name: "Próximo mês" }) as HTMLButtonElement;
+    let cliques = 0;
+    while (!proximo().disabled && cliques < 5) {
+      fireEvent.click(proximo());
+      cliques++;
+    }
+    expect(cliques).toBeLessThanOrEqual(2); // 30 dias à frente cabem no mês atual ou no seguinte
+    expect(chipDia(somarDias(hojeKey(), 31))).toBeUndefined();
+  });
+
+  it("a seta ‹ não volta para antes do mês de amanhã", () => {
+    render(montar());
+    expect((screen.getByRole("button", { name: "Mês anterior" }) as HTMLButtonElement).disabled).toBe(true);
+  });
+
+  it("trocar de mês desmarca o dia escolhido (o horário era daquele outro mês)", () => {
+    banco.agenda = { dias: TODOS_OS_DIAS(GRADE), bloqueios: [], antecedenciaDias: 90 };
+    render(montar());
+    fireEvent.click(chipDia(DIAS[1])!);
+    expect(horaBtn("09:00")).toBeTruthy();
+    fireEvent.click(screen.getByRole("button", { name: "Próximo mês" }));
+    expect(screen.getByText("Escolha um dia primeiro.")).toBeTruthy();
   });
 });
 

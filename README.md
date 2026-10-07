@@ -63,7 +63,8 @@ O diferencial está no cuidado com o dia a dia e com o custo. A trava de horári
 ## Funcionalidades
 
 **Site (link na bio)**
-- **Agendamento online com trava de horário** — a cliente escolhe um ou mais serviços, o dia e o horário. O horário sai da agenda pública na hora, então duas clientes nunca pegam o mesmo.
+- **Agendamento online com trava de horário** — a cliente escolhe um ou mais serviços, o dia num calendário do mês e o horário. O horário sai da agenda pública na hora, então duas clientes nunca pegam o mesmo.
+- **Agenda aberta até 3 meses à frente**, com a profissional escolhendo no painel até quando as clientes podem marcar.
 - **Foto, nome e estúdio em destaque**, com fontes autorais (serifada nos títulos, moderna no texto) e paleta própria — claro e escuro conforme o aparelho da cliente.
 - **Duração de cada serviço à vista**, quando a profissional cadastra, junto do preço.
 - **Espaço da lojinha e mapa real do estúdio**, além dos atalhos de WhatsApp e Instagram.

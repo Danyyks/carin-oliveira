@@ -2,10 +2,15 @@
 
 import { useState } from "react";
 import { ChevronRight, CalendarOff } from "lucide-react";
-import { labelData } from "@/lib/utils";
-import { hojeKeySalao } from "@/lib/datas";
+import { dataPorExtenso, labelData } from "@/lib/utils";
+import { hojeKeySalao, somarDias } from "@/lib/datas";
+import { salvarAntecedencia } from "@/lib/db";
+import { ANTECEDENCIAS, antecedenciaDe } from "@/lib/agendaDia";
+import { erroHumano } from "@/lib/erroHumano";
 import { useDados } from "./DadosProvider";
 import FolhaHorarioDia from "./FolhaHorarioDia";
+
+const ROTULO_ANTECEDENCIA: Record<number, string> = { 14: "2 semanas", 30: "1 mês", 60: "2 meses", 90: "3 meses" };
 
 const DIAS = [
   { k: "1", label: "Segunda" },
@@ -29,6 +34,22 @@ export default function HorariosTab({ onVerNoDia }: { onVerNoDia: (dataKey: stri
 
   const hoje = hojeKeySalao();
   const folgas = [...(agenda.bloqueios ?? [])].filter((d) => d >= hoje).sort();
+  const antecedencia = antecedenciaDe(agenda);
+  const [salvando, setSalvando] = useState<number | null>(null);
+  const [erroAnt, setErroAnt] = useState("");
+
+  async function escolherAntecedencia(dias: number) {
+    if (dias === antecedencia || salvando !== null) return;
+    setSalvando(dias);
+    setErroAnt("");
+    try {
+      await salvarAntecedencia(dias);
+    } catch (e) {
+      setErroAnt(erroHumano(e));
+    } finally {
+      setSalvando(null);
+    }
+  }
 
   return (
     <div className="pn-agenda">
@@ -40,6 +61,33 @@ export default function HorariosTab({ onVerNoDia }: { onVerNoDia: (dataKey: stri
       </div>
 
       {erros.agenda && <p className="adm-erro">Não consegui carregar os horários agora. Tente de novo.</p>}
+
+      <section className="admin-card pn-antecedencia" aria-labelledby="titulo-antecedencia">
+        <h3 id="titulo-antecedencia" className="pn-antecedencia-titulo">
+          Até quando as clientes podem marcar
+        </h3>
+        <div className="pn-opcoes" role="group" aria-labelledby="titulo-antecedencia">
+          {ANTECEDENCIAS.map((dias) => {
+            const ativa = (salvando ?? antecedencia) === dias;
+            return (
+              <button
+                key={dias}
+                type="button"
+                className={`pn-opcao${ativa ? " active" : ""}`}
+                aria-pressed={ativa}
+                onClick={() => escolherAntecedencia(dias)}
+              >
+                {ROTULO_ANTECEDENCIA[dias]}
+              </button>
+            );
+          })}
+        </div>
+        <p className="adm-muted">As clientes veem a agenda até {dataPorExtenso(somarDias(hoje, salvando ?? antecedencia))}.</p>
+        {(salvando ?? antecedencia) > 30 && (
+          <p className="adm-muted">Antes de abrir meses à frente, marque as folgas do período (Natal, Ano Novo, férias).</p>
+        )}
+        {erroAnt && <p className="adm-erro">{erroAnt}</p>}
+      </section>
 
       <div className="pn-lista-periodo">
         {DIAS.map((d) => (

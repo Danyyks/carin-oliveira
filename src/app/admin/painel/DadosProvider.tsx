@@ -13,10 +13,12 @@ import {
 } from "@/lib/db";
 import { hojeKeySalao, somarDias } from "@/lib/datas";
 
-// Janela de leitura de `slots`: uma folga de 60 dias pra frente cobre a Agenda inteira
-// (o site já oferece só até +14 dias) e 7 pra trás cobre "hoje" com folga de fuso.
+// Janela de leitura de `slots`: 120 dias pra frente cobrem a maior antecedência que o site
+// pode abrir (3 meses, ver ANTECEDENCIAS em db.ts) com folga, e 7 pra trás cobrem "hoje"
+// com folga de fuso. Se um dia o site abrir mais que isso, esta janela tem que crescer junto
+// — senão um horário já marcado lá na frente apareceria "Livre" na Agenda.
 const DIAS_ANTES = 7;
-const DIAS_DEPOIS = 60;
+const DIAS_DEPOIS = 120;
 
 export type Dados = {
   servicos: ServicoDoc[];

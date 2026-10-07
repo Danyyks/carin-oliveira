@@ -82,7 +82,7 @@ src/
     Profile.tsx           # nome/título/bio + chip de bairro (redesenho 29/09/2026)
     Avatar.tsx             # foto/inicial + selo de verificada sobreposto (Fase do redesenho)
     BentoGrid.tsx         # os tiles do bento: Agendar, WhatsApp/Instagram, Serviços (com duração), lojinha, mini-mapa
-    BookingSheet.tsx      # bottom sheet do fluxo de agendamento
+    BookingSheet.tsx      # bottom sheet do fluxo de agendamento; dia escolhido num calendário por mês (lê só o mês na tela)
     icons.tsx             # ícones de marca (WhatsApp, Instagram, Verified)
   lib/
     firebase.ts           # init do Firebase (client)
@@ -118,7 +118,9 @@ scripts/test-regras.mjs   # sobe o emulador com o Java certo, roda os testes, de
   apaga o outro); `bloquearDias`/`liberarDias` usam `arrayUnion`/`arrayRemove` (não regravam a lista).
   `ouvirAgenda` devolve sempre `dias` e `bloqueios` preenchidos (`normalizarAgenda`). O site
   (`BookingSheet`) esconde os dias bloqueados; o painel tem o card "Folgas" (mini-calendário —
-  `CalendarioFolgas`) e o botão "Bloquear horários"
+  `CalendarioFolgas`) e o botão "Bloquear horários". `antecedenciaDias?` (14/30/60/90, escolhido na
+  aba Horários — `salvarAntecedencia`; sem o campo vale 14, ver `antecedenciaDe` em `agendaDia.ts`):
+  até quantos dias à frente o site deixa a cliente marcar
 - `slots/{data_hora}` — horários ocupados, **público** (só data/hora/status, sem dados do cliente).
   `status`: `pendente`, `confirmado` ou `bloqueado` (a dona fechou o horário, sem cliente e sem motivo)
 - `agendamentos/{data_hora}` — pedido com dados do cliente (só a dona lê/gerencia)
@@ -188,7 +190,7 @@ padrão; o clássico é o plano B, acessível direto em `/admin/classico` ou gra
 `localStorage["painel-carin:versao"] = "classico"` naquele aparelho (lido uma vez no mount de
 `admin/page.tsx`, sem precisar de outro deploy). `/admin/nova` continua existindo, igual ao
 `/admin` padrão. `DadosProvider` (`admin/painel/`) centraliza uma
-assinatura por fonte (serviços, agenda, slots numa janela de -7 a +60 dias, agendamentos) —
+assinatura por fonte (serviços, agenda, slots numa janela de -7 a +120 dias — cobre os até 3 meses que o site pode abrir, agendamentos) —
 `useDados()` lê esse contexto em vez de cada tela assinar o Firestore de novo; erro numa fonte
 não derruba as outras (`erros.servicos/agenda/slots/agendamentos`). `AgendaDia` mostra o dia com
 5 estados por horário — livre, confirmado (com atalho de WhatsApp), pedido, bloqueado (com

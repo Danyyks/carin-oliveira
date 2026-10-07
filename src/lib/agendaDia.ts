@@ -1,6 +1,13 @@
 // Horários de um dia: a tabela da dona junto com o que já está ocupado ou bloqueado.
-import type { Agendamento } from "./db";
+import type { Agenda, Agendamento } from "./db";
 import { passouDoHorario, somarDias } from "./datas";
+
+/** Até quantos dias à frente o site deixa a cliente marcar — opções que o painel oferece. */
+export const ANTECEDENCIAS = [14, 30, 60, 90] as const;
+/** Sem escolha salva, vale o de sempre: duas semanas. */
+export const ANTECEDENCIA_PADRAO = 14;
+export const antecedenciaDe = (agenda: Pick<Agenda, "antecedenciaDias">): number =>
+  agenda.antecedenciaDias ?? ANTECEDENCIA_PADRAO;
 
 export type HorarioDia = {
   hora: string; // "HH:MM"

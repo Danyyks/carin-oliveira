@@ -2,6 +2,7 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { cleanup, render, screen, act } from "@testing-library/react";
 import DadosProvider, { useDados } from "./DadosProvider";
+import { hojeKeySalao, somarDias } from "@/lib/datas";
 
 const banco = vi.hoisted(() => ({
   servicosCb: null as null | ((v: unknown[]) => void),
@@ -126,14 +127,17 @@ describe("agregação dos dados", () => {
     expect(screen.getByTestId("n-slots").textContent).toBe("1");
   });
 
-  it("lê slots numa janela de 7 dias atrás a 60 dias à frente (fuso do salão)", () => {
+  it("lê slots de 7 dias atrás até além dos 3 meses que o site pode abrir (fuso do salão)", () => {
     render(
       <DadosProvider>
         <Sonda />
       </DadosProvider>,
     );
     expect(banco.janelaSlots).toBeTruthy();
-    expect(banco.janelaSlots!.desde! < banco.janelaSlots!.ate!).toBe(true);
+    const hoje = hojeKeySalao();
+    expect(banco.janelaSlots!.desde).toBe(somarDias(hoje, -7));
+    // A maior antecedência do site é 90 dias: a Agenda tem que enxergar pelo menos isso.
+    expect(banco.janelaSlots!.ate! >= somarDias(hoje, 90)).toBe(true);
   });
 });
 

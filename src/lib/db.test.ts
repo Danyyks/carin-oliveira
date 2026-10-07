@@ -177,6 +177,16 @@ describe("normalizarAgenda", () => {
     expect(a.dias).toEqual({ "1": [], "2": ["10:00"] });
     expect(a.bloqueios).toEqual(["2030-01-01"]);
   });
+
+  it("guarda a antecedência escolhida pela dona (só as opções que o painel oferece)", () => {
+    expect(normalizarAgenda({ antecedenciaDias: 90 }).antecedenciaDias).toBe(90);
+    expect(normalizarAgenda({ antecedenciaDias: 30 }).antecedenciaDias).toBe(30);
+  });
+
+  it("antecedência estranha (outro número, texto) é ignorada — vale o padrão", () => {
+    expect(normalizarAgenda({ antecedenciaDias: 365 })).toEqual({ dias: {}, bloqueios: [] });
+    expect(normalizarAgenda({ antecedenciaDias: "90" })).toEqual({ dias: {}, bloqueios: [] });
+  });
 });
 
 describe("leitura", () => {

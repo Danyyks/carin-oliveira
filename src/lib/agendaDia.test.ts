@@ -14,8 +14,22 @@ import {
   itensDoDia,
   pedidosNoDia,
   datasRepetidas,
+  antecedenciaDe,
+  ANTECEDENCIAS,
 } from "./agendaDia";
 import type { Agendamento } from "./db";
+
+describe("antecedenciaDe", () => {
+  it("sem escolha salva, vale 14 dias (o de sempre)", () => {
+    expect(antecedenciaDe({})).toBe(14);
+  });
+  it("devolve a escolha da dona", () => {
+    expect(antecedenciaDe({ antecedenciaDias: 90 })).toBe(90);
+  });
+  it("as opções vão de 2 semanas a 3 meses", () => {
+    expect([...ANTECEDENCIAS]).toEqual([14, 30, 60, 90]);
+  });
+});
 
 const DIA = "2030-05-07";
 const grade = ["09:00", "10:00", "14:00"];

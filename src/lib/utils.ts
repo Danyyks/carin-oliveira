@@ -70,3 +70,14 @@ export function labelData(dataKey: string): string {
   const dt = new Date(y, m - 1, d);
   return `${DIAS[dt.getDay()]}, ${d}/${String(m).padStart(2, "0")}`;
 }
+
+const MESES_EXTENSO = [
+  "janeiro", "fevereiro", "março", "abril", "maio", "junho",
+  "julho", "agosto", "setembro", "outubro", "novembro", "dezembro",
+];
+
+/** "2027-01-05" → "5 de janeiro". */
+export function dataPorExtenso(dataKey: string): string {
+  const [, m, d] = dataKey.split("-").map(Number);
+  return `${d} de ${MESES_EXTENSO[m - 1]}`;
+}

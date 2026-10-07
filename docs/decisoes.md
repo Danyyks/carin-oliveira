@@ -124,6 +124,25 @@ aproveitar e já fazer a Fase B4 (o único passo que faltava do plano do painel 
   continuam abrindo a tela de login normalmente, sem regressão.
 - **Ainda não publicado** — pronto pro deploy final único.
 
+### 22. Agenda aberta até 3 meses à frente, escolhida pela Carin (07/10/2026)
+
+Clientes queriam garantir vaga em dezembro e o site só mostrava os próximos 14 dias (fixo no
+código, por economia de leituras). Prévia visual aprovada pelo Dany antes do código.
+- **Quem decide é a Carin**, na aba Horários: "Até quando as clientes podem marcar" — 2 semanas, 1
+  mês, 2 meses ou 3 meses (`disponibilidade/regras.antecedenciaDias` = 14/30/60/90). Sem escolha
+  salva, continua 14 (nada muda pra quem não mexer). Mais que 3 meses ficou de fora: quanto mais
+  longe, maior a chance de esquecimento e de mudar preço/horário antes.
+- **Site troca a fileira de dias por um calendário do mês** com setas: 90 botões numa fileira não
+  cabem no celular. Dia tocável = tem horário livre; apagado = sem horário/fora do limite; riscado =
+  folga. As setas param no mês de amanhã e no mês do limite.
+- **Leitura por mês**: o site lê os `slots` só do mês que está na tela (não os 3 meses de uma vez),
+  então abrir mais a agenda não multiplica o custo de cada visita. Ao trocar de mês, os dias só ficam
+  tocáveis quando os ocupados daquele mês chegaram (nunca "livre" por engano).
+- **Painel acompanha**: a janela de leitura do `DadosProvider` foi de +60 pra +120 dias — senão um
+  horário já marcado lá na frente apareceria "Livre" na Agenda.
+- Lembrete na própria opção (acima de 1 mês): marcar as folgas do período antes de abrir.
+- Sem mudança nas regras do Firestore (`disponibilidade` já é escrita só pela dona, leitura pública).
+
 ### 21. Pedido do site também fecha o horário seguinte do serviço longo (02/10/2026)
 
 Achado no teste ponta a ponta antes do deploy: com duração cadastrada, um pedido do site às 11:00 de um

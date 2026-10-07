@@ -1,11 +1,22 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import { Check } from "lucide-react";
+import { Check, ChevronLeft, ChevronRight } from "lucide-react";
 import type { StudioConfig, Servico } from "@/config/studio";
-import { brl, proximosDias, type Dia } from "@/lib/utils";
+import { brl, dataPorExtenso, diaDaSemana, hojeKey, labelData, proximosDias } from "@/lib/utils";
 import { ouvirAgenda, ouvirSlotsOcupados, criarAgendamento, type Agenda } from "@/lib/db";
-import { duracaoTotal, duracaoCabe, horariosAfetados } from "@/lib/agendaDia";
+import { antecedenciaDe, duracaoTotal, duracaoCabe, horariosAfetados } from "@/lib/agendaDia";
+import { gradeDoMes, somarDias } from "@/lib/datas";
+
+const MESES = [
+  "Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho",
+  "Julho", "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro",
+];
+const SEMANA = ["D", "S", "T", "Q", "Q", "S", "S"];
+const chaveDe = (ano: number, mes: number, dia: number) =>
+  `${ano}-${String(mes + 1).padStart(2, "0")}-${String(dia).padStart(2, "0")}`;
+
+type DiaEscolhido = { key: string; label: string; livres: string[]; grade: string[] };
 
 export default function BookingSheet({
   studio,
@@ -21,14 +32,17 @@ export default function BookingSheet({
   onClose: () => void;
 }) {
   const [svcs, setSvcs] = useState<number[]>([]); // índices dos serviços escolhidos
-  const [diaSel, setDiaSel] = useState<Dia | null>(null);
+  const [diaSelKey, setDiaSelKey] = useState<string | null>(null);
   const [hora, setHora] = useState<string | null>(null);
   const [nome, setNome] = useState("");
   const [whatsapp, setWhatsapp] = useState("");
 
-  const [baseDias, setBaseDias] = useState<Dia[]>([]);
+  const [amanha, setAmanha] = useState<string | null>(null);
+  const [mesEscolhido, setMesEscolhido] = useState<{ ano: number; mes: number } | null>(null);
   const [agenda, setAgenda] = useState<Agenda>({ dias: {} });
-  const [ocupados, setOcupados] = useState<Set<string>>(new Set());
+  // Ocupados de UM mês (o que está na tela), marcados com o mês a que pertencem: ao trocar de
+  // mês, os dias novos só aparecem quando os ocupados DELES chegaram (nunca livre por engano).
+  const [ocupMes, setOcupMes] = useState<{ chave: string; ids: Set<string> } | null>(null);
 
   const [enviando, setEnviando] = useState(false);
   const [sucesso, setSucesso] = useState(false);
@@ -39,12 +53,11 @@ export default function BookingSheet({
   // abertura, segue em tempo real.
   const [carregar, setCarregar] = useState(false);
   const [agendaOk, setAgendaOk] = useState(false);
-  const [slotsOk, setSlotsOk] = useState(false);
   const [demorou, setDemorou] = useState(false);
   if (open && !carregar) setCarregar(true);
 
-  // Datas e disponibilidade (client-side, evita divergência de hidratação).
-  useEffect(() => setBaseDias(proximosDias(14)), []);
+  // "Amanhã" no aparelho da cliente (client-side, evita divergência de hidratação).
+  useEffect(() => setAmanha(proximosDias(1)[0].key), []);
   useEffect(() => {
     if (!carregar) return;
     return ouvirAgenda((a) => {
@@ -52,19 +65,22 @@ export default function BookingSheet({
       setAgendaOk(true);
     });
   }, [carregar]);
-  // Lê só a janela que o site oferece (de amanhã a +14 dias), não o histórico inteiro.
-  const desde = baseDias[0]?.key;
-  const ate = baseDias[baseDias.length - 1]?.key;
+
+  // Mês na tela: começa no mês de amanhã; as setas andam até o limite que a Carin escolheu.
+  const mesAtual = mesEscolhido ?? (amanha ? { ano: +amanha.slice(0, 4), mes: +amanha.slice(5, 7) - 1 } : null);
+  const chaveMes = mesAtual ? chaveDe(mesAtual.ano, mesAtual.mes, 1).slice(0, 7) : null;
+  const limite = amanha ? somarDias(hojeKey(), antecedenciaDe(agenda)) : null;
+
+  // Lê só o mês que a cliente está vendo (a partir de amanhã), não a janela toda de uma vez —
+  // com a agenda aberta por até 3 meses, cada visita continua gastando pouco da cota grátis.
+  const desde = mesAtual && amanha ? [`${chaveMes}-01`, amanha].sort()[1] : null;
+  const ate = mesAtual ? chaveDe(mesAtual.ano, mesAtual.mes, new Date(mesAtual.ano, mesAtual.mes + 1, 0).getDate()) : null;
   useEffect(() => {
-    if (!carregar || !desde || !ate) return;
-    return ouvirSlotsOcupados(
-      (o) => {
-        setOcupados(o);
-        setSlotsOk(true);
-      },
-      { desde, ate },
-    );
-  }, [carregar, desde, ate]);
+    if (!carregar || !desde || !ate || !chaveMes) return;
+    return ouvirSlotsOcupados((ids) => setOcupMes({ chave: chaveMes, ids }), { desde, ate });
+  }, [carregar, desde, ate, chaveMes]);
+  const slotsOk = ocupMes?.chave === chaveMes;
+  const ocupados = useMemo(() => (slotsOk && ocupMes ? ocupMes.ids : new Set<string>()), [slotsOk, ocupMes]);
   // Se a leitura falhar, não deixa "Carregando…" para sempre. Sem os dados de verdade nenhum
   // horário é oferecido (o padrão do config só vale quando a agenda chegou e está vazia).
   useEffect(() => {
@@ -73,7 +89,10 @@ export default function BookingSheet({
     return () => clearTimeout(t);
   }, [carregar]);
   const dadosOk = agendaOk && slotsOk;
-  const carregando = carregar && !dadosOk && !demorou;
+  // Primeira leitura: o calendário só aparece quando a agenda E um mês de horários chegaram.
+  // Trocar de mês depois não some com o calendário — só deixa os dias inativos um instante.
+  const primeiraCarga = agendaOk && ocupMes !== null;
+  const carregando = carregar && !primeiraCarga && !demorou;
 
   useEffect(() => {
     if (open && preset != null) setSvcs([preset]);
@@ -105,7 +124,8 @@ export default function BookingSheet({
       setSucesso(false);
       setErro("");
       setSvcs([]);
-      setDiaSel(null);
+      setDiaSelKey(null);
+      setMesEscolhido(null);
       setHora(null);
       setNome("");
       setWhatsapp("");
@@ -113,21 +133,43 @@ export default function BookingSheet({
     return () => clearTimeout(t);
   }, [open]);
 
-  // Dias com pelo menos um horário livre (respeita a agenda da dona; se ela ainda
-  // não configurou nada, usa os horários padrão do config como reserva).
-  const diasDisponiveis = useMemo(() => {
-    if (!dadosOk) return [];
+  // Células do mês na tela. Um dia é tocável se está entre amanhã e o limite da Carin, não é
+  // folga e tem horário livre (respeita a agenda da dona; se ela ainda não configurou nada,
+  // usa os horários padrão do config como reserva).
+  const anoVis = mesAtual?.ano;
+  const mesVis = mesAtual?.mes;
+  const celulas = useMemo(() => {
+    if (anoVis === undefined || mesVis === undefined || !amanha || !limite) return [];
     const configurada = Object.values(agenda.dias ?? {}).some((hs) => hs && hs.length > 0);
-    const bloqueadas = new Set(agenda.bloqueios ?? []); // folgas (datas)
-    return baseDias
-      .filter((d) => !bloqueadas.has(d.key)) // pula os dias de folga
-      .map((d) => {
-        const hors = configurada ? (agenda.dias ?? {})[String(d.weekday)] || [] : studio.horarios;
-        const livres = hors.filter((h) => !ocupados.has(`${d.key}_${h}`));
-        return { ...d, livres, grade: hors };
-      })
-      .filter((d) => d.livres.length > 0);
-  }, [dadosOk, baseDias, agenda, ocupados, studio.horarios]);
+    const folgas = new Set(agenda.bloqueios ?? []);
+    return gradeDoMes(anoVis, mesVis).map((dia) => {
+      if (dia === null) return null;
+      const key = chaveDe(anoVis, mesVis, dia);
+      const grade = configurada ? (agenda.dias ?? {})[String(diaDaSemana(key))] || [] : studio.horarios;
+      const noPeriodo = key >= amanha && key <= limite;
+      const folga = noPeriodo && folgas.has(key);
+      const livres = noPeriodo && !folga && dadosOk ? grade.filter((h) => !ocupados.has(`${key}_${h}`)) : [];
+      return { dia, key, grade, livres, folga };
+    });
+  }, [anoVis, mesVis, amanha, limite, agenda, ocupados, dadosOk, studio.horarios]);
+  const algumLivreNoMes = celulas.some((c) => c && c.livres.length > 0);
+  const podeVoltar = !!chaveMes && !!amanha && chaveMes > amanha.slice(0, 7);
+  const proximoMes = mesAtual ? new Date(mesAtual.ano, mesAtual.mes + 1, 1) : null;
+  const podeAvancar = !!proximoMes && !!limite && chaveDe(proximoMes.getFullYear(), proximoMes.getMonth(), 1) <= limite;
+
+  function mudarMes(delta: number) {
+    if (!mesAtual) return;
+    const d = new Date(mesAtual.ano, mesAtual.mes + delta, 1);
+    setMesEscolhido({ ano: d.getFullYear(), mes: d.getMonth() });
+    setDiaSelKey(null);
+    setHora(null);
+  }
+
+  const celulaSel = diaSelKey ? celulas.find((c) => c?.key === diaSelKey) : undefined;
+  const diaSel: DiaEscolhido | null =
+    celulaSel && celulaSel.livres.length > 0
+      ? { key: celulaSel.key, label: labelData(celulaSel.key), livres: celulaSel.livres, grade: celulaSel.grade }
+      : null;
 
   // Serviços escolhidos + total (na ordem em que aparecem na lista) e a duração somada,
   // usada pra não oferecer um horário que o serviço não cabe até o próximo da tabela.
@@ -135,7 +177,7 @@ export default function BookingSheet({
   const total = escolhidos.reduce((soma, s) => soma + s.preco, 0);
   const duracaoMin = duracaoTotal(escolhidos);
 
-  const diaAtual = diaSel ? diasDisponiveis.find((d) => d.key === diaSel.key) : undefined;
+  const diaAtual = diaSel;
   const horariosLivres =
     !diaAtual || duracaoMin <= 0
       ? (diaAtual?.livres ?? [])
@@ -243,25 +285,55 @@ export default function BookingSheet({
               <div className="step-label">
                 <span className="n">2</span>Dia
               </div>
-              {diasDisponiveis.length === 0 ? (
+              {!primeiraCarga || !mesAtual ? (
                 <p className="sheet-vazio">{carregando ? "Carregando horários…" : "Sem horários disponíveis no momento."}</p>
               ) : (
-                <div className="chips">
-                  {diasDisponiveis.map((d) => (
-                    <button
-                      key={d.key}
-                      type="button"
-                      className={`chip day-chip${diaSel?.key === d.key ? " active" : ""}`}
-                      onClick={() => {
-                        setDiaSel(d);
-                        setHora(null);
-                      }}
-                    >
-                      {d.dia}
-                      <b>{d.num}</b>
-                      <small>{d.mes}</small>
+                <div className="cal-site">
+                  <div className="cal-site-topo">
+                    <button type="button" className="cal-site-nav" onClick={() => mudarMes(-1)} disabled={!podeVoltar} aria-label="Mês anterior">
+                      <ChevronLeft size={18} aria-hidden="true" />
                     </button>
-                  ))}
+                    <span className="cal-site-mes" aria-live="polite">
+                      {MESES[mesAtual.mes]} {mesAtual.ano}
+                    </span>
+                    <button type="button" className="cal-site-nav" onClick={() => mudarMes(1)} disabled={!podeAvancar} aria-label="Próximo mês">
+                      <ChevronRight size={18} aria-hidden="true" />
+                    </button>
+                  </div>
+                  <div className="cal-site-grade">
+                    {SEMANA.map((s, i) => (
+                      <span key={i} className="cal-site-sem" aria-hidden="true">
+                        {s}
+                      </span>
+                    ))}
+                    {celulas.map((c, i) =>
+                      c === null ? (
+                        <span key={`v${i}`} />
+                      ) : (
+                        <button
+                          key={c.key}
+                          type="button"
+                          data-dia={c.key}
+                          className={`cal-site-dia${c.livres.length > 0 ? " livre" : ""}${c.folga ? " folga" : ""}${diaSelKey === c.key ? " active" : ""}`}
+                          disabled={c.livres.length === 0}
+                          aria-pressed={diaSelKey === c.key}
+                          aria-label={`${labelData(c.key)}${c.folga ? ", folga" : c.livres.length === 0 ? ", sem horário" : ""}`}
+                          onClick={() => {
+                            setDiaSelKey(c.key);
+                            setHora(null);
+                          }}
+                        >
+                          {c.dia}
+                        </button>
+                      ),
+                    )}
+                  </div>
+                  {slotsOk && !algumLivreNoMes && (
+                    <p className="sheet-vazio">
+                      {podeAvancar ? "Sem horários livres neste mês. Veja o próximo." : "Sem horários livres neste mês."}
+                    </p>
+                  )}
+                  {limite && <p className="cal-site-limite">Agenda aberta até {dataPorExtenso(limite)}</p>}
                 </div>
               )}
             </div>

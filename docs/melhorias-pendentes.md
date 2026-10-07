@@ -437,6 +437,20 @@ serviços criar/editar/excluir, copiar link, deep link da notificação, plano B
 
 **Testes:** 458 (eram 455) + 49 de regras. `tsc`/`next build` limpos, lint na mesma base de antes.
 
+## ✅ Aplicado depois (07/10/2026) — clientes marcando com até 3 meses de antecedência
+
+Clientes pediram pra garantir vaga em dezembro; o site só mostrava 14 dias. Ver `decisoes.md #22`.
+- Painel, aba Horários: card "Até quando as clientes podem marcar" (2 semanas / 1 mês / 2 meses /
+  3 meses) com a data-limite por extenso e, acima de 1 mês, o lembrete de marcar as folgas.
+- Site: calendário do mês com setas no lugar da fileira de dias; lê só o mês na tela; "Agenda aberta
+  até 5 de janeiro" embaixo.
+- Painel lê `slots` até +120 dias (antes +60).
+- Testado de ponta a ponta nos emuladores: padrão de 2 semanas igual a antes; trocar pra 3 meses no
+  painel libera dezembro no site **ao vivo** (sem recarregar); folgas de dezembro riscadas; horário já
+  ocupado em 10/12 não oferecido; pedido em 15/12 enviado, apareceu em Pedidos e na Agenda do painel,
+  confirmado com a mensagem de WhatsApp certa.
+- **Testes:** 475 (eram 458). `tsc`/`next build` limpos, lint na mesma base.
+
 ## ⏳ Próximos passos (por prioridade)
 
 ### Painel v2 (plano aprovado em 28/09/2026, revisado no mesmo dia) — ✅ concluído em 29/09/2026
@@ -454,6 +468,6 @@ troca" — a troca já aconteceu. Falta só o deploy final único.
 - **Grade de espaçamento de 4px** — alinhar paddings/gaps (17→16, 11→12, 9→8…).
 
 ### Código / escala
-- **Filtro por data nas consultas** — `slots` já é lido só por janela de datas (site: amanhã a +14 dias; painel: de hoje em diante). Falta `agendamentos` (lido por inteiro pelo painel) e arquivar/limpar os antigos (os `slots` de confirmados não são removidos hoje).
+- **Filtro por data nas consultas** — `slots` já é lido só por janela de datas (site: só o mês na tela, até o limite que a Carin abriu; painel: -7 a +120 dias). Falta `agendamentos` (lido por inteiro pelo painel) e arquivar/limpar os antigos (os `slots` de confirmados não são removidos hoje).
 - **Serviço por id, não por índice** — no `BookingSheet`, guardar o id do serviço em vez do índice do array (evita agendar o serviço errado caso a lista mude com o sheet aberto).
 - **Rate limiting** — proteger `criarAgendamento` e `/api/notify-owner` contra criação em massa (ex.: limite por IP na API route).
